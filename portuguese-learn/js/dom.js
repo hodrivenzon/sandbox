@@ -45,8 +45,10 @@ PT.dom = (function () {
     return shuffle(arr).slice(0, n);
   }
 
-  /* Falling-emoji celebration (asset-free). */
+  /* Falling-emoji celebration (asset-free). Skipped when the user prefers
+     reduced motion (the CSS only neutralizes durations; this burst is opt-out). */
   function celebrate(emojis) {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     var layer = document.getElementById("celebrate");
     if (!layer) return;
     var pool = emojis || ["🎉", "⭐", "🎈", "🌟", "✨", "💚", "💛"];

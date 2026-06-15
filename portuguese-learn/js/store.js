@@ -10,6 +10,9 @@ PT.store = (function () {
   var DAY = 86400000;
   // How long (in days) an item rests in each box before it is due again.
   var INTERVALS = [0, 1, 2, 4, 9, 21];
+  // A word counts as "learned" only once it survives into a multi-day box, so
+  // the stat reflects real retention rather than a single in-session correct tap.
+  var LEARNED_BOX = 4;
 
   var state = load();
 
@@ -34,7 +37,12 @@ PT.store = (function () {
 
   function todayStr() {
     var d = new Date();
-    return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+    var m = d.getMonth() + 1, day = d.getDate();
+    return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (day < 10 ? "0" : "") + day;
+  }
+  function midnightOf(dayStr) {
+    var p = dayStr.split("-").map(Number);
+    return new Date(p[0], p[1] - 1, p[2]).getTime();
   }
 
   /* Roll the daily counter + streak over at the start of each calendar day. */
@@ -51,11 +59,10 @@ PT.store = (function () {
     var t = rollDay();
     var last = state.stats.lastDay;
     if (last === t) return;
-    // consecutive calendar day -> +1 streak, otherwise reset to 1
+    // Compare CALENDAR days (midnight to midnight) — never mix a midnight
+    // timestamp with Date.now(), or the streak breaks for half of every day.
     if (last) {
-      var ly = last.split("-").map(Number);
-      var prev = new Date(ly[0], ly[1] - 1, ly[2]).getTime();
-      var diff = Math.round((Date.now() - prev) / DAY);
+      var diff = Math.round((midnightOf(t) - midnightOf(last)) / DAY);
       state.stats.streak = (diff === 1) ? state.stats.streak + 1 : 1;
     } else {
       state.stats.streak = 1;
@@ -65,28 +72,36 @@ PT.store = (function () {
 
   function get(key) { return state.srs[key] || null; }
   function box(key) { var r = state.srs[key]; return r ? r.box : 0; }
-  function isLearned(key) { return box(key) >= 3; }
+  function isLearned(key) { return box(key) >= LEARNED_BOX; }
 
-  /* Grade an item. correct=true promotes (capped at 5); false -> box 1. */
-  function grade(key, correct) {
+  /* Core grading. mode: "good" promotes one box, "again" -> box 1, "known" jumps
+     straight to the learned box. We capture the PRIOR learned-state BEFORE
+     mutating, or the learned counter can never increment (the record is aliased). */
+  function applyGrade(key, mode) {
     rollDay();
-    var rec = state.srs[key] || { box: 0, seen: 0, right: 0, due: 0 };
+    var prev = state.srs[key];
+    var wasLearned = !!(prev && prev.box >= LEARNED_BOX);
+    var rec = prev || { box: 0, seen: 0, right: 0, due: 0 };
     rec.seen++;
-    if (correct) { rec.right++; rec.box = Math.min(5, rec.box + 1); state.stats.xp += 10; }
-    else { rec.box = 1; state.stats.xp += 2; }
-    rec.due = Date.now() + INTERVALS[rec.box] * DAY;
-    var wasLearned = (state.srs[key] && state.srs[key].box >= 3);
+    if (mode === "again") { rec.box = 1; state.stats.xp += 2; }
+    else if (mode === "known") { rec.right++; rec.box = Math.max(rec.box, LEARNED_BOX); state.stats.xp += 10; }
+    else { rec.right++; rec.box = Math.min(5, rec.box + 1); state.stats.xp += 10; }
+    rec.due = Date.now() + INTERVALS[Math.min(rec.box, INTERVALS.length - 1)] * DAY;
     state.srs[key] = rec;
-    if (!wasLearned && rec.box >= 3) state.stats.learned++;
-    if (wasLearned && rec.box < 3) state.stats.learned = Math.max(0, state.stats.learned - 1);
+    var nowLearned = rec.box >= LEARNED_BOX;
+    if (!wasLearned && nowLearned) state.stats.learned++;
+    else if (wasLearned && !nowLearned) state.stats.learned = Math.max(0, state.stats.learned - 1);
     state.daily.reviewed++;
     recordStudyDay();
     save();
     return rec;
   }
 
-  /* Mark an item explicitly known (used by the "I know this" button on cards). */
-  function markKnown(key) { return grade(key, true); }
+  /* Grade an item. correct=true promotes one box; false sends it back to box 1. */
+  function grade(key, correct) { return applyGrade(key, correct ? "good" : "again"); }
+
+  /* "I know this" — assert mastery, jumping the item straight to the learned box. */
+  function markKnown(key) { return applyGrade(key, "known"); }
 
   /* From a list of {key,...} items, the ones due now (or never seen), due first. */
   function dueFrom(items) {

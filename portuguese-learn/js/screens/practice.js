@@ -5,6 +5,7 @@
    cards across all lessons; with a lesson id it drills just that topic. */
 (function () {
   var el = PT.dom.el, C = PT.components;
+  var timer = null; // tracks the auto-play setTimeout so onLeave can cancel it
 
   function buildQueue(lessonId) {
     var pool = lessonId ? (PT.content.lesson(lessonId) || { items: [] }).items : PT.content.allItems();
@@ -81,26 +82,35 @@
         ]) : null
       ]);
 
-      var card = el("div", { class: "flash-card" }, [front]);
-      card.addEventListener("click", function () {
+      // Flashcard is operable by mouse, touch AND keyboard (Enter/Space).
+      var card = el("div", { class: "flash-card", role: "button", tabindex: "0", aria: { label: "Show the answer" } }, [front]);
+      function flip() {
         if (flipped) return;
         flipped = true;
         PT.dom.clear(card); card.appendChild(back);
         card.classList.add("flipped");
-        if (ptFront) { /* already heard */ } else { PT.audio.speak(item.pt, { rate: 0.9 }); }
+        card.setAttribute("aria-label", "Answer shown");
+        if (!ptFront) PT.audio.speak(item.pt, { rate: 0.9 });
         showRating();
+      }
+      card.addEventListener("click", flip);
+      card.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); flip(); }
       });
       stage.appendChild(card);
 
       // auto-play the Portuguese when it's the prompt
-      if (ptFront) setTimeout(function () { PT.audio.speak(item.pt, { rate: 0.9 }); }, 250);
+      clearTimeout(timer);
+      if (ptFront) timer = setTimeout(function () { PT.audio.speak(item.pt, { rate: 0.9 }); }, 250);
 
       var rating = el("div", { class: "rating", hidden: "" });
       stage.appendChild(rating);
       function showRating() {
         rating.removeAttribute("hidden");
         rating.appendChild(el("button", { class: "rate again", text: "Again", onclick: function () { grade(false); } }));
-        rating.appendChild(el("button", { class: "rate good", text: "Good", onclick: function () { grade(true); } }));
+        var good = el("button", { class: "rate good", text: "Good", onclick: function () { grade(true); } });
+        rating.appendChild(good);
+        try { good.focus(); } catch (e) {} // hand keyboard focus to the rating control
       }
 
       function grade(correct) {

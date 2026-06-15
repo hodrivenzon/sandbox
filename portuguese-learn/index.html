@@ -29,14 +29,18 @@
       <button id="sound-btn" class="icon-btn" aria-label="Mute audio">🔊</button>
     </header>
 
-    <main id="screen" aria-live="polite"></main>
+    <main id="screen"></main>
+
+    <!-- polite live region for screen-reader status (kept tiny + offscreen) -->
+    <div id="sr-status" class="sr-only" aria-live="polite"></div>
 
     <nav id="tabbar" class="tabbar" aria-label="Main">
-      <a href="#/" data-tab="home" class="tab"><span class="tab-ic">🏠</span><span class="tab-lbl">Home</span></a>
-      <a href="#/lessons" data-tab="lessons" class="tab"><span class="tab-ic">📚</span><span class="tab-lbl">Lessons</span></a>
-      <a href="#/practice" data-tab="practice" class="tab"><span class="tab-ic">🎴</span><span class="tab-lbl">Practice</span></a>
-      <a href="#/verbs" data-tab="verbs" class="tab"><span class="tab-ic">🔤</span><span class="tab-lbl">Verbs</span></a>
-      <a href="#/search" data-tab="search" class="tab"><span class="tab-ic">🔎</span><span class="tab-lbl">Search</span></a>
+      <a href="#/" data-tab="home" class="tab"><span class="tab-ic" aria-hidden="true">🏠</span><span class="tab-lbl">Home</span></a>
+      <a href="#/lessons" data-tab="lessons" class="tab"><span class="tab-ic" aria-hidden="true">📚</span><span class="tab-lbl">Lessons</span></a>
+      <a href="#/songs" data-tab="songs" class="tab"><span class="tab-ic" aria-hidden="true">🎵</span><span class="tab-lbl">Songs</span></a>
+      <a href="#/talk" data-tab="talk" class="tab"><span class="tab-ic" aria-hidden="true">💬</span><span class="tab-lbl">Talk</span></a>
+      <a href="#/practice" data-tab="practice" class="tab"><span class="tab-ic" aria-hidden="true">🎴</span><span class="tab-lbl">Practice</span></a>
+      <a href="#/search" data-tab="search" class="tab"><span class="tab-ic" aria-hidden="true">🔎</span><span class="tab-lbl">Search</span></a>
     </nav>
   </div>
 
@@ -48,6 +52,7 @@
   <script src="js/speech.js"></script>
   <script src="js/store.js"></script>
   <script src="js/data.js"></script>
+  <script src="js/data-advanced.js"></script>
   <script src="js/content.js"></script>
   <script src="js/components.js"></script>
   <script src="js/screens/home.js"></script>
@@ -56,6 +61,8 @@
   <script src="js/screens/practice.js"></script>
   <script src="js/screens/quiz.js"></script>
   <script src="js/screens/verbs.js"></script>
+  <script src="js/screens/songs.js"></script>
+  <script src="js/screens/conversations.js"></script>
   <script src="js/screens/search.js"></script>
   <script src="js/app.js"></script>
 </body>

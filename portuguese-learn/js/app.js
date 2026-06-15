@@ -14,7 +14,22 @@
   var backBtn = document.getElementById("back-btn");
   var soundBtn = document.getElementById("sound-btn");
   var tabbar = document.getElementById("tabbar");
+  var srStatus = document.getElementById("sr-status");
   var prev = null;
+
+  /* Announce a short message to assistive tech via the polite live region. */
+  function announce(msg) { if (srStatus) srStatus.textContent = msg; }
+  PT.announce = announce;
+
+  /* Keep the topbar sound button in sync with the actual mute state. Screens
+     that need audio (e.g. "Play all") call PT.setMute(false) instead of poking
+     the audio module directly, so the button never lies about the state. */
+  function syncSoundBtn() {
+    var muted = PT.audio.muted;
+    soundBtn.textContent = muted ? "🔇" : "🔊";
+    soundBtn.setAttribute("aria-label", muted ? "Unmute audio" : "Mute audio");
+  }
+  PT.setMute = function (m) { PT.audio.setMuted(m); syncSoundBtn(); };
 
   function parse() {
     var raw = (location.hash || "").replace(/^#\/?/, "").trim();
@@ -34,14 +49,16 @@
     document.body.setAttribute("data-screen", route.id);
     document.title = (route.id === "home" ? "Falar — Learn Brazilian Portuguese" : screen.title + " · Falar");
 
-    // back button shows on detail screens (anything reached from a tab)
+    // Back shows only on detail screens — not on the top-level tab destinations.
     var isTab = !!tabbar.querySelector('[data-tab="' + route.id + '"]');
-    backBtn.hidden = (route.id === "home");
+    backBtn.hidden = (route.id === "home") || (isTab && !route.arg);
 
-    // highlight the owning tab
+    // highlight the owning tab + expose it to assistive tech
     var ownTab = screen.tab || route.id;
     Array.prototype.forEach.call(tabbar.querySelectorAll(".tab"), function (a) {
-      a.classList.toggle("active", a.getAttribute("data-tab") === ownTab);
+      var on = a.getAttribute("data-tab") === ownTab;
+      a.classList.toggle("active", on);
+      if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
 
     window.scrollTo(0, 0);
@@ -50,6 +67,12 @@
       screenHost.innerHTML = '<p class="screen-pad">Something went wrong on this screen.</p>';
       if (window.console) console.error(e);
     }
+
+    // Move focus to the new screen's heading so screen-reader users land in the
+    // right place, and announce the screen name politely.
+    var heading = screenHost.querySelector("h1, .page-title, .hero-greet");
+    if (heading) { heading.setAttribute("tabindex", "-1"); try { heading.focus({ preventScroll: true }); } catch (e2) { heading.focus(); } }
+    announce((route.id === "home" ? "Home" : screen.title) + " screen");
   }
 
   PT.go = function (hash) { location.hash = hash || "#/"; };
@@ -62,8 +85,7 @@
 
   soundBtn.addEventListener("click", function () {
     var muted = PT.audio.toggleMute();
-    soundBtn.textContent = muted ? "🔇" : "🔊";
-    soundBtn.setAttribute("aria-label", muted ? "Unmute audio" : "Mute audio");
+    syncSoundBtn();
     if (!muted) PT.audio.pop();
   });
 

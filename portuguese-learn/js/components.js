@@ -51,6 +51,9 @@ PT.components = (function () {
 
     var meaning = el("div", { class: "wc-en", text: item.en });
 
+    // advanced usage/nuance note (songs + dialogue expressions)
+    var noteEl = item.note ? el("div", { class: "wc-note", text: "💬 " + item.note }) : null;
+
     var example = (item.ex_pt) ? el("div", { class: "wc-ex" }, [
       el("div", { class: "wc-ex-row" }, [
         el("span", { class: "wc-ex-pt", lang: "pt-BR", text: item.ex_pt }),
@@ -60,17 +63,21 @@ PT.components = (function () {
     ]) : null;
 
     var learned = PT.store.isLearned(item.key);
-    var kids = [head, meta, meaning, example];
+    var kids = [head, meta, meaning, noteEl, example];
 
     if (opts.onKnow) {
+      var done = learned;
       var btn = el("button", {
         class: "know-btn" + (learned ? " is-known" : ""),
         type: "button",
         text: learned ? "✓ Known" : "I know this",
         onclick: function () {
+          if (done) return;            // guard against repeat taps re-grading
+          done = true;
           PT.store.markKnown(item.key);
           btn.classList.add("is-known");
           btn.textContent = "✓ Known";
+          card.classList.add("learned");
           PT.audio.correct();
           opts.onKnow(item);
         }
@@ -96,5 +103,20 @@ PT.components = (function () {
     return el("div", { class: "section-title" }, [el("h2", { text: text }), action || null]);
   }
 
-  return { speakBtn: speakBtn, genderPill: genderPill, wordCard: wordCard, stat: stat, sectionTitle: sectionTitle };
+  /* One line of a conversation as a chat bubble; `side` is "left" or "right". */
+  function dialogueLine(line, side) {
+    return el("div", { class: "dlg-line " + side }, [
+      el("div", { class: "dlg-speaker", text: line.speaker }),
+      el("div", { class: "dlg-bubble" }, [
+        el("div", { class: "dlg-row" }, [
+          el("span", { class: "dlg-pt", lang: "pt-BR", text: line.pt }),
+          speakBtn(line.pt, { rate: 0.92 })
+        ]),
+        el("div", { class: "dlg-en", text: line.en }),
+        line.note ? el("div", { class: "dlg-note", text: "💡 " + line.note }) : null
+      ])
+    ]);
+  }
+
+  return { speakBtn: speakBtn, genderPill: genderPill, wordCard: wordCard, stat: stat, sectionTitle: sectionTitle, dialogueLine: dialogueLine };
 })();

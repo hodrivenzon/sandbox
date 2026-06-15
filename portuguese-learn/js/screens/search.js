@@ -16,7 +16,7 @@
     wrap.appendChild(el("div", { class: "search-bar" }, [el("span", { class: "search-ic", text: "🔎" }), input]));
 
     var results = el("div", { class: "card-list" });
-    var hint = el("p", { class: "page-sub", text: "Type to search " + PT.content.count() + " words and phrases." });
+    var hint = el("p", { class: "page-sub", text: "Type to search " + PT.content.totalCount() + " words, phrases & expressions." });
     wrap.appendChild(hint);
     wrap.appendChild(results);
     host.appendChild(wrap);
@@ -30,7 +30,7 @@
       if (!found.length) { results.appendChild(el("p", { class: "page-sub", text: "No matches for “" + q + "”." })); return; }
       found.forEach(function (item) {
         var card = C.wordCard(item, {});
-        card.appendChild(el("a", { class: "wc-lesson-link", href: "#/lesson/" + item.lessonId, onclick: function () { PT.audio.pop(); }, text: "from " + item.lessonTitle + " →" }));
+        card.appendChild(el("a", { class: "wc-lesson-link", href: item.route || ("#/lesson/" + item.lessonId), onclick: function () { PT.audio.pop(); }, text: "from " + item.lessonTitle + " →" }));
         results.appendChild(card);
       });
     }

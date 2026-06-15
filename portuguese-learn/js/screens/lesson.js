@@ -20,7 +20,7 @@
     ]));
 
     /* action row */
-    var playBtn = el("button", { class: "btn btn-soft", onclick: function () { playAll(lesson, playBtn); } }, [
+    var playBtn = el("button", { class: "btn btn-soft", aria: { pressed: "false" }, onclick: function () { playAll(lesson, playBtn); } }, [
       el("span", { class: "btn-ic", text: "▶︎" }), el("span", { class: "lbl", text: "Play all" })
     ]);
     wrap.appendChild(el("div", { class: "action-row" }, [
@@ -65,9 +65,10 @@
   var playing = false;
   function playAll(lesson, btn) {
     if (playing) { stopAll(btn); return; }
-    if (PT.audio.muted) { PT.audio.toggleMute(); }
+    if (PT.audio.muted && PT.setMute) { PT.setMute(false); } // unmute *and* sync the topbar button
     playing = true;
     btn.classList.add("is-active");
+    btn.setAttribute("aria-pressed", "true");
     btn.querySelector(".lbl").textContent = "Stop";
     var i = 0;
     (function next() {
@@ -79,7 +80,7 @@
   function stopAll(btn) {
     playing = false;
     try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
-    if (btn) { btn.classList.remove("is-active"); var l = btn.querySelector(".lbl"); if (l) l.textContent = "Play all"; }
+    if (btn) { btn.classList.remove("is-active"); btn.setAttribute("aria-pressed", "false"); var l = btn.querySelector(".lbl"); if (l) l.textContent = "Play all"; }
   }
 
   PT.screens.lesson = { title: "Lesson", tab: "lessons", render: render, onLeave: function () { stopAll(); } };
