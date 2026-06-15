@@ -1665,7 +1665,7 @@ PT.data = {
         {
           "pt": "olho",
           "en": "eye",
-          "hint": "OH-lyo",
+          "hint": "OH-lyoo",
           "pos": "noun",
           "gender": "m",
           "ex_pt": "Tenho algo no olho.",
@@ -2110,7 +2110,7 @@ PT.data = {
       {
         "infinitive": "ser",
         "en": "to be (permanent/identity)",
-        "hint": "seh",
+        "hint": "sehr",
         "irregular": true,
         "conj": {
           "eu": "sou",
@@ -2152,7 +2152,7 @@ PT.data = {
       {
         "infinitive": "ir",
         "en": "to go",
-        "hint": "eeh",
+        "hint": "EER",
         "irregular": true,
         "conj": {
           "eu": "vou",

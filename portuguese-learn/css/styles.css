@@ -12,9 +12,11 @@
   --primary-d: #0b5a54;
   --primary-soft: #d7efe9;
   --primary-ink: #ffffff;
-  --accent: #f59e0b;
+  --accent: #f59e0b;          /* amber — for fills/icons */
+  --accent-ink: #b45309;      /* darker amber — for amber TEXT (passes contrast) */
   --accent-soft: #fdecc8;
   --green: #16a34a;
+  --green-ink: #15803d;       /* darker green — for green TEXT (passes contrast) */
   --red: #dc2626;
   --m: #2563eb;          /* masculine */
   --f: #db2777;          /* feminine */
@@ -41,7 +43,9 @@
     --primary-soft: #133a36;
     --primary-ink: #04211e;
     --accent: #fbbf24;
+    --accent-ink: #fcd34d;
     --accent-soft: #3a2e10;
+    --green-ink: #4ade80;
     --m: #60a5fa;
     --f: #f472b6;
     --line: #28332f;
@@ -220,7 +224,7 @@ a { color: inherit; text-decoration: none; }
 .pill.pos { text-transform: lowercase; }
 .pill.gender-m { background: color-mix(in srgb, var(--m) 16%, transparent); color: var(--m); }
 .pill.gender-f { background: color-mix(in srgb, var(--f) 16%, transparent); color: var(--f); }
-.pill.irr { background: var(--accent-soft); color: var(--accent); }
+.pill.irr { background: var(--accent-soft); color: var(--accent-ink); }
 
 /* speaker button */
 .speak-btn {
@@ -244,7 +248,7 @@ a { color: inherit; text-decoration: none; }
 .session-bar { margin-bottom: 16px; }
 .session-meta { display: flex; align-items: center; justify-content: space-between; font-size: 13.5px; color: var(--ink-soft); font-weight: 600; margin-bottom: 8px; }
 .dir-toggle { border: 1px solid var(--line); background: var(--surface); color: var(--primary); font-weight: 700; font-size: 12.5px; padding: 5px 10px; border-radius: 99px; }
-.score-chip { color: var(--accent); font-weight: 800; }
+.score-chip { color: var(--accent-ink); font-weight: 800; }
 
 /* ---------- flashcards ---------- */
 .flash-stage { display: flex; flex-direction: column; align-items: center; }
@@ -289,7 +293,10 @@ a { color: inherit; text-decoration: none; }
 .option:active { transform: scale(.99); }
 .options:not(.locked) .option:hover { border-color: var(--primary); }
 .options.locked .option { cursor: default; }
-.option.correct { border-color: var(--green); background: color-mix(in srgb, var(--green) 14%, var(--surface)); color: var(--green); }
+.option.correct { border-color: var(--green); background: color-mix(in srgb, var(--green) 14%, var(--surface)); color: var(--green-ink); }
+.opt-label { flex: 1; }
+.opt-mark { font-weight: 800; font-size: 18px; }
+.option { display: flex; align-items: center; gap: 10px; }
 .option.wrong { border-color: var(--red); background: color-mix(in srgb, var(--red) 12%, var(--surface)); color: var(--red); }
 .quiz-stage .btn-block { margin-top: 16px; }
 
@@ -298,7 +305,7 @@ a { color: inherit; text-decoration: none; }
 .summary-emoji { font-size: 54px; }
 .summary h2 { margin: 6px 0; font-size: 23px; }
 .summary-line { font-size: 17px; font-weight: 650; margin: 4px 0; }
-.summary-sub { color: var(--accent); font-weight: 750; }
+.summary-sub { color: var(--accent-ink); font-weight: 750; }
 
 /* ---------- verbs ---------- */
 .verb-card { overflow: hidden; }
@@ -329,6 +336,56 @@ a { color: inherit; text-decoration: none; }
 #celebrate { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
 .confetti { position: absolute; top: -8vh; will-change: transform; animation: fall var(--d, 1.3s) linear forwards; }
 @keyframes fall { to { transform: translateY(118vh) rotate(var(--r, 360deg)); } }
+
+/* ---------- screen-reader only ---------- */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ---------- feature cards (home: songs / conversations) ---------- */
+.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.feature-card { padding: 16px 14px; display: flex; flex-direction: column; gap: 4px; transition: transform .1s, box-shadow .15s; }
+.feature-card:hover { box-shadow: var(--shadow-lg); }
+.feature-card:active { transform: scale(.98); }
+.feature-emoji { font-size: 30px; }
+.feature-title { font-weight: 760; font-size: 15.5px; }
+.feature-sub { color: var(--ink-soft); font-size: 12.5px; line-height: 1.35; }
+
+/* lessons "verbs" feature row + chevrons */
+.lesson-card.feature { background: var(--primary-soft); border-color: transparent; }
+.lc-chev { color: var(--primary); font-size: 26px; font-weight: 700; }
+
+/* ---------- info note ---------- */
+.info-note { background: var(--surface-2); color: var(--ink-soft); font-size: 13px; padding: 11px 13px; border-radius: 12px; margin-bottom: 14px; line-height: 1.4; }
+
+/* ---------- songs ---------- */
+.song-card { display: flex; align-items: center; gap: 13px; padding: 13px 14px; }
+.song-emoji { font-size: 28px; width: 48px; height: 48px; display: grid; place-items: center; background: var(--surface-2); border-radius: 12px; flex: 0 0 auto; }
+.song-meta { color: var(--ink-soft); font-size: 12px; margin-top: 1px; }
+.culture-card { padding: 14px 16px; margin: 4px 0 8px; }
+.culture-text { margin: 6px 0 0; font-size: 14.5px; line-height: 1.5; }
+
+/* advanced usage note on word cards */
+.wc-note { margin-top: 8px; font-size: 13px; line-height: 1.45; color: var(--ink-soft); background: var(--surface-2); padding: 9px 11px; border-radius: 10px; }
+
+/* ---------- register pill ---------- */
+.pill.reg { flex: 0 0 auto; align-self: center; }
+.pill.reg-informal { background: color-mix(in srgb, var(--f) 16%, transparent); color: var(--f); }
+.pill.reg-neutral { background: color-mix(in srgb, var(--primary) 16%, transparent); color: var(--primary-d); }
+.pill.reg-formal { background: color-mix(in srgb, var(--m) 16%, transparent); color: var(--m); }
+
+/* ---------- conversation thread ---------- */
+.dlg-thread { display: flex; flex-direction: column; gap: 14px; margin-top: 6px; }
+.dlg-line { display: flex; flex-direction: column; max-width: 88%; }
+.dlg-line.left { align-self: flex-start; align-items: flex-start; }
+.dlg-line.right { align-self: flex-end; align-items: flex-end; }
+.dlg-speaker { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); margin: 0 6px 3px; text-transform: uppercase; letter-spacing: .04em; }
+.dlg-bubble { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 11px 13px; box-shadow: var(--shadow); }
+.dlg-line.left .dlg-bubble { border-bottom-left-radius: 5px; }
+.dlg-line.right .dlg-bubble { background: var(--primary-soft); border-color: transparent; border-bottom-right-radius: 5px; }
+.dlg-row { display: flex; align-items: center; gap: 8px; }
+.dlg-pt { font-size: 16px; font-weight: 600; }
+.dlg-en { color: var(--ink-soft); font-size: 13.5px; margin-top: 3px; }
+.dlg-note { margin-top: 7px; padding-top: 7px; border-top: 1px dashed var(--line); font-size: 12.5px; color: var(--ink-soft); }
+.dlg-line .speak-btn { width: 32px; height: 32px; flex-basis: 32px; font-size: 14px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }

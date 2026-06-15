@@ -33,7 +33,8 @@
 
   function verbCard(v) {
     var open = false;
-    var table = el("div", { class: "conj-table", hidden: "" });
+    var tid = "conj-" + v.infinitive.normalize("NFD").replace(/[^a-zA-Z]/g, "").toLowerCase();
+    var table = el("div", { class: "conj-table", id: tid, hidden: "" });
     PRON.forEach(function (p) {
       var form = v.conj[p.key];
       var phrase = p.lbl.split(" ")[0] + " " + form; // speak "eu sou"
@@ -52,11 +53,12 @@
     }
 
     var head = el("button", {
-      class: "verb-head",
+      class: "verb-head", aria: { expanded: "false", controls: tid },
       onclick: function () {
         open = !open;
         if (open) { table.removeAttribute("hidden"); head.classList.add("open"); }
         else { table.setAttribute("hidden", ""); head.classList.remove("open"); }
+        head.setAttribute("aria-expanded", open ? "true" : "false");
         PT.audio.pop();
       }
     }, [
@@ -71,5 +73,5 @@
     return el("div", { class: "card verb-card" }, [head, table]);
   }
 
-  PT.screens.verbs = { title: "Verbs", tab: "verbs", render: render };
+  PT.screens.verbs = { title: "Verbs", tab: "lessons", render: render };
 })();

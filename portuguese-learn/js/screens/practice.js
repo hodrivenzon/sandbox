@@ -128,7 +128,7 @@
       var pct = done ? Math.round((right / done) * 100) : 0;
       stage.appendChild(el("div", { class: "summary card" }, [
         el("div", { class: "summary-emoji", text: pct >= 80 ? "🎉" : "💪" }),
-        el("h2", { text: "Boa! Session complete" }),
+        el("h2", {}, [el("span", { lang: "pt-BR", text: "Boa!" }), " Session complete"]),
         el("p", { class: "summary-line", text: right + " of " + done + " correct (" + pct + "%)" }),
         el("p", { class: "summary-sub", text: "+" + (right * 10 + (done - right) * 2) + " XP" }),
         el("div", { class: "action-row center" }, [
@@ -141,5 +141,10 @@
     show();
   }
 
-  PT.screens.practice = { title: "Practice", tab: "practice", render: render };
+  function onLeave() {
+    clearTimeout(timer);
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  }
+
+  PT.screens.practice = { title: "Practice", tab: "practice", render: render, onLeave: onLeave };
 })();

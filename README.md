@@ -11,6 +11,7 @@ The landing page ([`index.html`](index.html)) links to everything below.
 | | Project | What it is | Link |
 | --- | --- | --- | --- |
 | 🧸 | **Tiny Explorers** | A static, research-grounded learning playground for ages 2–3 (colors, shapes, numbers, animals, letters, music, matching, body parts, drawing). Tap-to-learn, narrated aloud, offline-ready, no ads, no data collection. | [`toddler-learn/`](toddler-learn/) |
+| 🇧🇷 | **Falar** | A Brazilian Portuguese learning app — themed vocabulary lessons with audio, spaced-repetition flashcards, quizzes, and verb conjugations. Tracks streaks/XP, works offline, no account. | [`portuguese-learn/`](portuguese-learn/) |
 | 🏋️ | **FORGE** | A CrossFit strength-analytics dashboard — track lifts, benchmark scores, and visualize progress. | [`crossfit-dashboard.html`](crossfit-dashboard.html) |
 | 📋 | **Baby Gear List** | A Python (`openpyxl`) script that generates a color-coded Excel shopping list for baby equipment, organized by priority and status (Hebrew / RTL). Not a web app — run it locally. | [`build_list.py`](build_list.py) |
 

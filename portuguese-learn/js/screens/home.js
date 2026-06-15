@@ -16,8 +16,11 @@
 
     /* hero */
     wrap.appendChild(el("section", { class: "hero" }, [
-      el("p", { class: "hero-greet", lang: "pt-BR", text: "Olá! 👋" }),
-      el("p", { class: "hero-sub", text: "Bem-vindo de volta — let's learn some Brazilian Portuguese." })
+      el("h1", { class: "hero-greet", lang: "pt-BR", text: "Olá! 👋" }),
+      el("p", { class: "hero-sub" }, [
+        el("span", { lang: "pt-BR", text: "Bem-vindo de volta" }),
+        " — let's learn some Brazilian Portuguese."
+      ])
     ]));
 
     /* stat row */
@@ -50,6 +53,15 @@
     ]);
     wrap.appendChild(cta);
 
+    /* advanced pillars: learn through famous songs + real conversations */
+    if (PT.content.songs().length || PT.content.dialogues().length) {
+      wrap.appendChild(C.sectionTitle("Learn with…"));
+      wrap.appendChild(el("div", { class: "feature-grid" }, [
+        featureCard("🎵", "Famous songs", "Vocabulary & culture from Brazilian classics", "#/songs"),
+        featureCard("💬", "Real conversations", "Everyday dialogues with slang & idioms", "#/talk")
+      ]));
+    }
+
     /* continue learning: first lesson not yet finished */
     var lessons = PT.content.lessons();
     var next = null;
@@ -73,6 +85,14 @@
     }
 
     host.appendChild(wrap);
+  }
+
+  function featureCard(emoji, title, sub, href) {
+    return el("a", { class: "card feature-card", href: href, onclick: function () { PT.audio.pop(); } }, [
+      el("div", { class: "feature-emoji", text: emoji }),
+      el("div", { class: "feature-title", text: title }),
+      el("div", { class: "feature-sub", text: sub })
+    ]);
   }
 
   function lessonCard(l, compact) {

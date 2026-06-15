@@ -6,6 +6,7 @@
 (function () {
   var el = PT.dom.el, C = PT.components;
   var QN = 10;
+  var timer = null; // tracks the listen-question auto-play timeout
 
   function pickDistractors(pool, answer, field, n) {
     var seen = {};
@@ -34,9 +35,10 @@
   function render(host, lessonId) {
     PT.dom.clear(host);
     var lesson = lessonId ? PT.content.lesson(lessonId) : null;
-    var pool = lesson ? lesson.items : PT.content.allItems();
     var wrap = el("div", { class: "screen-pad quiz" });
     host.appendChild(wrap);
+    if (lessonId && !lesson) { wrap.appendChild(el("p", { class: "page-sub", text: "Lesson not found." })); return; }
+    var pool = lesson ? lesson.items : PT.content.allItems();
     if (pool.length < 4) { wrap.appendChild(el("p", { text: "Need at least 4 words to make a quiz." })); return; }
 
     var questions = makeQuestions(pool);
@@ -70,7 +72,8 @@
           el("div", { class: "q-instr", text: "Listen and choose the meaning" }),
           C.speakBtn(q.item.pt, { big: true })
         ]);
-        setTimeout(function () { PT.audio.speak(q.item.pt, { rate: 0.85 }); }, 250);
+        clearTimeout(timer);
+        timer = setTimeout(function () { PT.audio.speak(q.item.pt, { rate: 0.85 }); }, 250);
       } else if (q.type === "pt-en") {
         prompt = el("div", { class: "q-prompt" }, [
           el("div", { class: "q-instr", text: "What does this mean?" }),
@@ -87,29 +90,32 @@
       var opts = el("div", { class: "options" });
       q.options.forEach(function (opt) {
         var label = opt[q.field];
+        var mark = el("span", { class: "opt-mark", aria: { hidden: "true" } });
         var b = el("button", {
           class: "option" + (q.field === "pt" ? " pt" : ""),
           lang: q.field === "pt" ? "pt-BR" : null,
-          text: label,
           onclick: function () {
             if (answered) return;
             answered = true;
             var correct = opt === q.item;
             PT.store.grade(q.item.key, correct);
-            if (correct) { score++; b.classList.add("correct"); PT.audio.correct(); }
-            else {
-              b.classList.add("wrong"); PT.audio.wrong();
-              // reveal the right one
+            // correctness is shown with a ✓/✗ glyph + announced, not by color alone
+            if (correct) {
+              score++; b.classList.add("correct"); mark.textContent = "✓"; PT.audio.correct();
+              if (PT.announce) PT.announce("Correct");
+            } else {
+              b.classList.add("wrong"); mark.textContent = "✗"; PT.audio.wrong();
               Array.prototype.forEach.call(opts.children, function (c, k) {
-                if (q.options[k] === q.item) c.classList.add("correct");
+                if (q.options[k] === q.item) { c.classList.add("correct"); var m = c.querySelector(".opt-mark"); if (m) m.textContent = "✓"; }
               });
+              if (PT.announce) PT.announce("Incorrect. The answer is " + q.item[q.field]);
             }
             // speak the correct Portuguese as reinforcement
             PT.audio.speak(q.item.pt, { rate: 0.9 });
             opts.classList.add("locked");
             next.removeAttribute("hidden");
           }
-        });
+        }, [el("span", { class: "opt-label", text: label }), mark]);
         opts.appendChild(b);
       });
       stage.appendChild(opts);
@@ -126,7 +132,7 @@
       if (pct >= 70) PT.dom.celebrate();
       stage.appendChild(el("div", { class: "summary card" }, [
         el("div", { class: "summary-emoji", text: pct >= 90 ? "🏆" : pct >= 70 ? "🎉" : "📚" }),
-        el("h2", { text: pct >= 70 ? "Muito bem!" : "Keep going!" }),
+        pct >= 70 ? el("h2", { lang: "pt-BR", text: "Muito bem!" }) : el("h2", { text: "Keep going!" }),
         el("p", { class: "summary-line", text: "You scored " + score + " / " + questions.length + " (" + pct + "%)" }),
         el("div", { class: "action-row center" }, [
           el("button", { class: "btn btn-primary", onclick: function () { PT.audio.pop(); questions = makeQuestions(pool); qi = 0; score = 0; show(); } }, ["Try again"]),
@@ -138,5 +144,10 @@
     show();
   }
 
-  PT.screens.quiz = { title: "Quiz", tab: "lessons", render: render };
+  function onLeave() {
+    clearTimeout(timer);
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  }
+
+  PT.screens.quiz = { title: "Quiz", tab: "lessons", render: render, onLeave: onLeave };
 })();
