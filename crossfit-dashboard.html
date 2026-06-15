@@ -1118,6 +1118,84 @@ function renderCompare(){
       <div class="delta" style="color:${dCol}">${(dRel>=0?'+':'')+dRel.toFixed(2)}× BW vs them</div>`; grid.appendChild(d); });
 }
 
+/* ============================================================
+   HOME MODULE
+   ============================================================ */
+let wiredHome=false;
+function baselineRHR(){ const m=APP.logs.metrics; if(m.length){ const last=m.slice(-7); return last.reduce((s,x)=>s+(+x.rhr||55),0)/last.length; } return 55; }
+function computeReadiness(){
+  const t=APP.today; const base=baselineRHR();
+  let s=52 + (clamp(t.sleep,4,10)-7)*7 + (clamp(t.mood,1,5)-3)*5 + (clamp(t.energy,1,5)-3)*6
+        - (clamp(t.sore,1,10)-3)*5 - Math.max(0,(+t.rhr-base))*1.6;
+  s=Math.round(clamp(s,5,100));
+  let label,rec,col;
+  if(s>=78){label='Primed';rec='Green light — attack a heavy or high-intensity session.';col='#39d98a';}
+  else if(s>=60){label='Ready';rec='Solid — train as planned at moderate-to-high intensity.';col='#4d9fff';}
+  else if(s>=42){label='Caution';rec='Dial it back — technique, skill work, or lighter volume today.';col='#ffb83c';}
+  else{label='Recover';rec='Prioritize rest, mobility & sleep. Active recovery only.';col='#ff5a5a';}
+  return {s,label,rec,col};
+}
+function wireHome(){
+  [['tdSleep','sleep'],['tdRhr','rhr'],['tdSore','sore'],['tdMood','mood'],['tdEnergy','energy']].forEach(([id,k])=>{
+    $(id).addEventListener('input',e=>{ APP.today[k]=+e.target.value||0; save(); renderHomeReadiness(); }); });
+  wiredHome=true;
+}
+function renderHomeReadiness(){
+  const r=computeReadiness();
+  donut($('readyRing'),r.s,r.col,38);
+  $('readyStatus').textContent=r.label+' · '+r.s; $('readyStatus').style.color=r.col; $('readyRec').textContent=r.rec;
+}
+function suggestSession(){
+  const w=WAVE[APP.week-1]; const keyLifts=['back_squat','strict_press','deadlift','front_squat','snatch','clean_jerk','back_squat','split_jerk','deadlift'];
+  const main=keyLifts[(APP.week-1)%keyLifts.length]; const acc=keyLifts[(APP.week+2)%keyLifts.length];
+  const mt=round((APP.lifts[main]||0)*w.p/100,2.5), at=round((APP.lifts[acc]||0)*Math.max(60,w.p-12)/100,2.5);
+  const wod=WODS[(APP.week*3)%WODS.length];
+  return {w,main,acc,mt,at,wod};
+}
+function renderHome(){
+  if(!wiredHome) wireHome();
+  const h=new Date().getHours(); const part=h<12?'morning':h<18?'afternoon':'evening';
+  $('greetLine').textContent=`Good ${part}, ${APP.profile.name||'Athlete'}`;
+  $('greetDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  $('tdSleep').value=APP.today.sleep; $('tdRhr').value=APP.today.rhr; $('tdSore').value=APP.today.sore; $('tdMood').value=APP.today.mood; $('tdEnergy').value=APP.today.energy;
+  renderHomeReadiness();
+  // stats
+  const sd=sessionDates(); const wkAgo=Date.now()-7*864e5; let wk=0; sd.forEach(d=>{ if(new Date(d+'T00:00').getTime()>=wkAgo)wk++; });
+  $('stStreak').textContent=streak(); $('stWeek').textContent=wk; $('stTotal').textContent=sd.size; $('stScore').textContent=strengthScore().score;
+  // suggested session
+  const s=suggestSession(); $('homePhase').textContent=`Week ${APP.week} · ${s.w.ph}`;
+  const hw=$('homeWorkout');
+  hw.innerHTML=`
+    <div class="workout"><div class="wt">💪 Strength — ${LIFTNAME[s.main]}</div>
+      <div class="wd">${PHASE_SCHEME[s.w.ph]} @ ${s.w.p}%  →  <b style="color:var(--accent2)">${s.mt?fmtW(s.mt)+' '+APP.units:'set 1RM'}</b>
+      \nAccessory: ${LIFTNAME[s.acc]} 3×8 @ ${s.at?fmtW(s.at)+' '+APP.units:'—'}</div></div>
+    <div class="workout"><div class="wt">🔥 Conditioning — ${s.wod.name} <span class="badge ${s.wod.category==='Hero'?'hero':'girl'}">${s.wod.category}</span></div>
+      <div class="wd">${s.wod.description}</div>
+      <div style="display:flex;gap:7px;margin-top:10px">
+        <button class="btn sm" onclick="startWodOnTimer(${JSON.stringify(s.wod.name)})">⏱️ Start Timer</button>
+        <button class="btn sm ghost" onclick="showView('log','wod');logWodPrefill(${JSON.stringify(s.wod.name)})">📋 Log Result</button>
+      </div></div>`;
+  // goals
+  const gl=$('homeGoals'); gl.innerHTML='';
+  if(!APP.goals.length) gl.innerHTML='<p class="hint">Add goals in the Profile tab.</p>';
+  APP.goals.forEach(g=>{ const cur=APP.lifts[g.lift]||0; const pct=clamp(cur/g.target*100,0,100);
+    const d=document.createElement('div'); d.className='goalrow';
+    d.innerHTML=`<div class="gt"><span>${LIFTNAME[g.lift]||g.lift}</span><span><b>${fmtW(cur)}</b> / ${fmtW(g.target)} ${APP.units} · ${Math.round(pct)}%</span></div><div class="goalbar"><i style="width:${pct}%"></i></div>`; gl.appendChild(d); });
+  // this week targets
+  const tg=$('homeTargets'); tg.innerHTML='';
+  ['back_squat','front_squat','deadlift','clean_jerk','snatch','strict_press'].forEach(k=>{ const max=APP.lifts[k]||0; const target=round(max*s.w.p/100,2.5);
+    const d=document.createElement('div'); d.className='tgt';
+    d.innerHTML=`<div class="l">${LIFTNAME[k]}</div><div class="w">${target?fmtW(target):'—'} <span style="font-size:11px;color:var(--dim)">${APP.units}</span></div><div class="r">${s.w.p}%</div>`; tg.appendChild(d); });
+  // feed
+  const feed=[]; APP.logs.lifts.slice(-12).forEach(l=>feed.push({date:l.date,ic:'🏋️',txt:`${LIFTNAME[l.lift]||l.lift} ${fmtW(l.weight)}${APP.units}×${l.reps} (e1RM ${fmtW(l.e1rm)})`}));
+  APP.logs.wods.slice(-12).forEach(w=>feed.push({date:w.date,ic:'📋',txt:`${w.wod} — ${w.result} (${w.rx})`}));
+  APP.logs.metrics.slice(-6).forEach(m=>feed.push({date:m.date,ic:'❤️',txt:`Check-in · ${m.bw}kg · RHR ${m.rhr}`}));
+  feed.sort((a,b)=>a.date<b.date?1:-1);
+  const fe=$('homeFeed'); fe.innerHTML=''; if(!feed.length)fe.innerHTML='<p class="hint">No activity yet — log a lift or WOD.</p>';
+  feed.slice(0,8).forEach(f=>{ const d=document.createElement('div'); d.className='feeditem';
+    d.innerHTML=`<div class="fi">${f.ic}</div><div>${f.txt}</div><div class="fd">${daysAgo(f.date)}</div>`; fe.appendChild(d); });
+}
+
 APP=load(); COMPARE=APP.compareId?ATHLETES.find(a=>a.id===APP.compareId):null;
 refreshHeader();
 renderHome();
