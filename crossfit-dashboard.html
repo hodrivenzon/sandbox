@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORGE — CrossFit Strength Analytics</title>
+<style>
+  :root{
+    --bg:#0b0e14; --bg2:#11151f; --card:#161b27; --card2:#1c2230;
+    --line:#252c3d; --txt:#e6ebf5; --mut:#8b95a8; --dim:#5d6678;
+    --accent:#ff5a3c; --accent2:#ffb83c; --good:#39d98a; --warn:#ffb83c; --bad:#ff5a5a;
+    --blue:#4d9fff; --purple:#a87bff; --teal:#2dd4bf;
+    --grad:linear-gradient(135deg,#ff5a3c,#ffb83c);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,#1a2030 0%,var(--bg) 55%);
+    color:var(--txt); line-height:1.45; min-height:100vh; padding-bottom:60px;
+  }
+  .wrap{max-width:1280px;margin:0 auto;padding:0 20px}
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:26px 0 20px;flex-wrap:wrap;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{
+    width:46px;height:46px;border-radius:12px;background:var(--grad);
+    display:grid;place-items:center;font-weight:900;font-size:22px;color:#0b0e14;
+    box-shadow:0 8px 24px rgba(255,90,60,.35);
+  }
+  .brand h1{font-size:22px;letter-spacing:1px;font-weight:800}
+  .brand p{color:var(--mut);font-size:12.5px;letter-spacing:.5px}
+  .tagpill{
+    font-size:11px;color:var(--accent2);border:1px solid var(--line);
+    padding:5px 11px;border-radius:999px;background:var(--card);
+  }
+  .grid{display:grid;gap:16px}
+  .cols-3{grid-template-columns:320px 1fr 360px}
+  .cols-2{grid-template-columns:1fr 1fr}
+  @media(max-width:1100px){.cols-3{grid-template-columns:1fr}.cols-2{grid-template-columns:1fr}}
+  .card{
+    background:linear-gradient(180deg,var(--card),var(--bg2));
+    border:1px solid var(--line);border-radius:16px;padding:18px;
+  }
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--mut);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .card h2 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  label{display:block;font-size:11.5px;color:var(--mut);margin:10px 0 5px;letter-spacing:.4px;text-transform:uppercase}
+  input,select{
+    width:100%;background:var(--bg);border:1px solid var(--line);color:var(--txt);
+    padding:9px 11px;border-radius:9px;font-size:14px;font-family:inherit;
+  }
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:3px;gap:3px}
+  .seg button{flex:1;background:transparent;border:none;color:var(--mut);padding:8px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600}
+  .seg button.on{background:var(--grad);color:#0b0e14}
+  .liftgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  /* Score hero */
+  .hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:6px 0 4px}
+  .ring-wrap{position:relative;width:200px;height:200px}
+  .ring-num{position:absolute;inset:0;display:grid;place-items:center;flex-direction:column}
+  .ring-num b{font-size:52px;font-weight:900;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .ring-num span{display:block;font-size:11px;color:var(--mut);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+  .levelbadge{padding:6px 16px;border-radius:999px;font-weight:800;letter-spacing:1px;font-size:14px;text-transform:uppercase}
+
+  /* Stratification bars */
+  .strat{display:flex;flex-direction:column;gap:11px}
+  .strat-row{display:grid;grid-template-columns:96px 1fr 56px;align-items:center;gap:10px}
+  .strat-row .name{font-size:12.5px;color:var(--txt);font-weight:600}
+  .strat-row .name small{display:block;color:var(--dim);font-weight:400;font-size:10px}
+  .track{position:relative;height:24px;background:var(--bg);border-radius:7px;overflow:hidden;border:1px solid var(--line)}
+  .track .tiers{position:absolute;inset:0;display:flex}
+  .track .tiers i{flex:1;border-right:1px solid rgba(255,255,255,.04)}
+  .track .fill{position:absolute;top:0;left:0;bottom:0;border-radius:6px 0 0 6px;background:var(--grad);opacity:.85;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+  .track .marker{position:absolute;top:-3px;bottom:-3px;width:2px;background:#fff;box-shadow:0 0 8px #fff}
+  .strat-row .val{font-size:13px;font-weight:700;text-align:right}
+  .strat-row .val small{color:var(--dim);font-weight:400}
+
+  .tierlegend{display:flex;justify-content:space-between;font-size:9.5px;color:var(--dim);letter-spacing:.5px;margin:4px 0 0;padding-left:106px}
+
+  /* radar */
+  .radar-wrap{display:flex;justify-content:center}
+
+  /* diagnostics */
+  .diag{display:flex;flex-direction:column;gap:10px}
+  .alert{display:flex;gap:11px;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--card2)}
+  .alert .ic{width:30px;height:30px;border-radius:8px;flex:0 0 30px;display:grid;place-items:center;font-size:16px}
+  .alert.ok .ic{background:rgba(57,217,138,.15)} .alert.ok{border-color:rgba(57,217,138,.3)}
+  .alert.warn .ic{background:rgba(255,184,60,.15)} .alert.warn{border-color:rgba(255,184,60,.3)}
+  .alert.bad .ic{background:rgba(255,90,90,.15)} .alert.bad{border-color:rgba(255,90,90,.3)}
+  .alert b{font-size:13px;display:block;margin-bottom:3px}
+  .alert p{font-size:12px;color:var(--mut)}
+  .alert .ratio{font-size:11px;color:var(--accent2);font-weight:700;margin-top:4px;display:inline-block}
+
+  /* ratio mini */
+  .ratios{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .ratiocard{background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:12px}
+  .ratiocard .lbl{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px}
+  .ratiocard .big{font-size:26px;font-weight:900;margin:4px 0}
+  .ratiocard .sub{font-size:10.5px;color:var(--dim)}
+  .ratiocard .bar{height:5px;background:var(--bg);border-radius:3px;margin-top:8px;overflow:hidden}
+  .ratiocard .bar i{display:block;height:100%;border-radius:3px}
+
+  /* readiness wheels */
+  .wheels{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:6px}
+  .wheel{text-align:center}
+  .wheel .sub{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin-top:6px}
+  .miniinputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+  .miniinputs label{margin:0 0 3px}
+
+  /* gauge */
+  .gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .mrv-status{font-weight:800;letter-spacing:1px;font-size:15px;text-transform:uppercase}
+  .mrv-legend{font-size:11px;color:var(--mut);text-align:center;margin-top:2px}
+
+  /* macrocycle */
+  .weekstrip{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin:10px 0}
+  .weekcell{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 3px;text-align:center;cursor:pointer;transition:.15s}
+  .weekcell:hover{border-color:var(--accent)}
+  .weekcell.on{background:var(--grad);color:#0b0e14;border-color:transparent}
+  .weekcell .wk{font-size:9px;letter-spacing:.5px;opacity:.8}
+  .weekcell .pc{font-size:14px;font-weight:800}
+  .weekcell .ph{font-size:8px;text-transform:uppercase;opacity:.7;margin-top:2px}
+  .targets{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;margin-top:8px}
+  .tgt{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .tgt .l{font-size:10.5px;color:var(--mut)}
+  .tgt .w{font-size:20px;font-weight:800;color:var(--accent2)}
+  .tgt .r{font-size:10px;color:var(--dim)}
+
+  /* percent table */
+  .pctctl{display:flex;gap:10px;align-items:flex-end;margin-bottom:12px}
+  .pcttable{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px}
+  .pctcell{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 6px;text-align:center}
+  .pctcell .p{font-size:11px;color:var(--mut)}
+  .pctcell .k{font-size:17px;font-weight:800}
+  .pctcell.hl{border-color:var(--accent);background:rgba(255,90,60,.08)}
+
+  /* compare */
+  .cmpbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .athcard{display:flex;align-items:center;gap:12px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:230px}
+  .athav{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-size:22px;flex:0 0 44px}
+  .athcard b{font-size:14px;display:block}
+  .athcard .meta{font-size:11px;color:var(--mut)}
+  .athcard .titles{font-size:10px;color:var(--accent2);margin-top:2px}
+  .vsgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-top:14px}
+  .vsrow{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  .vsrow .l{font-size:11px;color:var(--mut)}
+  .vsrow .nums{display:flex;align-items:baseline;justify-content:space-between;margin-top:3px}
+  .vsrow .you{font-size:16px;font-weight:800}
+  .vsrow .them{font-size:13px;font-weight:700;color:var(--blue)}
+  .vsrow .delta{font-size:10px;margin-top:2px}
+  .vsrow .vbar{height:5px;background:var(--bg);border-radius:3px;margin-top:6px;position:relative;overflow:hidden}
+  .vsrow .vbar .yi{position:absolute;left:0;top:0;bottom:0;background:var(--accent);opacity:.8;border-radius:3px}
+  .vsrow .vbar .ti{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--blue);box-shadow:0 0 6px var(--blue)}
+  .est{font-size:9px;color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:middle}
+  .leg-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .foot{color:var(--dim);font-size:11px;text-align:center;margin-top:30px;line-height:1.7}
+  .sectitle{font-size:15px;font-weight:800;letter-spacing:.5px;margin:8px 2px 2px;display:flex;align-items:center;gap:9px}
+  .sectitle .bar{width:4px;height:18px;background:var(--grad);border-radius:2px}
+  .hint{font-size:11px;color:var(--dim);margin-top:3px}
+  .spark{display:flex;align-items:flex-end;gap:2px;height:34px;margin-top:4px}
+  .spark i{flex:1;background:var(--blue);border-radius:2px 2px 0 0;opacity:.6;min-height:3px}
+  .spark i:last-child{background:var(--accent);opacity:1}
+  .pill{font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">⚡</div>
+      <div>
+        <h1>FORGE<span style="color:var(--accent)">·</span>ANALYTICS</h1>
+        <p>Strength Stratification &amp; CrossFit Readiness Engine</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="tagpill">2023 Strength Standards</span>
+      <span class="tagpill">Adaptation Currency Logic</span>
+    </div>
+  </header>
+
+  <!-- ===== TOP ROW: profile | stratification | score ===== -->
+  <div class="grid cols-3">
+
+    <!-- PROFILE + LIFTS -->
+    <div class="card">
+      <h2><span class="dot"></span>Athlete Profile</h2>
+      <label>Sex</label>
+      <div class="seg" id="sexSeg">
+        <button data-sex="male" class="on">Male</button>
+        <button data-sex="female">Female</button>
+      </div>
+      <div class="row2">
+        <div><label>Bodyweight (kg)</label><input id="bw" type="number" value="80" min="30" max="200"></div>
+        <div><label>Age</label><input id="age" type="number" value="28" min="14" max="80"></div>
+      </div>
+
+      <h2 style="margin-top:18px"><span class="dot"></span>1RM Lifts (kg)</h2>
+      <div class="liftgrid" id="liftGrid"></div>
+      <p class="hint">Enter your best lifts. Leave 0 if untested.</p>
+    </div>
+
+    <!-- STRATIFICATION MAP -->
+    <div class="card">
+      <h2><span class="dot"></span>Standard Stratification Map</h2>
+      <div class="strat" id="stratList"></div>
+      <div class="tierlegend">
+        <span>Untrained</span><span>Novice</span><span>Intermediate</span><span>Advanced</span><span>Elite</span>
+      </div>
+      <p class="hint" style="margin-top:12px">White marker = your lift vs. bodyweight-scaled <span style="color:var(--accent2)">2023 standards</span> for your sex. Fill bar shows position within tier range.</p>
+    </div>
+
+    <!-- OVERALL SCORE -->
+    <div class="card">
+      <h2><span class="dot"></span>Strength Index</h2>
+      <div class="hero">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 120 120" width="200" height="200">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="11"/>
+            <circle id="scoreRing" cx="60" cy="60" r="52" fill="none" stroke="url(#g1)" stroke-width="11"
+              stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" transform="rotate(-90 60 60)"/>
+            <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ff5a3c"/><stop offset="1" stop-color="#ffb83c"/>
+            </linearGradient></defs>
+          </svg>
+          <div class="ring-num">
+            <div><b id="scoreVal">0</b><span>Strength Score</span></div>
+          </div>
+        </div>
+        <div class="levelbadge" id="levelBadge">—</div>
+        <p class="hint" id="levelHint" style="text-align:center"></p>
+      </div>
+      <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px;display:flex;justify-content:space-between;font-size:12px">
+        <div><span style="color:var(--mut)">Total (Big 3)</span><br><b id="big3" style="font-size:17px">— kg</b></div>
+        <div style="text-align:right"><span style="color:var(--mut)">Wilks-style</span><br><b id="wilks" style="font-size:17px">—</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION: COMPARE VS LEGENDS ===== -->
+  <div class="sectitle"><span class="bar"></span>Compare vs CrossFit Legends</div>
+  <div class="card" style="margin-top:10px">
+    <h2><span class="dot"></span>Benchmark Against the GOATs</h2>
+    <div class="cmpbar">
+      <div style="min-width:200px">
+        <label>Select an athlete</label>
+        <select id="athSel"></select>
+      </div>
+      <div class="athcard" id="athCard" style="display:none"></div>
+      <div style="flex:1;min-width:160px">
+        <span class="pill"><span class="leg-dot" style="background:var(--accent)"></span>You</span>
+        <span class="pill" style="margin-left:6px"><span class="leg-dot" style="background:var(--blue)"></span>Legend</span>
+        <p class="hint" style="margin-top:6px">Comparison is <b>bodyweight-relative</b> — each athlete scored against standards for their own bodyweight &amp; sex, so a 58 kg champion and a 90 kg athlete compare fairly.</p>
+      </div>
+    </div>
+    <div class="vsgrid" id="vsGrid"></div>
+  </div>
+
+  <!-- ===== SECTION: PROFILE ANALYSIS ===== -->
+  <div class="sectitle"><span class="bar"></span>Strength Profile Analysis</div>
+  <div class="grid cols-2" style="margin-top:10px">
+    <!-- RADAR -->
+    <div class="card">
+      <h2><span class="dot"></span>Relative Strength Radar</h2>
+      <div class="radar-wrap"><svg id="radar" viewBox="0 0 360 320" width="100%" height="320"></svg></div>
+      <p class="hint">Each axis = your lift as % of <b>Elite</b> standard for your bodyweight/sex. Outer ring = Elite.</p>
+    </div>
+    <!-- DIAGNOSTICS -->
+    <div class="card">
+      <h2><span class="dot"></span>Weakness Detection &amp; Coaching Feedback</h2>
+      <div class="diag" id="diag"></div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION: ADVANCED RATIOS ===== -->
+  <div class="sectitle"><span class="bar"></span>Advanced Differentiators</div>
+  <div class="card" style="margin-top:10px">
+    <h2><span class="dot"></span>Speed-Strength, Technical &amp; Pressing Efficiency</h2>
+    <div class="ratios" id="ratioGrid" style="grid-template-columns:repeat(4,1fr)"></div>
+  </div>
+
+  <!-- ===== SECTION: READINESS ===== -->
+  <div class="sectitle"><span class="bar"></span>CrossFit Readiness Score</div>
+  <div class="grid cols-2" style="margin-top:10px">
+    <div class="card">
+      <h2><span class="dot"></span>Theoretical Hierarchy of Development</h2>
+      <div class="wheels">
+        <div class="wheel"><svg class="wsvg" data-w="strengthW" viewBox="0 0 90 90" width="100%"></svg><div class="sub">Strength</div></div>
+        <div class="wheel"><svg class="wsvg" data-w="metaW" viewBox="0 0 90 90" width="100%"></svg><div class="sub">Metabolic</div></div>
+        <div class="wheel"><svg class="wsvg" data-w="gymW" viewBox="0 0 90 90" width="100%"></svg><div class="sub">Gymnastics</div></div>
+      </div>
+      <div class="miniinputs">
+        <div><label>2k Row (mm:ss)</label><input id="row2k" value="7:30"></div>
+        <div><label>5k Run (mm:ss)</label><input id="run5k" value="24:00"></div>
+        <div><label>Max Strict Pull-ups</label><input id="pullups" type="number" value="15"></div>
+        <div><label>Max Ring MU</label><input id="mu" type="number" value="5"></div>
+        <div><label>HS Walk (m)</label><input id="hswalk" type="number" value="10"></div>
+        <div><label>L-sit hold (s)</label><input id="lsit" type="number" value="30"></div>
+      </div>
+      <p class="hint">Composite weighs strength, metabolic capacity (3 pathways) &amp; gymnastic body-control benchmarks.</p>
+    </div>
+
+    <!-- MRV MONITOR + power curve -->
+    <div class="card">
+      <h2><span class="dot"></span>MRV Recovery Monitor</h2>
+      <div class="gauge-wrap">
+        <svg id="mrvGauge" viewBox="0 0 240 140" width="280" height="160"></svg>
+        <div class="mrv-status" id="mrvStatus">—</div>
+        <div class="mrv-legend" id="mrvLegend"></div>
+      </div>
+      <div class="row2" style="margin-top:10px">
+        <div><label>Weekly sets (hard)</label><input id="vol" type="number" value="80"></div>
+        <div><label>Sleep / night (h)</label><input id="sleep" type="number" value="7" step="0.5"></div>
+      </div>
+      <div class="row2">
+        <div><label>Resting HR (bpm)</label><input id="rhr" type="number" value="52"></div>
+        <div><label>Soreness (1–10)</label><input id="sore" type="number" value="4" min="1" max="10"></div>
+      </div>
+      <p class="hint">Estimates <b>Max Recoverable Volume</b> headroom from volume vs. recovery markers. Red = recovery debt.</p>
+    </div>
+  </div>
+
+  <!-- ===== SECTION: MACROCYCLE ===== -->
+  <div class="sectitle"><span class="bar"></span>Macro-Cycle Programming</div>
+  <div class="card" style="margin-top:10px">
+    <h2><span class="dot"></span>9-Week Intensity Wave &amp; Daily Targets</h2>
+    <div class="weekstrip" id="weekStrip"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+      <p class="hint">Select a week to compute target loads off your heavy single. Wave: build → peak → de-load.</p>
+      <span class="pill" id="cycPhase">—</span>
+    </div>
+    <div class="targets" id="targets"></div>
+  </div>
+
+  <!-- ===== SECTION: PERCENT CALC ===== -->
+  <div class="sectitle"><span class="bar"></span>Relative Intensity Scaler</div>
+  <div class="card" style="margin-top:10px">
+    <h2><span class="dot"></span>Percentage Loading Chart</h2>
+    <div class="pctctl">
+      <div style="flex:1"><label>Lift</label><select id="pctLift"></select></div>
+      <div style="width:140px"><label>1RM (kg)</label><input id="pctMax" type="number" value="100"></div>
+      <div style="width:160px"><label>Bar rounding</label>
+        <select id="rounding"><option value="2.5">2.5 kg</option><option value="1">1 kg</option><option value="5">5 kg</option></select>
+      </div>
+    </div>
+    <div class="pcttable" id="pctTable"></div>
+    <p class="hint" style="margin-top:10px">Threshold zone (<span style="color:var(--accent2)">~80–90%</span>) highlighted — where technique degrades under intensity. Stay sharp on the "fine line of bad movement."</p>
+  </div>
+
+  <p class="foot">
+    FORGE Analytics · single-file dashboard · all calculations run locally in your browser.<br>
+    Standards are bodyweight-scaled approximations of public 2023 strength benchmarks for coaching guidance — not medical advice.
+    Watch for recovery debt &amp; rhabdomyolysis risk when stacking high relative intensity.<br>
+    Legend lifts: <span style="color:var(--good)">✓</span> = publicly reported PRs · <span style="color:var(--dim)">~est</span> = coach estimate completing the profile. Bodyweights are approximate competition figures.
+  </p>
+</div>
+
+<script>
+/* ============================================================
+   STRENGTH STANDARDS  (1RM as multiple of bodyweight)
+   Tiers: Untrained, Novice, Intermediate, Advanced, Elite
+   Approximations synthesized from public 2023 standards.
+   ============================================================ */
+const STD = {
+  male:{
+    back_squat:   [0.75,1.25,1.50,2.00,2.50],
+    front_squat:  [0.60,1.00,1.30,1.65,2.05],
+    deadlift:     [1.00,1.50,2.00,2.50,3.00],
+    clean_jerk:   [0.55,0.85,1.10,1.35,1.65],
+    snatch:       [0.45,0.65,0.85,1.05,1.30],
+    power_clean:  [0.50,0.75,1.00,1.20,1.45],
+    strict_press: [0.40,0.60,0.80,1.00,1.20],
+    split_jerk:   [0.55,0.85,1.10,1.35,1.65],
+    bench_press:  [0.75,1.00,1.25,1.60,2.00],
+    overhead_sq:  [0.40,0.65,0.90,1.15,1.45],
+  },
+  female:{
+    back_squat:   [0.55,0.90,1.20,1.55,1.95],
+    front_squat:  [0.45,0.75,1.00,1.30,1.60],
+    deadlift:     [0.75,1.20,1.55,1.95,2.40],
+    clean_jerk:   [0.40,0.62,0.82,1.02,1.25],
+    snatch:       [0.33,0.50,0.66,0.82,1.02],
+    power_clean:  [0.38,0.58,0.78,0.95,1.15],
+    strict_press: [0.28,0.45,0.60,0.78,0.95],
+    split_jerk:   [0.40,0.62,0.82,1.02,1.25],
+    bench_press:  [0.45,0.65,0.85,1.10,1.40],
+    overhead_sq:  [0.30,0.50,0.70,0.92,1.15],
+  }
+};
+const TIER_NAMES=['Untrained','Novice','Intermediate','Advanced','Elite'];
+const TIER_COLORS=['#5d6678','#4d9fff','#2dd4bf','#a87bff','#ff5a3c'];
+
+const LIFTS=[
+  {k:'back_squat',  n:'Back Squat',   d:'Absolute strength'},
+  {k:'front_squat', n:'Front Squat',  d:'Torso / position'},
+  {k:'deadlift',    n:'Deadlift',     d:'Posterior chain'},
+  {k:'clean_jerk',  n:'Clean & Jerk', d:'Olympic total'},
+  {k:'snatch',      n:'Snatch',       d:'Speed-strength'},
+  {k:'power_clean', n:'Power Clean',  d:'Explosive hip'},
+  {k:'strict_press',n:'Strict Press', d:'Static press'},
+  {k:'split_jerk',  n:'Split Jerk',   d:'Dynamic OH'},
+  {k:'bench_press', n:'Bench Press',  d:'Upper push'},
+  {k:'overhead_sq', n:'Overhead Sq',  d:'OH mobility'},
+];
+
+// default sample lifts (kg) for an intermediate ~80kg male
+const DEFAULTS={back_squat:150,front_squat:120,deadlift:185,clean_jerk:110,snatch:85,
+  power_clean:95,strict_press:62,split_jerk:108,bench_press:115,overhead_sq:70};
+
+let state={sex:'male', bw:80, age:28, lifts:{...DEFAULTS}, week:4, compare:null};
+
+/* ============================================================
+   CROSSFIT LEGENDS — documented PRs + coach estimates (kg)
+   ✓ = publicly documented / reported.  ~ = coach estimate to
+   complete the profile (clearly flagged in the UI).
+   Sources cited in the chat alongside this build.
+   ============================================================ */
+const ATHLETES=[
+  {id:'fraser',sex:'male',name:'Mat Fraser',emoji:'🇺🇸',color:'#ff5a3c',bw:88,
+   titles:'5× CrossFit Games Champion (2016–2020)',
+   doc:['back_squat','deadlift','clean_jerk','snatch','split_jerk'],
+   lifts:{back_squat:220,front_squat:195,deadlift:245,clean_jerk:170,snatch:143,
+          power_clean:150,strict_press:90,split_jerk:170,bench_press:140,overhead_sq:130}},
+  {id:'froning',sex:'male',name:'Rich Froning',emoji:'🐐',color:'#ff5a3c',bw:88,
+   titles:'4× Games Champion · "Fittest of all time"',
+   doc:['back_squat','deadlift','clean_jerk','snatch','split_jerk'],
+   lifts:{back_squat:201,front_squat:180,deadlift:247,clean_jerk:167,snatch:136,
+          power_clean:145,strict_press:85,split_jerk:167,bench_press:135,overhead_sq:120}},
+  {id:'adler',sex:'male',name:'Jeffrey Adler',emoji:'🇨🇦',color:'#ff5a3c',bw:86,
+   titles:'2023 Fittest Man on Earth',
+   doc:['clean_jerk','snatch','split_jerk'],
+   lifts:{back_squat:215,front_squat:190,deadlift:240,clean_jerk:163,snatch:128,
+          power_clean:148,strict_press:85,split_jerk:163,bench_press:135,overhead_sq:120}},
+  {id:'medeiros',sex:'male',name:'Justin Medeiros',emoji:'🇺🇸',color:'#ff5a3c',bw:84,
+   titles:'2× Fittest Man on Earth (2021, 2022)',
+   doc:['back_squat'],
+   lifts:{back_squat:206,front_squat:185,deadlift:230,clean_jerk:160,snatch:125,
+          power_clean:140,strict_press:80,split_jerk:160,bench_press:125,overhead_sq:115}},
+  {id:'toomey',sex:'female',name:'Tia-Clair Toomey',emoji:'🇦🇺',color:'#4d9fff',bw:58,
+   titles:'6× Games Champion · Olympic weightlifter',
+   doc:['deadlift','clean_jerk','snatch','split_jerk','back_squat'],
+   lifts:{back_squat:150,front_squat:130,deadlift:188,clean_jerk:115,snatch:89,
+          power_clean:100,strict_press:60,split_jerk:115,bench_press:80,overhead_sq:95}},
+  {id:'horvath',sex:'female',name:'Laura Horvath',emoji:'🇭🇺',color:'#4d9fff',bw:76,
+   titles:'2023 Fittest Woman on Earth',
+   doc:['clean_jerk','snatch','split_jerk'],
+   lifts:{back_squat:165,front_squat:145,deadlift:200,clean_jerk:120,snatch:90,
+          power_clean:105,strict_press:65,split_jerk:120,bench_press:85,overhead_sq:98}},
+  {id:'annie',sex:'female',name:'Annie Thorisdottir',emoji:'🇮🇸',color:'#4d9fff',bw:70,
+   titles:'2× Games Champion (2011, 2012)',
+   doc:['snatch'],
+   lifts:{back_squat:150,front_squat:130,deadlift:185,clean_jerk:105,snatch:85,
+          power_clean:95,strict_press:60,split_jerk:105,bench_press:75,overhead_sq:88}},
+  {id:'katrin',sex:'female',name:'Katrín Davíðsdóttir',emoji:'🇮🇸',color:'#4d9fff',bw:68,
+   titles:'2× Games Champion (2015, 2016)',
+   doc:[],
+   lifts:{back_squat:145,front_squat:125,deadlift:180,clean_jerk:100,snatch:80,
+          power_clean:92,strict_press:58,split_jerk:100,bench_press:72,overhead_sq:84}},
+];
+
+/* ---------- build lift inputs ---------- */
+const liftGrid=document.getElementById('liftGrid');
+LIFTS.forEach(L=>{
+  const w=document.createElement('div');
+  w.innerHTML=`<label>${L.n}</label><input type="number" data-k="${L.k}" value="${DEFAULTS[L.k]}" min="0">`;
+  liftGrid.appendChild(w);
+});
+liftGrid.addEventListener('input',e=>{
+  if(e.target.dataset.k){state.lifts[e.target.dataset.k]=+e.target.value||0; render();}
+});
+
+/* sex toggle */
+document.getElementById('sexSeg').addEventListener('click',e=>{
+  if(!e.target.dataset.sex)return;
+  [...e.currentTarget.children].forEach(b=>b.classList.remove('on'));
+  e.target.classList.add('on'); state.sex=e.target.dataset.sex; render();
+});
+document.getElementById('bw').addEventListener('input',e=>{state.bw=+e.target.value||80;render();});
+document.getElementById('age').addEventListener('input',e=>{state.age=+e.target.value||28;render();});
+
+/* ---------- helpers ---------- */
+function std(k){return STD[state.sex][k].map(m=>m*state.bw);} // tier thresholds in kg
+// generic tier position for any {lifts,bw,sex}
+function tierIndexFor(k,lifts,bw,sex){
+  const t=STD[sex][k].map(m=>m*bw), v=lifts[k]||0;
+  if(v<=0) return 0;
+  if(v<=t[0]) return v/t[0]*0.0001;
+  for(let i=0;i<t.length-1;i++){ if(v<=t[i+1]) return i+(v-t[i])/(t[i+1]-t[i]); }
+  return Math.min(4+(v-t[4])/(t[4]-t[3]),4.6);
+}
+function pctEliteFor(k,lifts,bw,sex){return (lifts[k]||0)/(STD[sex][k][4]*bw);}
+function tierIndexFloat(k){return tierIndexFor(k,state.lifts,state.bw,state.sex);}
+function pctOfElite(k){return pctEliteFor(k,state.lifts,state.bw,state.sex);}
+function round(v,step){return Math.round(v/step)*step;}
+function mmssToSec(s){const p=(s||'').split(':');return p.length===2?(+p[0]*60+ +p[1]):(+s||0);}
+
+/* ============================================================
+   RENDER: STRATIFICATION BARS
+   ============================================================ */
+function renderStrat(){
+  const el=document.getElementById('stratList'); el.innerHTML='';
+  LIFTS.forEach(L=>{
+    const t=std(L.k), v=state.lifts[L.k]||0;
+    const ti=tierIndexFloat(L.k);
+    const pos=Math.max(0,Math.min(ti/4,1.12)); // 0..1 across 5 tiers (elite at 1.0 boundary=4)
+    // map tier float (0..4) to % width where each tier = 25%
+    const widthPct=Math.min(ti/4*100,118);
+    const tierName=v<t[0]?'Sub':TIER_NAMES[Math.min(Math.floor(ti),4)];
+    const col=TIER_COLORS[Math.min(Math.floor(ti),4)];
+    // comparison athlete ghost marker (scaled to their own bodyweight)
+    let ghost='';
+    if(state.compare){
+      const cti=tierIndexFor(L.k,state.compare.lifts,state.compare.bw,state.compare.sex);
+      const cw=Math.min(cti/4*100,99);
+      ghost=`<div class="marker" style="left:${cw}%;background:#4d9fff;box-shadow:0 0 8px #4d9fff"></div>`;
+    }
+    const row=document.createElement('div'); row.className='strat-row';
+    row.innerHTML=`
+      <div class="name">${L.n}<small>${L.d}</small></div>
+      <div class="track">
+        <div class="tiers"><i></i><i></i><i></i><i></i></div>
+        <div class="fill" style="width:${Math.min(widthPct,100)}%;background:linear-gradient(90deg,${col},${col}cc)"></div>
+        <div class="marker" style="left:${Math.min(widthPct,99)}%"></div>
+        ${ghost}
+      </div>
+      <div class="val">${v||'—'}<small> ${(v/state.bw).toFixed(2)}×</small><br>
+        <span style="color:${col};font-size:10px">${tierName}</span></div>`;
+    el.appendChild(row);
+  });
+}
+
+/* ============================================================
+   OVERALL SCORE
+   ============================================================ */
+function renderScore(){
+  // average tier float across tested lifts, normalize 0..100 (Elite=100)
+  const tested=LIFTS.filter(L=>state.lifts[L.k]>0);
+  let avg=0; tested.forEach(L=>avg+=Math.min(tierIndexFloat(L.k),4)); avg/= (tested.length||1);
+  const score=Math.round(avg/4*100);
+  const ring=document.getElementById('scoreRing');
+  const C=2*Math.PI*52;
+  ring.style.strokeDasharray=C; ring.style.strokeDashoffset=C*(1-Math.min(score,100)/100);
+  document.getElementById('scoreVal').textContent=score;
+
+  const lvlIdx=Math.min(Math.floor(avg),4);
+  const badge=document.getElementById('levelBadge');
+  badge.textContent=TIER_NAMES[lvlIdx];
+  badge.style.background=TIER_COLORS[lvlIdx]+'22';
+  badge.style.color=TIER_COLORS[lvlIdx];
+  badge.style.border='1px solid '+TIER_COLORS[lvlIdx]+'66';
+  const hints=[
+    'Foundation phase — focus on consistent linear progression.',
+    'Novice gains available weekly — drill technique while loading.',
+    'Adapts over weeks — periodization now matters.',
+    'Advanced — adaptations come over multi-month cycles.',
+    'Elite — annual planning; chase your weakest differentiator.'];
+  document.getElementById('levelHint').textContent=hints[lvlIdx];
+
+  const big3=(state.lifts.back_squat||0)+(state.lifts.deadlift||0)+(state.lifts.bench_press||0);
+  document.getElementById('big3').textContent=big3+' kg';
+  // crude Wilks-ish coefficient
+  const w=Math.max(state.lifts.back_squat,state.lifts.deadlift,state.lifts.bench_press)
+          ? big3/state.bw : 0;
+  document.getElementById('wilks').textContent=(big3/state.bw).toFixed(2)+'×BW';
+}
+
+/* ============================================================
+   RADAR CHART
+   ============================================================ */
+function renderRadar(){
+  const svg=document.getElementById('radar');
+  const cx=180,cy=160,R=120, n=LIFTS.length;
+  let html='';
+  // grid rings
+  [.25,.5,.75,1].forEach(f=>{
+    let pts='';
+    for(let i=0;i<n;i++){const a=-Math.PI/2+i/n*2*Math.PI;
+      pts+=(cx+Math.cos(a)*R*f)+','+(cy+Math.sin(a)*R*f)+' ';}
+    html+=`<polygon points="${pts}" fill="none" stroke="var(--line)" stroke-width="1" opacity="${f===1?.9:.5}"/>`;
+  });
+  // axes + labels
+  for(let i=0;i<n;i++){const a=-Math.PI/2+i/n*2*Math.PI;
+    const x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R;
+    html+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)" stroke-width="1" opacity=".5"/>`;
+    const lx=cx+Math.cos(a)*(R+22), ly=cy+Math.sin(a)*(R+16);
+    const anchor=Math.abs(Math.cos(a))<.3?'middle':(Math.cos(a)>0?'start':'end');
+    html+=`<text x="${lx}" y="${ly}" fill="var(--mut)" font-size="9.5" text-anchor="${anchor}" dominant-baseline="middle">${LIFTS[i].n}</text>`;
+  }
+  // comparison athlete polygon (drawn under yours)
+  const cmp=state.compare;
+  if(cmp){
+    let cp='';
+    for(let i=0;i<n;i++){const a=-Math.PI/2+i/n*2*Math.PI;
+      const f=Math.min(pctEliteFor(LIFTS[i].k,cmp.lifts,cmp.bw,cmp.sex),1.12);
+      cp+=(cx+Math.cos(a)*R*f)+','+(cy+Math.sin(a)*R*f)+' ';}
+    html+=`<polygon points="${cp}" fill="rgba(77,159,255,.14)" stroke="#4d9fff" stroke-width="2" stroke-dasharray="4 3"/>`;
+  }
+  // your data polygon (% of elite, capped 1.1)
+  let pts='', dots='';
+  for(let i=0;i<n;i++){const a=-Math.PI/2+i/n*2*Math.PI;
+    const f=Math.min(pctOfElite(LIFTS[i].k),1.12);
+    const x=cx+Math.cos(a)*R*f, y=cy+Math.sin(a)*R*f;
+    pts+=x+','+y+' '; dots+=`<circle cx="${x}" cy="${y}" r="3" fill="var(--accent)"/>`;
+  }
+  html+=`<polygon points="${pts}" fill="rgba(255,90,60,.18)" stroke="var(--accent)" stroke-width="2"/>${dots}`;
+  svg.innerHTML=html;
+}
+
+/* ============================================================
+   DIAGNOSTICS  (Adaptation-currency coaching logic)
+   ============================================================ */
+function renderDiag(){
+  const L=state.lifts, out=[];
+  const r=(a,b)=> L[b]? L[a]/L[b]:0;
+  // 1. Front/Back squat — mobility bottleneck
+  const fsbs=r('front_squat','back_squat');
+  if(L.back_squat&&L.front_squat){
+    if(fsbs<0.85) out.push(['bad','🧘','Mobility Bottleneck',
+      `Front Squat is only <b>${(fsbs*100|0)}%</b> of Back Squat (target ≥85%). You have the legs but not the torso position. Prescribe <b>thoracic spine &amp; front-rack mobility</b> — not more squats.`,`FS/BS ${(fsbs*100|0)}%`]);
+    else out.push(['ok','🧘','Front Rack Solid',`FS/BS at <b>${(fsbs*100|0)}%</b> — torso orientation supports your leg strength.`,`FS/BS ${(fsbs*100|0)}%`]);
+  }
+  // 2. Snatch/Back squat — technical bottleneck (speed strength)
+  const snbs=r('snatch','back_squat');
+  if(L.back_squat&&L.snatch){
+    if(snbs<0.55) out.push(['warn','🎯','Technical Efficiency Gap',
+      `Snatch is <b>${(snbs*100|0)}%</b> of Back Squat — strong but can't express it dynamically. Shift from <b>Strength → Skill</b>: precise, well-timed pulls over heavy lifting.`,`Sn/BS ${(snbs*100|0)}%`]);
+    else out.push(['ok','🎯','Good Speed-Strength',`Snatch at <b>${(snbs*100|0)}%</b> of squat — elastic &amp; technically efficient.`,`Sn/BS ${(snbs*100|0)}%`]);
+  }
+  // 3. Deadlift vs Power Clean — explosive hip extension
+  const pcdl=r('power_clean','deadlift');
+  if(L.deadlift&&L.power_clean){
+    if(pcdl<0.50) out.push(['warn','💥','Explosive Hip Deficit',
+      `Power Clean only <b>${(pcdl*100|0)}%</b> of Deadlift — you hinge well but lack rate of force. Add <b>med-ball throws &amp; light high-velocity Olympic complexes</b>.`,`PC/DL ${(pcdl*100|0)}%`]);
+    else out.push(['ok','💥','Explosive Power Good',`PC/DL at <b>${(pcdl*100|0)}%</b> — solid hip extension velocity.`,`PC/DL ${(pcdl*100|0)}%`]);
+  }
+  // 4. Strict press vs Split jerk — dynamic pressing / leg drive transfer
+  const spj=r('strict_press','split_jerk');
+  if(L.strict_press&&L.split_jerk){
+    if(spj>0.72) out.push(['warn','🏋️','Leg-Drive Transfer Low',
+      `Strict Press is <b>${(spj*100|0)}%</b> of Split Jerk — lots of static power but weak transfer of leg drive overhead. Drill <b>dip-drive timing &amp; jerk footwork</b>.`,`SP/SJ ${(spj*100|0)}%`]);
+    else out.push(['ok','🏋️','Pressing Efficient',`Strict Press <b>${(spj*100|0)}%</b> of Jerk — good leg-to-overhead transfer.`,`SP/SJ ${(spj*100|0)}%`]);
+  }
+  // 5. Overhead squat vs back squat — overhead stability
+  const ohbs=r('overhead_sq','back_squat');
+  if(L.back_squat&&L.overhead_sq&&ohbs<0.45)
+    out.push(['warn','🤸','Overhead Stability Limit',`OHS is <b>${(ohbs*100|0)}%</b> of Back Squat — shoulder/ankle mobility caps your snatch receiving position.`,`OHS/BS ${(ohbs*100|0)}%`]);
+
+  const el=document.getElementById('diag'); el.innerHTML='';
+  if(!out.length){el.innerHTML='<p class="hint">Enter Back Squat, Front Squat, Snatch, Deadlift &amp; Power Clean to unlock diagnostics.</p>';return;}
+  out.forEach(([cls,ic,t,p,rt])=>{
+    const d=document.createElement('div'); d.className='alert '+cls;
+    d.innerHTML=`<div class="ic">${ic}</div><div><b>${t}</b><p>${p}</p><span class="ratio">${rt}</span></div>`;
+    el.appendChild(d);
+  });
+}
+
+/* ============================================================
+   ADVANCED RATIO CARDS
+   ============================================================ */
+function renderRatios(){
+  const L=state.lifts;
+  const cards=[
+    {lbl:'Speed-Strength',a:'snatch',b:'back_squat',ideal:0.6,sub:'Snatch ÷ Back Squat',col:'--blue'},
+    {lbl:'Technical Eff.',a:'clean_jerk',b:'back_squat',ideal:0.75,sub:'C&J ÷ Back Squat',col:'--teal'},
+    {lbl:'Mobility / Position',a:'front_squat',b:'back_squat',ideal:0.87,sub:'Front ÷ Back Squat',col:'--purple'},
+    {lbl:'Pressing Transfer',a:'split_jerk',b:'strict_press',ideal:1.6,sub:'Split Jerk ÷ Strict Press',col:'--accent2'},
+  ];
+  const g=document.getElementById('ratioGrid'); g.innerHTML='';
+  cards.forEach(c=>{
+    const val=L[c.b]? L[c.a]/L[c.b]:0;
+    const ratioToIdeal=Math.min(val/c.ideal,1.3);
+    const col=val>=c.ideal*0.95?'var(--good)':val>=c.ideal*0.8?'var(--warn)':'var(--bad)';
+    const d=document.createElement('div'); d.className='ratiocard';
+    d.innerHTML=`<div class="lbl">${c.lbl}</div>
+      <div class="big" style="color:${col}">${val?val.toFixed(2):'—'}</div>
+      <div class="sub">${c.sub} · target ≈ ${c.ideal}</div>
+      <div class="bar"><i style="width:${Math.min(ratioToIdeal*77,100)}%;background:${col}"></i></div>`;
+    g.appendChild(d);
+  });
+}
+
+/* ============================================================
+   READINESS WHEELS
+   ============================================================ */
+function donut(svg,pct,color){
+  const C=2*Math.PI*32;
+  svg.innerHTML=`
+    <circle cx="45" cy="45" r="32" fill="none" stroke="var(--line)" stroke-width="9"/>
+    <circle cx="45" cy="45" r="32" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round"
+      stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct/100)}" transform="rotate(-90 45 45)"/>
+    <text x="45" y="45" fill="var(--txt)" font-size="20" font-weight="800" text-anchor="middle" dominant-baseline="central">${Math.round(pct)}</text>`;
+}
+function renderReadiness(){
+  // strength component: overall score
+  const tested=LIFTS.filter(L=>state.lifts[L.k]>0);
+  let avg=0; tested.forEach(L=>avg+=Math.min(tierIndexFloat(L.k),4)); avg/=(tested.length||1);
+  const strengthW=Math.round(avg/4*100);
+
+  // metabolic: 2k row + 5k run vs benchmarks (lower=better)
+  const row=mmssToSec(document.getElementById('row2k').value);
+  const run=mmssToSec(document.getElementById('run5k').value);
+  // elite ~ row 6:30(390s), run 18:00(1080s); untrained row 9:00(540), run 32:00(1920)
+  const rowScore=clamp((540-row)/(540-390)*100,0,100);
+  const runScore=clamp((1920-run)/(1920-1080)*100,0,100);
+  const metaW=Math.round((rowScore+runScore)/2);
+
+  // gymnastics
+  const pu=+document.getElementById('pullups').value||0;
+  const mu=+document.getElementById('mu').value||0;
+  const hs=+document.getElementById('hswalk').value||0;
+  const ls=+document.getElementById('lsit').value||0;
+  const gymW=Math.round(clamp(
+    (clamp(pu/30,0,1)*0.3+clamp(mu/15,0,1)*0.3+clamp(hs/30,0,1)*0.2+clamp(ls/60,0,1)*0.2)*100,0,100));
+
+  const map={strengthW:[strengthW,'#ff5a3c'],metaW:[metaW,'#4d9fff'],gymW:[gymW,'#2dd4bf']};
+  document.querySelectorAll('.wsvg').forEach(s=>{const[p,c]=map[s.dataset.w];donut(s,p,c);});
+  return {strengthW,metaW,gymW};
+}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+/* ============================================================
+   MRV GAUGE
+   ============================================================ */
+function renderMRV(){
+  const vol=+document.getElementById('vol').value||0;
+  const sleep=+document.getElementById('sleep').value||7;
+  const rhr=+document.getElementById('rhr').value||55;
+  const sore=+document.getElementById('sore').value||5;
+  // recovery capacity baseline
+  let capacity=100;
+  capacity+= (sleep-7)*10;          // each hr over 7 adds 10
+  capacity-= Math.max(0,(rhr-50))*1.2; // elevated RHR reduces
+  capacity-= (sore-3)*6;            // soreness
+  capacity=clamp(capacity,40,150);
+  // MRV ~ proportional to capacity; "load" = vol
+  const mrv=capacity*0.85; // approx max recoverable sets
+  const usage=clamp(vol/mrv*100,0,140);
+
+  const svg=document.getElementById('mrvGauge');
+  // semicircle gauge
+  const cx=120,cy=120,R=92;
+  function pt(frac){const a=Math.PI*(1-frac);return [cx+Math.cos(a)*R,cy-Math.sin(a)*R];}
+  let arcs='';
+  const zones=[[0,.6,'#39d98a'],[.6,.85,'#ffb83c'],[.85,1.4/1.4,'#ff5a5a']];
+  // simpler 3 zone over 0..140 scaled to 0..1 where 100%->~.71
+  function arc(f0,f1,col){
+    const [x0,y0]=pt(f0),[x1,y1]=pt(f1);
+    const large=(f1-f0)>.5?1:0;
+    return `<path d="M ${x0} ${y0} A ${R} ${R} 0 ${large} 1 ${x1} ${y1}" stroke="${col}" stroke-width="16" fill="none" stroke-linecap="round"/>`;
+  }
+  arcs+=arc(0,.45,'#39d98a');
+  arcs+=arc(.47,.68,'#ffb83c');
+  arcs+=arc(.70,1,'#ff5a5a');
+  // needle at usage (0..140 -> 0..1)
+  const nf=clamp(usage/140,0,1);
+  const [nx,ny]=pt(nf);
+  arcs+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#fff" stroke-width="3"/>
+         <circle cx="${cx}" cy="${cy}" r="6" fill="#fff"/>
+         <text x="${cx}" y="${cy-26}" text-anchor="middle" fill="var(--txt)" font-size="26" font-weight="800">${Math.round(usage)}%</text>
+         <text x="${cx}" y="${cy-8}" text-anchor="middle" fill="var(--mut)" font-size="10">of MRV used</text>`;
+  svg.innerHTML=arcs;
+
+  const st=document.getElementById('mrvStatus'), lg=document.getElementById('mrvLegend');
+  if(usage<60){st.textContent='Headroom';st.style.color='var(--good)';
+    lg.textContent=`~${Math.round(mrv-vol)} recoverable sets of headroom — you can add stimulus.`;}
+  else if(usage<85){st.textContent='Productive';st.style.color='var(--warn)';
+    lg.textContent='At productive volume — hold and monitor markers before adding.';}
+  else if(usage<100){st.textContent='Near MRV';st.style.color='var(--warn)';
+    lg.textContent='Approaching Max Recoverable Volume — deload soon to avoid junk fatigue.';}
+  else{st.textContent='Recovery Debt';st.style.color='var(--bad)';
+    lg.textContent='⚠ Exceeding MRV — overreaching risk. Cut volume, prioritize sleep, watch for rhabdo signs.';}
+}
+
+/* ============================================================
+   MACROCYCLE (9-week wave)
+   ============================================================ */
+// % of heavy single per week + phase
+const WAVE=[
+  {p:75,ph:'Intro'},{p:80,ph:'Build'},{p:85,ph:'Build'},{p:80,ph:'Deload'},
+  {p:87,ph:'Intensify'},{p:90,ph:'Intensify'},{p:93,ph:'Peak'},{p:75,ph:'Deload'},{p:100,ph:'Test'}
+];
+function renderMacro(){
+  const strip=document.getElementById('weekStrip'); strip.innerHTML='';
+  WAVE.forEach((w,i)=>{
+    const c=document.createElement('div');
+    c.className='weekcell'+(state.week===i+1?' on':'');
+    c.innerHTML=`<div class="wk">WK ${i+1}</div><div class="pc">${w.p}%</div><div class="ph">${w.ph}</div>`;
+    c.onclick=()=>{state.week=i+1;render();};
+    strip.appendChild(c);
+  });
+  const w=WAVE[state.week-1];
+  document.getElementById('cycPhase').textContent=`Week ${state.week} · ${w.ph} · ${w.p}% of heavy single`;
+  const keyLifts=['back_squat','front_squat','deadlift','clean_jerk','snatch','strict_press'];
+  const tg=document.getElementById('targets'); tg.innerHTML='';
+  keyLifts.forEach(k=>{
+    const max=state.lifts[k]||0; const target=round(max*w.p/100,2.5);
+    const L=LIFTS.find(x=>x.k===k);
+    const d=document.createElement('div'); d.className='tgt';
+    d.innerHTML=`<div class="l">${L.n}</div><div class="w">${target||'—'} <span style="font-size:11px;color:var(--dim)">kg</span></div>
+      <div class="r">${w.p}% × ${max||'—'}</div>`;
+    tg.appendChild(d);
+  });
+}
+
+/* ============================================================
+   PERCENT TABLE
+   ============================================================ */
+const pctSel=document.getElementById('pctLift');
+LIFTS.forEach(L=>{const o=document.createElement('option');o.value=L.k;o.textContent=L.n;pctSel.appendChild(o);});
+pctSel.value='back_squat';
+function syncPctMax(){document.getElementById('pctMax').value=state.lifts[pctSel.value]||0;}
+pctSel.addEventListener('change',()=>{syncPctMax();renderPct();});
+document.getElementById('pctMax').addEventListener('input',renderPct);
+document.getElementById('rounding').addEventListener('change',renderPct);
+function renderPct(){
+  const max=+document.getElementById('pctMax').value||0;
+  const step=+document.getElementById('rounding').value;
+  const t=document.getElementById('pctTable'); t.innerHTML='';
+  for(let p=100;p>=40;p-=5){
+    const hl=(p<=90&&p>=80)?' hl':'';
+    const c=document.createElement('div'); c.className='pctcell'+hl;
+    c.innerHTML=`<div class="p">${p}%</div><div class="k">${round(max*p/100,step)}</div>`;
+    t.appendChild(c);
+  }
+}
+
+/* ============================================================
+   COMPARE VS LEGENDS
+   ============================================================ */
+const athSel=document.getElementById('athSel');
+(function buildAthSel(){
+  athSel.innerHTML='<option value="">— None (your data only) —</option>';
+  ['male','female'].forEach(sx=>{
+    const og=document.createElement('optgroup'); og.label=sx==='male'?'Men':'Women';
+    ATHLETES.filter(a=>a.sex===sx).forEach(a=>{
+      const o=document.createElement('option'); o.value=a.id; o.textContent=`${a.emoji} ${a.name}`;
+      og.appendChild(o);
+    });
+    athSel.appendChild(og);
+  });
+})();
+athSel.addEventListener('change',()=>{
+  state.compare=ATHLETES.find(a=>a.id===athSel.value)||null;
+  render();
+});
+function renderCompare(){
+  const card=document.getElementById('athCard');
+  const grid=document.getElementById('vsGrid');
+  const a=state.compare;
+  if(!a){card.style.display='none';grid.innerHTML='<p class="hint">Pick a legend above to overlay their bodyweight-relative strength on your radar &amp; stratification map.</p>';return;}
+  card.style.display='flex';
+  card.innerHTML=`<div class="athav" style="background:${a.color}22">${a.emoji}</div>
+    <div><b>${a.name}</b><div class="meta">${a.bw} kg · ${a.sex==='male'?'Men':'Women'}</div>
+    <div class="titles">${a.titles}</div></div>`;
+  // per-lift comparison: bodyweight-relative tier position
+  grid.innerHTML='';
+  LIFTS.forEach(L=>{
+    const you=state.lifts[L.k]||0, them=a.lifts[L.k]||0;
+    const youR=you/state.bw, themR=them/a.bw;
+    const youTi=tierIndexFloat(L.k), themTi=tierIndexFor(L.k,a.lifts,a.bw,a.sex);
+    const isDoc=a.doc.includes(L.k);
+    const dRel=youR-themR;
+    const dCol=dRel>=0?'var(--good)':'var(--bad)';
+    const dTxt=(dRel>=0?'+':'')+dRel.toFixed(2)+'× BW vs them';
+    const d=document.createElement('div'); d.className='vsrow';
+    d.innerHTML=`<div class="l">${L.n}</div>
+      <div class="nums"><span class="you">${you||'—'}<small style="font-size:10px;color:var(--dim)"> kg · ${youR.toFixed(2)}×</small></span>
+        <span class="them">${them}<small style="font-size:9px;color:var(--dim)"> ${themR.toFixed(2)}×</small>${isDoc?'<span class="est" style="color:var(--good);border-color:var(--good)">✓</span>':'<span class="est">~est</span>'}</span></div>
+      <div class="vbar">
+        <i class="yi" style="width:${Math.min(youTi/4*100,100)}%"></i>
+        <i class="ti" style="left:${Math.min(themTi/4*100,99)}%"></i>
+      </div>
+      <div class="delta" style="color:${dCol}">${dTxt}</div>`;
+    grid.appendChild(d);
+  });
+}
+
+/* ============================================================
+   MASTER RENDER
+   ============================================================ */
+function render(){
+  renderStrat(); renderScore(); renderRadar(); renderDiag();
+  renderRatios(); renderReadiness(); renderMRV(); renderMacro(); renderCompare();
+}
+['row2k','run5k','pullups','mu','hswalk','lsit','vol','sleep','rhr','sore']
+  .forEach(id=>document.getElementById(id).addEventListener('input',()=>{renderReadiness();renderMRV();}));
+
+syncPctMax(); renderPct(); render();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "Tiny Explorers — Learning for Ages 2–3",
+  "short_name": "Tiny Explorers",
+  "description": "A free, ad-free, offline-friendly learning playground for toddlers aged 2–3.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ff8a3d",
+  "theme_color": "#ff8a3d",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

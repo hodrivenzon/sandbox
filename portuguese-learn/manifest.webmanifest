@@ -1,0 +1,20 @@
+{
+  "name": "Falar — Learn Brazilian Portuguese",
+  "short_name": "Falar",
+  "description": "Learn Brazilian Portuguese: vocabulary with native-style audio, spaced-repetition flashcards, quizzes and verb conjugations.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7f4",
+  "theme_color": "#0f766e",
+  "lang": "en",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%230f766e'/%3E%3Ctext x='256' y='350' font-size='300' text-anchor='middle'%3E%F0%9F%87%A7%F0%9F%87%B7%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

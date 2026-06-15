@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#6366f1" />
+  <title>Sandbox — Projects by Hod</title>
+  <meta name="description" content="A small collection of self-contained web apps and scripts: a toddler learning playground, a CrossFit analytics dashboard, and more." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%AA%3C/text%3E%3C/svg%3E" />
+  <style>
+    :root{
+      --bg:#0e1320; --bg2:#0a0e18;
+      --card:#161c2c; --card-hi:#1d2436; --line:#28324a;
+      --txt:#eef2fb; --mut:#9aa6c0; --dim:#6b7794;
+      --ring:#6366f1;
+      --r:22px;
+      --font:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{min-height:100%}
+    body{
+      font-family:var(--font); color:var(--txt);
+      background:
+        radial-gradient(1100px 560px at 12% -8%, #1c2340 0%, transparent 60%),
+        radial-gradient(900px 520px at 100% 0%, #241c3e 0%, transparent 55%),
+        linear-gradient(180deg,var(--bg),var(--bg2));
+      background-attachment:fixed;
+      -webkit-font-smoothing:antialiased; line-height:1.5;
+      padding:clamp(20px,5vw,56px) clamp(16px,5vw,40px) 64px;
+    }
+    .wrap{max-width:1080px;margin:0 auto}
+
+    header.hero{text-align:center;margin:18px auto 44px;max-width:680px}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:13px;color:var(--mut);background:rgba(255,255,255,.04);
+      border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:20px;
+    }
+    .badge .dot{width:8px;height:8px;border-radius:50%;background:#39d98a;box-shadow:0 0 10px #39d98a}
+    .hero h1{
+      font-size:clamp(38px,8vw,64px);font-weight:800;letter-spacing:-1.5px;line-height:1.02;
+      background:linear-gradient(120deg,#a5b4fc,#f0abfc 55%,#fda4af);
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .hero p{color:var(--mut);font-size:clamp(15px,3.6vw,19px);margin-top:16px}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:clamp(16px,2.6vw,22px)}
+
+    .card{
+      position:relative;display:flex;flex-direction:column;
+      background:linear-gradient(180deg,var(--card),var(--bg2));
+      border:1px solid var(--line);border-radius:var(--r);
+      padding:24px 24px 20px;text-decoration:none;color:inherit;overflow:hidden;
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      min-height:210px;
+    }
+    .card::before{
+      content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+      background:linear-gradient(135deg,var(--g1,#6366f1),var(--g2,#a855f7));
+      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+      -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .18s ease;
+    }
+    .card:hover{transform:translateY(-5px);box-shadow:0 22px 50px rgba(0,0,0,.45)}
+    .card:hover::before{opacity:1}
+    .card:focus-visible{outline:3px solid var(--ring);outline-offset:3px}
+
+    .ico{
+      width:60px;height:60px;border-radius:16px;display:grid;place-items:center;font-size:32px;
+      background:linear-gradient(135deg,var(--g1,#6366f1),var(--g2,#a855f7));
+      box-shadow:0 10px 26px rgba(0,0,0,.4);margin-bottom:18px;
+    }
+    .card h2{font-size:21px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:9px}
+    .card p.desc{color:var(--mut);font-size:14.5px;margin-top:8px;flex:1}
+    .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+    .tag{font-size:11.5px;color:var(--mut);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+    .go{display:inline-flex;align-items:center;gap:7px;margin-top:18px;font-size:14px;font-weight:600;color:#c7d2fe}
+    .go .arrow{transition:transform .18s ease}
+    .card:hover .go .arrow{transform:translateX(4px)}
+    .pilltype{
+      position:absolute;top:18px;right:18px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+      color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:4px 9px;background:rgba(255,255,255,.03);
+    }
+
+    footer{text-align:center;color:var(--dim);font-size:13px;margin-top:48px}
+    footer a{color:var(--mut);text-decoration:none;border-bottom:1px solid var(--line)}
+    @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <span class="badge"><span class="dot"></span> Live on GitHub Pages</span>
+      <h1>The Sandbox</h1>
+      <p>A small collection of self-contained projects — each one runs entirely in your browser with no install. Pick one to explore.</p>
+    </header>
+
+    <main class="grid">
+      <!-- Tiny Explorers -->
+      <a class="card" href="toddler-learn/" style="--g1:#ff8a3d;--g2:#ff5d8f">
+        <span class="pilltype">Web App</span>
+        <span class="ico">🧸</span>
+        <h2>Tiny Explorers</h2>
+        <p class="desc">A learning playground for ages 2–3 — colors, shapes, numbers, animals, letters, music and more. Tap-to-learn, narrated aloud, and grounded in early-childhood research.</p>
+        <div class="tags"><span class="tag">Kids 2–3</span><span class="tag">Offline-ready</span><span class="tag">No ads</span></div>
+        <span class="go">Open app <span class="arrow">→</span></span>
+      </a>
+
+      <!-- FORGE -->
+      <a class="card" href="crossfit-dashboard.html" style="--g1:#ff5a3c;--g2:#ffb83c">
+        <span class="pilltype">Web App</span>
+        <span class="ico">🏋️</span>
+        <h2>FORGE</h2>
+        <p class="desc">A CrossFit strength-analytics dashboard. Track lifts, benchmark scores, and visualize progress in a sleek single-page interface.</p>
+        <div class="tags"><span class="tag">Fitness</span><span class="tag">Analytics</span><span class="tag">Dashboard</span></div>
+        <span class="go">Open dashboard <span class="arrow">→</span></span>
+      </a>
+
+      <!-- build_list.py -->
+      <a class="card" href="https://github.com/hodrivenzon/sandbox/blob/main/build_list.py" target="_blank" rel="noopener" style="--g1:#22c55e;--g2:#16a34a">
+        <span class="pilltype">Script</span>
+        <span class="ico">📋</span>
+        <h2>Baby Gear List</h2>
+        <p class="desc">A Python script (openpyxl) that generates a tidy, color-coded Excel shopping list for baby equipment — organized by priority and status, in Hebrew (RTL).</p>
+        <div class="tags"><span class="tag">Python</span><span class="tag">Excel / openpyxl</span></div>
+        <span class="go">View source <span class="arrow">↗</span></span>
+      </a>
+    </main>
+
+    <footer>
+      Built in the open · <a href="https://github.com/hodrivenzon/sandbox" target="_blank" rel="noopener">github.com/hodrivenzon/sandbox</a>
+    </footer>
+  </div>
+</body>
+</html>

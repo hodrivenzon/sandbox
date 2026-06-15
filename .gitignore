@@ -1,0 +1,13 @@
+# Local Claude Code config / session state — not for the repo
+.claude/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.xlsx
+
+# Logs / scratch
+*.log
