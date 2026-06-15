@@ -31,6 +31,15 @@
   }
   PT.setMute = function (m) { PT.audio.setMuted(m); syncSoundBtn(); };
 
+  /* Apply the saved theme preference: "auto" follows the OS, else force it. */
+  function applyTheme() {
+    var t = (PT.store.settings && PT.store.settings.theme) || "auto";
+    if (t === "auto") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", t);
+  }
+  PT.applyTheme = applyTheme;
+  applyTheme();
+
   function parse() {
     var raw = (location.hash || "").replace(/^#\/?/, "").trim();
     var parts = raw.split("/").filter(Boolean);

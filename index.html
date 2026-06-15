@@ -1,144 +1,256 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#6366f1" />
-  <title>Sandbox — Projects by Hod</title>
-  <meta name="description" content="A small collection of self-contained web apps and scripts: a toddler learning playground, a CrossFit analytics dashboard, and more." />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#0e1320" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#eef1f8" media="(prefers-color-scheme: light)" />
+
+  <title>The Sandbox — Projects by Hod</title>
+  <meta name="description" content="A small collection of self-contained, browser-based projects: Tiny Explorers (a toddler learning playground), Falar (Brazilian Portuguese), FORGE (CrossFit analytics), and more. No installs — each runs in your browser." />
+  <link rel="canonical" href="https://hodrivenzon.github.io/sandbox/" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="The Sandbox" />
+  <meta property="og:title" content="The Sandbox — browser-based projects" />
+  <meta property="og:description" content="Tiny Explorers, Falar, FORGE and more — self-contained apps that run entirely in your browser." />
+  <meta property="og:url" content="https://hodrivenzon.github.io/sandbox/" />
+  <meta property="og:image" content="https://hodrivenzon.github.io/sandbox/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Sandbox — browser-based projects" />
+  <meta name="twitter:description" content="Tiny Explorers, Falar, FORGE and more — self-contained apps that run entirely in your browser." />
+  <meta name="twitter:image" content="https://hodrivenzon.github.io/sandbox/og-image.png" />
+
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%AA%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="icons/hub-icon.svg" />
+  <link rel="manifest" href="site.webmanifest" />
+
+  <!-- set theme before paint to avoid a flash -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('sandbox-theme');
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+
   <style>
+    /* ---- light (default) + dark theme tokens ---- */
     :root{
-      --bg:#0e1320; --bg2:#0a0e18;
-      --card:#161c2c; --card-hi:#1d2436; --line:#28324a;
+      --bg:#eef1f8; --bg2:#e6eaf4; --grad1:#dbe4ff; --grad2:#f0e2ff;
+      --card:#ffffff; --card2:#f6f8fe; --line:#e3e7f1;
+      --txt:#1b2233; --mut:#5a6478; --dim:#8b94a8;
+      --ring:#6366f1; --shadow:0 18px 40px rgba(40,50,90,.13);
+      --pill:#eef1ff; --pill-txt:#5b6478;
+    }
+    html[data-theme="dark"]{
+      --bg:#0e1320; --bg2:#0a0e18; --grad1:#1c2340; --grad2:#241c3e;
+      --card:#161c2c; --card2:#0a0e18; --line:#28324a;
       --txt:#eef2fb; --mut:#9aa6c0; --dim:#6b7794;
-      --ring:#6366f1;
-      --r:22px;
-      --font:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+      --shadow:0 22px 50px rgba(0,0,0,.45);
+      --pill:rgba(255,255,255,.05); --pill-txt:#9aa6c0;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{min-height:100%}
     body{
-      font-family:var(--font); color:var(--txt);
+      font-family:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+      color:var(--txt);
       background:
-        radial-gradient(1100px 560px at 12% -8%, #1c2340 0%, transparent 60%),
-        radial-gradient(900px 520px at 100% 0%, #241c3e 0%, transparent 55%),
+        radial-gradient(1100px 560px at 12% -8%, var(--grad1) 0%, transparent 60%),
+        radial-gradient(900px 520px at 100% 0%, var(--grad2) 0%, transparent 55%),
         linear-gradient(180deg,var(--bg),var(--bg2));
-      background-attachment:fixed;
-      -webkit-font-smoothing:antialiased; line-height:1.5;
-      padding:clamp(20px,5vw,56px) clamp(16px,5vw,40px) 64px;
+      background-attachment:fixed; -webkit-font-smoothing:antialiased; line-height:1.5;
+      padding:clamp(18px,5vw,52px) clamp(16px,5vw,40px) 56px;
+      transition:background-color .3s ease, color .3s ease;
     }
     .wrap{max-width:1080px;margin:0 auto}
 
-    header.hero{text-align:center;margin:18px auto 44px;max-width:680px}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      font-size:13px;color:var(--mut);background:rgba(255,255,255,.04);
-      border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:20px;
+    .skip{position:absolute;left:-9999px;top:8px;background:var(--card);color:var(--txt);
+      padding:10px 16px;border-radius:10px;border:1px solid var(--line);z-index:50}
+    .skip:focus{left:16px}
+
+    .topbar{display:flex;justify-content:flex-end;margin-bottom:4px}
+    .theme-toggle{
+      display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--mut);
+      background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;
+      transition:transform .15s ease, border-color .15s ease;
     }
-    .badge .dot{width:8px;height:8px;border-radius:50%;background:#39d98a;box-shadow:0 0 10px #39d98a}
-    .hero h1{
-      font-size:clamp(38px,8vw,64px);font-weight:800;letter-spacing:-1.5px;line-height:1.02;
-      background:linear-gradient(120deg,#a5b4fc,#f0abfc 55%,#fda4af);
-      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-    }
+    .theme-toggle:hover{transform:translateY(-1px);border-color:var(--ring)}
+    .theme-toggle .ic{font-size:16px}
+
+    header.hero{text-align:center;margin:8px auto 40px;max-width:680px}
+    .badge{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);
+      background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:20px}
+    .badge .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 10px #22c55e}
+    .hero h1{font-size:clamp(38px,8vw,64px);font-weight:800;letter-spacing:-1.5px;line-height:1.02;
+      background:linear-gradient(120deg,#7c8cff,#c264f0 55%,#ff7a8a);
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
     .hero p{color:var(--mut);font-size:clamp(15px,3.6vw,19px);margin-top:16px}
 
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:clamp(16px,2.6vw,22px)}
 
-    .card{
-      position:relative;display:flex;flex-direction:column;
-      background:linear-gradient(180deg,var(--card),var(--bg2));
-      border:1px solid var(--line);border-radius:var(--r);
-      padding:24px 24px 20px;text-decoration:none;color:inherit;overflow:hidden;
-      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
-      min-height:210px;
-    }
-    .card::before{
-      content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+    .card{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--card),var(--card2));
+      border:1px solid var(--line);border-radius:22px;padding:24px 24px 20px;overflow:hidden;min-height:230px;
+      opacity:0;transform:translateY(14px);animation:rise .5s ease forwards;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease}
+    .card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
       background:linear-gradient(135deg,var(--g1,#6366f1),var(--g2,#a855f7));
       -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-      -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .18s ease;
-    }
-    .card:hover{transform:translateY(-5px);box-shadow:0 22px 50px rgba(0,0,0,.45)}
+      -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .18s ease}
+    .card:hover{transform:translateY(-5px);box-shadow:var(--shadow)}
     .card:hover::before{opacity:1}
-    .card:focus-visible{outline:3px solid var(--ring);outline-offset:3px}
+    .card:focus-within{box-shadow:var(--shadow)}
+    .card:nth-child(1){animation-delay:.04s}.card:nth-child(2){animation-delay:.10s}
+    .card:nth-child(3){animation-delay:.16s}.card:nth-child(4){animation-delay:.22s}.card:nth-child(5){animation-delay:.28s}
+    @keyframes rise{to{opacity:1;transform:none}}
 
-    .ico{
-      width:60px;height:60px;border-radius:16px;display:grid;place-items:center;font-size:32px;
+    .ico{width:60px;height:60px;border-radius:16px;display:grid;place-items:center;font-size:32px;
       background:linear-gradient(135deg,var(--g1,#6366f1),var(--g2,#a855f7));
-      box-shadow:0 10px 26px rgba(0,0,0,.4);margin-bottom:18px;
-    }
-    .card h2{font-size:21px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:9px}
+      box-shadow:0 10px 26px rgba(0,0,0,.28);margin-bottom:18px}
+    .card h2{font-size:21px;font-weight:700;letter-spacing:-.3px}
     .card p.desc{color:var(--mut);font-size:14.5px;margin-top:8px;flex:1}
     .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
-    .tag{font-size:11.5px;color:var(--mut);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
-    .go{display:inline-flex;align-items:center;gap:7px;margin-top:18px;font-size:14px;font-weight:600;color:#c7d2fe}
-    .go .arrow{transition:transform .18s ease}
-    .card:hover .go .arrow{transform:translateX(4px)}
-    .pilltype{
-      position:absolute;top:18px;right:18px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
-      color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:4px 9px;background:rgba(255,255,255,.03);
-    }
+    .tag{font-size:11.5px;color:var(--pill-txt);background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
 
-    footer{text-align:center;color:var(--dim);font-size:13px;margin-top:48px}
+    .actions{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
+    .open{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--txt);text-decoration:none}
+    .open .arrow{transition:transform .18s ease}
+    .card:hover .open .arrow{transform:translateX(4px)}
+    .open .kbd{font-size:11px;font-weight:600;color:var(--dim);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-left:2px}
+    /* stretched-link: the primary "open" covers the whole card */
+    .open::after{content:"";position:absolute;inset:0;z-index:1}
+    .source{position:relative;z-index:2;font-size:13px;font-weight:600;color:var(--mut);text-decoration:none;
+      border:1px solid var(--line);border-radius:999px;padding:5px 11px;transition:color .15s ease,border-color .15s ease}
+    .source:hover{color:var(--txt);border-color:var(--ring)}
+
+    .pilltype{position:absolute;top:18px;right:18px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+      color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:4px 9px;background:var(--card2)}
+
+    footer{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;text-align:center;
+      color:var(--dim);font-size:13px;margin-top:44px}
     footer a{color:var(--mut);text-decoration:none;border-bottom:1px solid var(--line)}
-    @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+    footer .sep{opacity:.5}
+    .hint{color:var(--dim);font-size:12.5px;margin-top:10px;text-align:center}
+
+    :focus-visible{outline:3px solid var(--ring);outline-offset:3px;border-radius:6px}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.card{opacity:1;transform:none}}
   </style>
 </head>
 <body>
+  <a class="skip" href="#main">Skip to content</a>
   <div class="wrap">
+    <div class="topbar">
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light or dark theme">
+        <span class="ic" aria-hidden="true">🌙</span><span class="lbl">Theme</span>
+      </button>
+    </div>
+
     <header class="hero">
       <span class="badge"><span class="dot"></span> Live on GitHub Pages</span>
       <h1>The Sandbox</h1>
       <p>A small collection of self-contained projects — each one runs entirely in your browser with no install. Pick one to explore.</p>
     </header>
 
-    <main class="grid">
+    <main id="main" class="grid">
       <!-- Tiny Explorers -->
-      <a class="card" href="toddler-learn/" style="--g1:#ff8a3d;--g2:#ff5d8f">
+      <article class="card" style="--g1:#ff8a3d;--g2:#ff5d8f">
         <span class="pilltype">Web App</span>
-        <span class="ico">🧸</span>
+        <span class="ico" aria-hidden="true">🧸</span>
         <h2>Tiny Explorers</h2>
-        <p class="desc">A learning playground for ages 2–3 — colors, shapes, numbers, animals, letters, music and more. Tap-to-learn, narrated aloud, and grounded in early-childhood research.</p>
+        <p class="desc">A learning playground for ages 2–3 — colors, shapes, numbers, animals, letters, music and more. Tap-to-learn, narrated aloud, grounded in early-childhood research.</p>
         <div class="tags"><span class="tag">Kids 2–3</span><span class="tag">Offline-ready</span><span class="tag">No ads</span></div>
-        <span class="go">Open app <span class="arrow">→</span></span>
-      </a>
+        <div class="actions">
+          <a class="open" href="toddler-learn/">Open app <span class="arrow">→</span><span class="kbd">1</span></a>
+          <a class="source" href="https://github.com/hodrivenzon/sandbox/tree/main/toddler-learn" target="_blank" rel="noopener" aria-label="Tiny Explorers source on GitHub">Source ↗</a>
+        </div>
+      </article>
 
       <!-- Falar -->
-      <a class="card" href="portuguese-learn/" style="--g1:#14b8a6;--g2:#0f766e">
+      <article class="card" style="--g1:#14b8a6;--g2:#0f766e">
         <span class="pilltype">Web App</span>
-        <span class="ico">🇧🇷</span>
+        <span class="ico" aria-hidden="true">🇧🇷</span>
         <h2>Falar</h2>
-        <p class="desc">Learn Brazilian Portuguese — themed vocabulary lessons with audio, spaced-repetition flashcards, quizzes, and verb conjugations. Tracks streaks and XP, works offline, no account needed.</p>
+        <p class="desc">Learn Brazilian Portuguese — themed vocabulary lessons with audio, spaced-repetition flashcards, quizzes, and verb conjugations. Tracks streaks and XP, works offline, no account.</p>
         <div class="tags"><span class="tag">Languages</span><span class="tag">Flashcards</span><span class="tag">Offline-ready</span></div>
-        <span class="go">Open app <span class="arrow">→</span></span>
-      </a>
+        <div class="actions">
+          <a class="open" href="portuguese-learn/">Open app <span class="arrow">→</span><span class="kbd">2</span></a>
+          <a class="source" href="https://github.com/hodrivenzon/sandbox/tree/main/portuguese-learn" target="_blank" rel="noopener" aria-label="Falar source on GitHub">Source ↗</a>
+        </div>
+      </article>
 
       <!-- FORGE -->
-      <a class="card" href="crossfit-dashboard.html" style="--g1:#ff5a3c;--g2:#ffb83c">
+      <article class="card" style="--g1:#ff5a3c;--g2:#ffb83c">
         <span class="pilltype">Web App</span>
-        <span class="ico">🏋️</span>
+        <span class="ico" aria-hidden="true">🏋️</span>
         <h2>FORGE</h2>
         <p class="desc">A CrossFit strength-analytics dashboard. Track lifts, benchmark scores, and visualize progress in a sleek single-page interface.</p>
         <div class="tags"><span class="tag">Fitness</span><span class="tag">Analytics</span><span class="tag">Dashboard</span></div>
-        <span class="go">Open dashboard <span class="arrow">→</span></span>
-      </a>
+        <div class="actions">
+          <a class="open" href="crossfit-dashboard.html">Open dashboard <span class="arrow">→</span><span class="kbd">3</span></a>
+          <a class="source" href="https://github.com/hodrivenzon/sandbox/blob/main/crossfit-dashboard.html" target="_blank" rel="noopener" aria-label="FORGE source on GitHub">Source ↗</a>
+        </div>
+      </article>
 
-      <!-- build_list.py -->
-      <a class="card" href="https://github.com/hodrivenzon/sandbox/blob/main/build_list.py" target="_blank" rel="noopener" style="--g1:#22c55e;--g2:#16a34a">
+      <!-- Baby Gear List (script) -->
+      <article class="card" style="--g1:#22c55e;--g2:#16a34a">
         <span class="pilltype">Script</span>
-        <span class="ico">📋</span>
+        <span class="ico" aria-hidden="true">📋</span>
         <h2>Baby Gear List</h2>
-        <p class="desc">A Python script (openpyxl) that generates a tidy, color-coded Excel shopping list for baby equipment — organized by priority and status, in Hebrew (RTL).</p>
+        <p class="desc">A Python (openpyxl) script that generates a tidy, color-coded Excel shopping list for baby equipment — organized by priority and status, in Hebrew (RTL).</p>
         <div class="tags"><span class="tag">Python</span><span class="tag">Excel / openpyxl</span></div>
-        <span class="go">View source <span class="arrow">↗</span></span>
-      </a>
+        <div class="actions">
+          <a class="open" href="https://github.com/hodrivenzon/sandbox/blob/main/build_list.py" target="_blank" rel="noopener">View source <span class="arrow">↗</span><span class="kbd">4</span></a>
+        </div>
+      </article>
     </main>
 
+    <p class="hint">Tip: press <b>1</b>–<b>4</b> to open a project.</p>
+
     <footer>
-      Built in the open · <a href="https://github.com/hodrivenzon/sandbox" target="_blank" rel="noopener">github.com/hodrivenzon/sandbox</a>
+      <span>Built in the open</span><span class="sep">·</span>
+      <a href="https://github.com/hodrivenzon/sandbox" target="_blank" rel="noopener">github.com/hodrivenzon/sandbox</a>
     </footer>
   </div>
+
+  <script>
+    // Theme toggle (persisted)
+    (function () {
+      var btn = document.getElementById('theme-toggle');
+      var ic = btn.querySelector('.ic'), lbl = btn.querySelector('.lbl');
+      function paint() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        ic.textContent = dark ? '☀️' : '🌙';
+        lbl.textContent = dark ? 'Light' : 'Dark';
+      }
+      paint();
+      btn.addEventListener('click', function () {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('sandbox-theme', next); } catch (e) {}
+        paint();
+      });
+    })();
+
+    // Keyboard shortcuts: 1–9 open the matching project
+    document.addEventListener('keydown', function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (/^[1-9]$/.test(e.key)) {
+        var card = document.querySelectorAll('.grid .card')[+e.key - 1];
+        var link = card && card.querySelector('.open');
+        if (link) link.click();
+      }
+    });
+
+    // Register the hub service worker (offline) when served over http(s)
+    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+      window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+    }
+  </script>
 </body>
 </html>

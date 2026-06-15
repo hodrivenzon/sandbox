@@ -6,7 +6,7 @@ perfectly on **GitHub Pages** and even works **offline** after the first load.
 
 ## What's inside
 
-Nine tap-to-learn activities, all narrated aloud (toddlers can't read yet):
+Ten tap-to-learn activities, all narrated aloud (toddlers can't read yet):
 
 | Activity | What it teaches |
 | --- | --- |
@@ -18,6 +18,7 @@ Nine tap-to-learn activities, all narrated aloud (toddlers can't read yet):
 | 🎵 Music | Pentatonic sound pads (no wrong notes) + a song |
 | 🧩 Matching | "Which one is the same?" visual matching |
 | 🧒 My Body | Name/find body parts |
+| 🌦️ Weather | Name everyday weather (sun, rain, snow…) |
 | 🖍️ Draw | Open-ended sticker/stamp pad |
 
 Plus a gated **For Grown-Ups** page documenting the research the design is based

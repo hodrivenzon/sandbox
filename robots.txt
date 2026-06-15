@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hodrivenzon.github.io/sandbox/sitemap.xml

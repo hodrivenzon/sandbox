@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Lost in the Sandbox — 404</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%AA%3C/text%3E%3C/svg%3E" />
+  <script>
+    (function () { try { var t = localStorage.getItem('sandbox-theme'); if (t!=='light'&&t!=='dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light':'dark'; document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
+  </script>
+  <style>
+    :root{--bg:#eef1f8;--bg2:#e6eaf4;--grad1:#dbe4ff;--grad2:#f0e2ff;--card:#fff;--line:#e3e7f1;--txt:#1b2233;--mut:#5a6478;--ring:#6366f1}
+    html[data-theme="dark"]{--bg:#0e1320;--bg2:#0a0e18;--grad1:#1c2340;--grad2:#241c3e;--card:#161c2c;--line:#28324a;--txt:#eef2fb;--mut:#9aa6c0}
+    *{box-sizing:border-box;margin:0}
+    body{min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px;color:var(--txt);
+      font-family:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+      background:radial-gradient(1000px 520px at 12% -8%,var(--grad1) 0%,transparent 60%),
+        radial-gradient(800px 500px at 100% 0%,var(--grad2) 0%,transparent 55%),linear-gradient(180deg,var(--bg),var(--bg2))}
+    .emoji{font-size:84px;line-height:1}
+    h1{font-size:clamp(34px,9vw,60px);font-weight:800;letter-spacing:-1.5px;margin:8px 0 4px;
+      background:linear-gradient(120deg,#7c8cff,#c264f0 55%,#ff7a8a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    p{color:var(--mut);font-size:17px;max-width:440px;margin:6px auto 26px}
+    a.home{display:inline-flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);color:var(--txt);
+      text-decoration:none;font-weight:700;padding:14px 22px;border-radius:16px;transition:transform .15s ease,border-color .15s ease}
+    a.home:hover{transform:translateY(-2px);border-color:var(--ring)}
+  </style>
+</head>
+<body>
+  <div>
+    <div class="emoji">🧪🔍</div>
+    <h1>404</h1>
+    <p>This experiment isn't on the shelf. The page you're looking for doesn't exist (or moved).</p>
+    <a class="home" href="/sandbox/">🏠 Back to the Sandbox</a>
+  </div>
+</body>
+</html>

@@ -67,6 +67,12 @@ PT.audio = (function () {
 
   /* Speak Brazilian Portuguese text. opts.rate (default a touch slow for
      learners), opts.onend callback. Always cancels anything in flight. */
+  /* The learner's preferred default speed (0.75 slow / 0.9 normal / 1 native). */
+  function defaultRate() {
+    var r = PT.store && PT.store.settings && PT.store.settings.ttsRate;
+    return r ? r : 0.9;
+  }
+
   function speak(text, opts) {
     if (muted || !hasSpeech || !text) { if (opts && opts.onend) opts.onend(); return; }
     opts = opts || {};
@@ -74,7 +80,7 @@ PT.audio = (function () {
       window.speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(String(text));
       u.lang = "pt-BR";
-      u.rate = opts.rate || 0.9;
+      u.rate = opts.rate || defaultRate();
       u.pitch = opts.pitch || 1;
       u.volume = 1;
       if (ptVoice) u.voice = ptVoice;
@@ -82,6 +88,9 @@ PT.audio = (function () {
       window.speechSynthesis.speak(u);
     } catch (e) { if (opts.onend) opts.onend(); }
   }
+
+  /* Deliberately slow replay (for dictation / hard listening). */
+  function speakSlow(text, opts) { speak(text, Object.assign({}, opts, { rate: 0.62 })); }
 
   /* one soft tone */
   function tone(freq, dur, type, vol, when) {
@@ -105,7 +114,7 @@ PT.audio = (function () {
   function toggleMute() { setMuted(!muted); return muted; }
 
   return {
-    unlock: unlock, speak: speak, tone: tone, pop: pop, correct: correct, wrong: wrong,
+    unlock: unlock, speak: speak, speakSlow: speakSlow, tone: tone, pop: pop, correct: correct, wrong: wrong,
     setMuted: setMuted, toggleMute: toggleMute,
     get muted() { return muted; },
     get hasSpeech() { return hasSpeech; },

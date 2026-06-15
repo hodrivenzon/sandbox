@@ -71,7 +71,7 @@
       ]));
     }
 
-    wrap.appendChild(C.sectionTitle("Words & expressions", el("a", { class: "link", href: "#/practice/", onclick: function (e) { e.preventDefault(); PT.audio.pop(); location.hash = "#/practice"; }, text: "Practice all →" })));
+    wrap.appendChild(C.sectionTitle("Words & expressions", el("a", { class: "link", href: "#/practice/due", onclick: function () { PT.audio.pop(); }, text: "Practice →" })));
     var list = el("div", { class: "card-list" });
     s.items.forEach(function (item) { list.appendChild(C.wordCard(item, { onKnow: function () {} })); });
     wrap.appendChild(list);

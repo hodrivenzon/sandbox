@@ -10,6 +10,7 @@ window.TE = window.TE || {};
 TE.audio = (function () {
   var ctx = null;
   var muted = false;
+  try { muted = localStorage.getItem("te-muted") === "1"; } catch (e) {}
   var voice = null;
   var hasSpeech = ("speechSynthesis" in window) && ("SpeechSynthesisUtterance" in window);
 
@@ -110,7 +111,11 @@ TE.audio = (function () {
     tone(294, 0.20, "sine", 0.12, 0.12);
   }
 
-  function setMuted(m) { muted = !!m; if (muted && hasSpeech) { try { window.speechSynthesis.cancel(); } catch (e) {} } }
+  function setMuted(m) {
+    muted = !!m;
+    try { localStorage.setItem("te-muted", muted ? "1" : "0"); } catch (e) {}
+    if (muted && hasSpeech) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+  }
   function toggleMute() { setMuted(!muted); return muted; }
 
   return {

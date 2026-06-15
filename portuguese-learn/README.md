@@ -34,13 +34,16 @@ There is **no install step and no dependencies.**
 | Feature | How it works |
 |---|---|
 | **13 topic lessons, 191 words/phrases** | Greetings, survival phrases, numbers, time, family, food, restaurant, colors, travel, shopping, body/health, weather, home. |
-| **Native-style audio** | The browser's built-in **Web Speech API** speaks every word/phrase in `pt-BR`. No audio files shipped. |
-| **Spaced repetition** | A 5-box **Leitner system** schedules each word; correct answers wait longer, mistakes come back soon. Stored in `localStorage`. |
-| **Flashcards** | Flip cards in either direction (PT→EN or EN→PT), self-grade *Again / Good*. |
-| **Quizzes** | Generated on the fly from the vocabulary: read-PT, produce-PT, and **listen-and-choose** question types with plausible distractors. |
+| **🎵 Famous songs (advanced)** | 8 Brazilian classics (*Garota de Ipanema*, *Construção*, *Evidências*, *Eduardo e Mônica*…). Each teaches advanced, often literary vocabulary, idioms and slang plus the song's cultural context — **never the lyrics** — with original example sentences and a link to go listen. |
+| **💬 Real conversations (advanced)** | 8 colloquial daily-interaction dialogues (catching up, the bakery, haggling at the market, a doctor's visit, workplace gossip…) as chat bubbles with idiomatic translations, inline slang notes, key-expression cards, and play-the-whole-thing audio. |
+| **Native-style audio** | The browser's built-in **Web Speech API** speaks every word, line and phrase in `pt-BR`. No audio files shipped. |
+| **Spaced repetition** | A 5-box **Leitner system** schedules each item; correct answers wait longer, mistakes come back soon. A word counts as "learned" only once it survives into a multi-day box. Stored in `localStorage`. |
+| **Flashcards** | Flip cards in either direction (PT→EN or EN→PT), self-grade *Again / Good*. Keyboard-operable. |
+| **Quizzes** | Generated on the fly from the vocabulary: read-PT, produce-PT, and **listen-and-choose** question types with plausible distractors and ✓/✗ feedback. |
 | **Verb conjugations** | Present tense of the 12 most useful verbs (`eu / você / nós / eles`), irregulars flagged, every form tappable to hear. |
-| **Progress** | Streak, XP, words-learned, and a daily review goal on the dashboard. |
-| **Search** | Accent-insensitive search across everything, in English or Portuguese. |
+| **Progress** | Streak (calendar-day based), XP, words-learned, and a daily review goal on the dashboard. |
+| **Search** | Accent-insensitive search across all ~300 words, phrases & expressions, in English or Portuguese. |
+| **Accessibility** | Screen-reader live region, focus management on navigation, `aria-current`/`aria-expanded`, non-color quiz feedback, WCAG-checked contrast, reduced-motion support. |
 | **Dark mode** | Automatic via `prefers-color-scheme`. |
 
 ---
@@ -83,6 +86,14 @@ baked into `js/data.js` (pure data — regenerate rather than hand-edit en masse
 `js/content.js` normalizes it at load (stable keys for the SRS, lesson back-refs,
 search index).
 
+### Songs without lyrics (copyright)
+"Learn from famous songs" is implemented as **teaching the language and culture
+around** each song — its advanced vocabulary, idioms, slang and significance —
+**not by reproducing copyrighted lyrics**. Every example sentence is original,
+and each entry links out to YouTube/Spotify so you hear the real recording from
+the rights holder. The content pipeline explicitly checks for and strips any
+lyric quotation.
+
 ### Pedagogy
 The learning loop is **see/hear → self-test → spaced review**. The Leitner boxes
 (`js/store.js`) mean the app surfaces *due* cards first and treats a word as
@@ -106,16 +117,19 @@ portuguese-learn/
     ├── speech.js           # Web Speech (pt-BR TTS) + Web Audio cues
     ├── store.js            # localStorage: Leitner SRS, streak, XP, daily goal
     ├── data.js             # GENERATED verified lesson + verb content
-    ├── content.js          # normalizes PT.data: keys, search, queries
-    ├── components.js        # wordCard / speakBtn / stat / pills
-    ├── app.js              # hash router + app shell
+    ├── data-advanced.js    # GENERATED verified song + dialogue content
+    ├── content.js          # normalizes PT.data: keys, routes, search, queries
+    ├── components.js        # wordCard / speakBtn / dialogueLine / pills
+    ├── app.js              # hash router + app shell + a11y helpers
     └── screens/
         ├── home.js          # dashboard
-        ├── lessons.js       # all lessons
+        ├── lessons.js       # all lessons (+ verbs entry)
         ├── lesson.js        # one lesson (cards, grammar tips, play-all)
         ├── practice.js      # spaced-repetition flashcards
         ├── quiz.js          # multiple-choice quiz (incl. listening)
         ├── verbs.js         # conjugation tables
+        ├── songs.js         # famous songs: culture + advanced vocab
+        ├── conversations.js # daily-interaction dialogues
         └── search.js        # global search
 ```
 

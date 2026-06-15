@@ -91,6 +91,18 @@ TE.data = {
     { name: "Tooth", emoji: "🦷" }
   ],
 
+  /* Everyday weather — recognizable and great for daily-routine talk */
+  weather: [
+    { name: "Sun",     emoji: "☀️" },
+    { name: "Cloud",   emoji: "☁️" },
+    { name: "Rain",    emoji: "🌧️" },
+    { name: "Storm",   emoji: "⛈️" },
+    { name: "Snow",    emoji: "❄️" },
+    { name: "Rainbow", emoji: "🌈" },
+    { name: "Wind",    emoji: "💨" },
+    { name: "Moon",    emoji: "🌙" }
+  ],
+
   /* Music pads — a C-major pentatonic scale, so every tap sounds nice
      (no "wrong" notes = no-fail, pure cause-and-effect joy) */
   music: [
@@ -115,6 +127,7 @@ TE.data = {
     { id: "music",   label: "Music",   emoji: "🎵", tile: "#ff7fb6" },
     { id: "match",   label: "Matching",emoji: "🧩", tile: "#2bc4c0" },
     { id: "body",    label: "My Body", emoji: "🧒", tile: "#ff5d5d" },
+    { id: "weather", label: "Weather", emoji: "🌦️", tile: "#38bdf8" },
     { id: "draw",    label: "Draw",    emoji: "🖍️", tile: "#ffb03a" }
   ]
 };

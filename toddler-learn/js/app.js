@@ -88,10 +88,14 @@
   /* ----------------------------- controls -------------------------------- */
   homeBtn.addEventListener("click", function () { TE.audio.pop(); go("home"); });
 
+  function syncSound() {
+    soundBtn.textContent = TE.audio.muted ? "🔇" : "🔊";
+    soundBtn.setAttribute("aria-label", TE.audio.muted ? "Turn sound on" : "Turn sound off");
+  }
+  syncSound(); // reflect the persisted mute preference on load
   soundBtn.addEventListener("click", function () {
     var muted = TE.audio.toggleMute();
-    soundBtn.textContent = muted ? "🔇" : "🔊";
-    soundBtn.setAttribute("aria-label", muted ? "Turn sound on" : "Turn sound off");
+    syncSound();
     if (!muted) TE.audio.pop();
   });
 

@@ -23,9 +23,9 @@
       ])
     ]));
 
-    /* stat row */
-    wrap.appendChild(el("div", { class: "stat-row" }, [
-      C.stat(stats.streak, stats.streak === 1 ? "day streak" : "day streak", "🔥"),
+    /* stat row (tap to open the full progress page) */
+    wrap.appendChild(el("a", { class: "stat-row link-row", href: "#/progress", "aria-label": "View your progress", onclick: function () { PT.audio.pop(); } }, [
+      C.stat(stats.streak, "day streak", "🔥"),
       C.stat(stats.learned, "words learned", "✅"),
       C.stat(stats.xp, "XP", "⚡")
     ]));
@@ -46,10 +46,10 @@
     /* primary CTA: daily review */
     var cta = el("button", {
       class: "btn btn-primary btn-block",
-      onclick: function () { PT.audio.pop(); location.hash = "#/practice"; }
+      onclick: function () { PT.audio.pop(); location.hash = due > 0 ? "#/practice/due" : "#/practice"; }
     }, [
       el("span", { class: "btn-ic", text: "🎴" }),
-      el("span", { text: due > 0 ? ("Review " + due + " due " + (due === 1 ? "card" : "cards")) : "Practice flashcards" })
+      el("span", { text: due > 0 ? ("Review " + due + " due " + (due === 1 ? "card" : "cards")) : "Open practice" })
     ]);
     wrap.appendChild(cta);
 

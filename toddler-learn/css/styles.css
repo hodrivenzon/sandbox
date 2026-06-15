@@ -45,6 +45,7 @@ body[data-theme="music"]   { --bg: #ffeef4; }
 body[data-theme="match"]   { --bg: #effbf7; }
 body[data-theme="body"]    { --bg: #fdf3e8; }
 body[data-theme="draw"]    { --bg: #f1f1ff; }
+body[data-theme="weather"] { --bg: #e7f6ff; }
 body[data-theme="parents"] { --bg: #f4f5f8; }
 
 /* ----------------------------- reset / base ----------------------------- */

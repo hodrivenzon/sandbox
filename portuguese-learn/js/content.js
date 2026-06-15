@@ -76,6 +76,45 @@ PT.content = (function () {
     }).slice(0, 60);
   }
 
+  /* Normalize a typed answer: lowercase, trim, drop punctuation, collapse spaces
+     (accents preserved). Used to grade typed recall + dictation. */
+  function clean(s) {
+    return String(s).toLowerCase().trim()
+      .replace(/[.,!?;:¡¿"'()]/g, "").replace(/\s+/g, " ");
+  }
+  /* Compare a typed answer to the target. Returns {correct, exact, almost}:
+     exact = right including accents; almost = right but for accents only. */
+  function compareAnswer(user, target) {
+    var cu = clean(user), ct = clean(target);
+    if (!cu) return { correct: false, exact: false, almost: false };
+    if (cu === ct) return { correct: true, exact: true, almost: false };
+    if (deburr(cu) === deburr(ct)) return { correct: true, exact: false, almost: true };
+    return { correct: false, exact: false, almost: false };
+  }
+
+  /* Conjugation-drill items derived from the verb data: one per verb × pronoun. */
+  var PRON = [
+    { k: "eu", label: "eu" },
+    { k: "voce", label: "você" },
+    { k: "nos", label: "nós" },
+    { k: "eles", label: "eles" }
+  ];
+  function verbDrillItems() {
+    var out = [];
+    ((data.verbs && data.verbs.verbs) || []).forEach(function (v) {
+      PRON.forEach(function (p) {
+        if (!v.conj || !v.conj[p.k]) return;
+        out.push({
+          key: "conj:" + slug(v.infinitive) + ":" + p.k,
+          infinitive: v.infinitive, en: v.en, irregular: v.irregular,
+          pron: p.k, pronLabel: p.label, answer: v.conj[p.k],
+          ex_pt: v.ex_pt, ex_en: v.ex_en, route: "#/drill", source: "verb"
+        });
+      });
+    });
+    return out;
+  }
+
   return {
     lessons: function () { return lessons; },
     lesson: function (id) { return byId[id] || null; },
@@ -87,6 +126,8 @@ PT.content = (function () {
     allItems: function () { return all; },
     lessonCount: function () { return lessonItems.length; },
     totalCount: function () { return all.length; },
-    search: search
+    search: search,
+    compareAnswer: compareAnswer,
+    verbDrillItems: verbDrillItems
   };
 })();

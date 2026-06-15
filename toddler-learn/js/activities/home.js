@@ -32,8 +32,12 @@ TE.screens.home = {
       grid.appendChild(tile);
     });
 
-    // Discreet, gated grown-ups entrance.
-    var parents = el("div", { style: { textAlign: "center", marginTop: "30px" } }, [
+    // Back to the Sandbox hub + a discreet, gated grown-ups entrance.
+    var footer = el("div", {
+      style: { textAlign: "center", marginTop: "30px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }
+    }, [
+      el("a", { class: "mode-btn", href: "../", "aria-label": "Back to the Sandbox", style: { textDecoration: "none" } },
+        [el("span", { text: "← Sandbox" })]),
       el("button", {
         class: "mode-btn",
         onclick: function () { TE.audio.pop(); TE.requireParentGate(function () { TE.router.go("parents"); }); }
@@ -42,6 +46,6 @@ TE.screens.home = {
 
     host.appendChild(hero);
     host.appendChild(grid);
-    host.appendChild(parents);
+    host.appendChild(footer);
   }
 };
