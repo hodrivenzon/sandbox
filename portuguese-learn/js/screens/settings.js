@@ -84,8 +84,12 @@
       "aria-label": "Anthropic API key",
       oninput: function () { PT.store.setSetting("apiKey", keyInput.value.trim()); }
     });
-    var showKey = el("button", { class: "mini-btn", type: "button", onclick: function () {
-      var hidden = keyInput.type === "password"; keyInput.type = hidden ? "text" : "password"; showKey.textContent = hidden ? "Hide" : "Show";
+    var showKey = el("button", { class: "mini-btn", type: "button", aria: { pressed: "false", label: "Show API key" }, onclick: function () {
+      var reveal = keyInput.type === "password";
+      keyInput.type = reveal ? "text" : "password";
+      showKey.textContent = reveal ? "Hide" : "Show";
+      showKey.setAttribute("aria-pressed", reveal ? "true" : "false");
+      showKey.setAttribute("aria-label", reveal ? "Hide API key" : "Show API key");
     } }, ["Show"]);
 
     var modelSel = el("select", { class: "set-select", aria: { label: "Tutor model" },

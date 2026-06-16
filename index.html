@@ -40,6 +40,16 @@
     })();
   </script>
 
+  <!-- set sign-in state before paint so the page never flashes before the gate -->
+  <script>
+    (function () {
+      try {
+        var a = sessionStorage.getItem('sandbox-auth') === '1';
+        document.documentElement.setAttribute('data-auth', a ? 'in' : 'out');
+      } catch (e) { document.documentElement.setAttribute('data-auth', 'out'); }
+    })();
+  </script>
+
   <style>
     /* ---- light (default) + dark theme tokens ---- */
     :root{
@@ -140,10 +150,47 @@
 
     :focus-visible{outline:3px solid var(--ring);outline-offset:3px;border-radius:6px}
     @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.card{opacity:1;transform:none}}
+
+    /* ---- sign-in gate ---- */
+    #signin-overlay{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:24px;
+      background:
+        radial-gradient(1100px 560px at 12% -8%, var(--grad1) 0%, transparent 60%),
+        radial-gradient(900px 520px at 100% 0%, var(--grad2) 0%, transparent 55%),
+        linear-gradient(180deg,var(--bg),var(--bg2))}
+    html[data-auth="out"] #signin-overlay{display:grid}
+    html[data-auth="out"] .wrap{display:none}
+    .signin-card{width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px;text-align:center;
+      background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);
+      border-radius:22px;padding:32px 26px;box-shadow:var(--shadow)}
+    .signin-logo{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:32px;margin:0 auto 4px;
+      background:linear-gradient(135deg,#6366f1,#a855f7);box-shadow:0 10px 26px rgba(0,0,0,.28)}
+    .signin-card h2{font-size:24px;font-weight:800;letter-spacing:-.3px}
+    .signin-card p.sub{color:var(--mut);font-size:14px;margin-bottom:6px}
+    .signin-input{width:100%;font:inherit;font-size:15px;color:var(--txt);background:var(--card2);
+      border:1px solid var(--line);border-radius:12px;padding:13px 14px;outline:none;transition:border-color .15s ease}
+    .signin-input:focus{border-color:var(--ring)}
+    .signin-btn{width:100%;font:inherit;font-size:15px;font-weight:700;color:#fff;cursor:pointer;border:none;
+      background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:12px;padding:13px 14px;
+      transition:transform .15s ease,filter .15s ease}
+    .signin-btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+    .signin-err{color:#ff6b6b;font-size:13px;font-weight:600;min-height:16px;margin:0}
   </style>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
+
+  <!-- sign-in gate (client-side only) -->
+  <div id="signin-overlay" aria-label="Sign in">
+    <form id="signin-form" class="signin-card" autocomplete="off">
+      <div class="signin-logo" aria-hidden="true">🔐</div>
+      <h2>Sign in</h2>
+      <p class="sub">Enter your credentials to access The Sandbox.</p>
+      <input id="su-user" class="signin-input" type="text" autocomplete="username" placeholder="Username" aria-label="Username" />
+      <input id="su-pass" class="signin-input" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password" />
+      <p id="su-err" class="signin-err" hidden></p>
+      <button id="su-btn" class="signin-btn" type="submit">Sign in</button>
+    </form>
+  </div>
   <div class="wrap">
     <div class="topbar">
       <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light or dark theme">
@@ -246,6 +293,36 @@
         if (link) link.click();
       }
     });
+
+    // Sign-in gate.
+    // NOTE: client-side only — the hub is fully static, so these credentials live
+    // in the page source and can be read or bypassed by anyone who views source.
+    // It keeps casual visitors out; it is NOT real security (that needs a backend).
+    // Also note: linking straight to a sub-app (e.g. toddler-learn/) bypasses this.
+    (function () {
+      var KEY = 'sandbox-auth', USER = 'sandbox', PASS = 'forge';
+      var root = document.documentElement;
+      var form = document.getElementById('signin-form');
+      var u = document.getElementById('su-user');
+      var p = document.getElementById('su-pass');
+      var err = document.getElementById('su-err');
+      function authed() { try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+      if (authed()) { root.setAttribute('data-auth', 'in'); return; }
+      root.setAttribute('data-auth', 'out');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (String(u.value).trim().toLowerCase() === USER && String(p.value) === PASS) {
+          try { sessionStorage.setItem(KEY, '1'); } catch (_) {}
+          err.hidden = true; p.value = '';
+          root.setAttribute('data-auth', 'in');
+        } else {
+          err.textContent = 'Wrong username or password.';
+          err.hidden = false;
+          p.value = ''; p.focus();
+        }
+      });
+      setTimeout(function () { if (u) u.focus(); }, 60);
+    })();
 
     // Register the hub service worker (offline) when served over http(s)
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {

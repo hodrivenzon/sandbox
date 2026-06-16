@@ -3,7 +3,7 @@
    cache-first with a network fallback. It does NOT cache anything at runtime,
    so it can never interfere with the sub-apps (Tiny Explorers, Falar, FORGE),
    which are served normally (and have their own workers where applicable). */
-var CACHE = "sandbox-hub-v1";
+var CACHE = "sandbox-hub-v2";
 var SHELL = ["./", "index.html", "404.html", "site.webmanifest", "icons/hub-icon.svg"];
 
 self.addEventListener("install", function (e) {

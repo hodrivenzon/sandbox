@@ -438,26 +438,3 @@ body[data-theme="settings"] { --bg: #f4f5f8; }
 }
 @keyframes walkAcross { to { right: 116%; } }
 @keyframes paradeBounce { from { transform: translateY(0) rotate(-6deg); } to { transform: translateY(-26px) rotate(6deg); } }
-
-/* -------------------------------- sign-in ------------------------------- */
-#signin-overlay {
-  position: fixed; inset: 0; z-index: 120;
-  display: grid; place-items: center;
-  background: radial-gradient(120% 120% at 50% 0%, #cfe6ff 0%, var(--blue) 60%, #2f6fde 100%);
-  text-align: center; padding: 24px;
-}
-#signin-overlay[hidden] { display: none; }
-.signin-card {
-  background: rgba(255, 255, 255, .96); border-radius: 36px; padding: 30px 26px;
-  box-shadow: var(--shadow); max-width: 420px; width: 100%;
-}
-.signin-card .logo { font-size: 72px; line-height: 1; }
-.signin-card h1 { margin: 6px 0 2px; font-size: 34px; }
-.signin-card p { color: var(--ink-soft); margin: 0 0 20px; font-size: 17px; }
-#signin-form { display: flex; flex-direction: column; gap: 12px; }
-.signin-input {
-  font: inherit; font-size: 20px; text-align: center;
-  padding: 14px 16px; border-radius: 16px; border: 3px solid #e7e3ef; width: 100%;
-}
-.signin-input:focus { outline: none; border-color: var(--blue); }
-.signin-err { color: var(--coral); font-weight: 700; font-size: 15px; min-height: 20px; margin: 0; }

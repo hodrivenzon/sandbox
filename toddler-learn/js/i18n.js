@@ -132,15 +132,6 @@ TE.i18n = (function () {
       soundIntro: "Listen! Who made that sound?",
       soundReplay: "🔊 Hear it again",
 
-      /* sign-in gate */
-      signInTitle: "Sign In",
-      signInSub: "Please sign in to continue",
-      signInUser: "Username",
-      signInPass: "Password",
-      signInBtn: "Sign In",
-      signInErr: "Wrong username or password.",
-      signOut: "Sign out",
-
       cheers: ["Yay!", "Great job!", "You did it!", "Wonderful!", "Hooray!", "Well done!", "Awesome!"]
     },
 
@@ -239,15 +230,6 @@ TE.i18n = (function () {
       soundBanner: "מי אמר את זה? 🔊",
       soundIntro: "הקשיבו! מי השמיע את הקול?",
       soundReplay: "🔊 לשמוע שוב",
-
-      /* sign-in gate */
-      signInTitle: "כניסה",
-      signInSub: "התחברו כדי להמשיך",
-      signInUser: "שם משתמש",
-      signInPass: "סיסמה",
-      signInBtn: "כניסה",
-      signInErr: "שם משתמש או סיסמה שגויים.",
-      signOut: "התנתקות",
 
       cheers: ["יפה מאוד!", "כל הכבוד!", "הצלחתם!", "מצוין!", "איזה יופי!", "וואו!", "נהדר!"]
     }

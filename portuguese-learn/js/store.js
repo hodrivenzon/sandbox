@@ -188,17 +188,24 @@ PT.store = (function () {
   }
   function reset() { state = defaults(); state.daily.day = todayStr(); save(); }
 
-  /* Back up / restore the whole profile as JSON text. */
-  function exportJSON() { return JSON.stringify(state); }
+  /* Back up / restore the whole profile as JSON text. The API key is a secret —
+     never write it to a downloadable backup, and never import one from a file. */
+  function exportJSON() {
+    var copy = JSON.parse(JSON.stringify(state));
+    if (copy.settings) delete copy.settings.apiKey;
+    return JSON.stringify(copy);
+  }
   function importJSON(text) {
     try {
       var obj = JSON.parse(text);
       if (!obj || typeof obj !== "object" || !obj.srs) return false;
+      var keepKey = (state.settings && state.settings.apiKey) || "";
       var fresh = defaults();
       fresh.custom = Array.isArray(obj.custom) ? obj.custom : [];
       Object.assign(fresh.stats, obj.stats || {});
       Object.assign(fresh.daily, obj.daily || {});
       Object.assign(fresh.settings, obj.settings || {});
+      fresh.settings.apiKey = keepKey;  // keep this device's key; never import one
       // Normalize every SRS record (older/edited backups may miss fields) and
       // recompute "learned" from the boxes so the counter can never disagree.
       var learned = 0;

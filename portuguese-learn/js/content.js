@@ -71,11 +71,12 @@ PT.content = (function () {
      are immediately practiceable and searchable without a reload. */
   function customItems() {
     var words = (PT.store && PT.store.getCustomWords) ? PT.store.getCustomWords() : [];
-    return words.map(function (w) {
+    return words.map(function (w, i) {
       return {
         pt: w.pt, en: w.en, hint: "", pos: "phrase", gender: null,
         note: "Saved from your AI tutor session", ex_pt: "", ex_en: "", emoji: "💬",
-        key: "custom:" + slug(w.pt), lessonId: "custom", lessonTitle: "My words",
+        // index-based key: distinct words never collide even if they deburr the same
+        key: "custom:" + i, lessonId: "custom", lessonTitle: "My words",
         route: "#/tutor", source: "custom"
       };
     });

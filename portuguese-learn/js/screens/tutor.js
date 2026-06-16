@@ -77,26 +77,26 @@
     wrap.appendChild(seg("Dialect", [{ label: "🇧🇷 Brazil", value: "pt-BR" }, { label: "🇵🇹 Portugal", value: "pt-PT" }], function () { return choice.dialect; }, function (v) { choice.dialect = v; PT.store.setSetting("dialect", v); if (PT.audio.repickVoice) PT.audio.repickVoice(); }));
     wrap.appendChild(seg("Level", ["A2", "B1", "B2", "C1"].map(function (l) { return { label: l, value: l }; }), function () { return choice.level; }, function (v) { choice.level = v; PT.store.setSetting("level", v); }));
 
+    function pickGroup(group, isActive, onPick) {
+      Array.prototype.forEach.call(group.children, function (c) { c.classList.remove("active"); c.setAttribute("aria-checked", "false"); });
+      isActive.classList.add("active"); isActive.setAttribute("aria-checked", "true"); onPick();
+    }
+
     // structure grid
-    var sg = el("div", { class: "tutor-structures" });
+    var sg = el("div", { class: "tutor-structures", role: "radiogroup", aria: { label: "Lesson type" } });
     STRUCTURES.forEach(function (st) {
-      var b = el("button", { class: "struct-card" + (st.key === choice.structure ? " active" : ""), onclick: function () {
-        PT.audio.pop(); choice.structure = st.key;
-        Array.prototype.forEach.call(sg.children, function (c) { c.classList.remove("active"); });
-        b.classList.add("active");
-      } }, [el("span", { class: "struct-emoji", text: st.emoji }), el("span", { class: "struct-title", text: st.title })]);
+      var b = el("button", { class: "struct-card" + (st.key === choice.structure ? " active" : ""), role: "radio", aria: { checked: st.key === choice.structure ? "true" : "false" },
+        onclick: function () { PT.audio.pop(); pickGroup(sg, b, function () { choice.structure = st.key; }); } },
+        [el("span", { class: "struct-emoji", text: st.emoji }), el("span", { class: "struct-title", text: st.title })]);
       sg.appendChild(b);
     });
     wrap.appendChild(el("div", { class: "kick-block" }, [el("div", { class: "kick-label", text: "Lesson type" }), sg]));
 
     // topic chips
-    var tg = el("div", { class: "topic-chips" });
+    var tg = el("div", { class: "topic-chips", role: "radiogroup", aria: { label: "Topic" } });
     TOPICS.forEach(function (t) {
-      var b = el("button", { class: "topic-chip" + (t === choice.topic ? " active" : ""), onclick: function () {
-        PT.audio.pop(); choice.topic = t;
-        Array.prototype.forEach.call(tg.children, function (c) { c.classList.remove("active"); });
-        b.classList.add("active");
-      } }, [t]);
+      var b = el("button", { class: "topic-chip" + (t === choice.topic ? " active" : ""), role: "radio", aria: { checked: t === choice.topic ? "true" : "false" },
+        onclick: function () { PT.audio.pop(); pickGroup(tg, b, function () { choice.topic = t; }); } }, [t]);
       tg.appendChild(b);
     });
     wrap.appendChild(el("div", { class: "kick-block" }, [el("div", { class: "kick-label", text: "Topic" }), tg]));
@@ -150,6 +150,7 @@
     var input = el("textarea", { class: "tutor-input", rows: "1", placeholder: "Escreva em português…", "aria-label": "Type your message in Portuguese", autocapitalize: "sentences" });
     var send = el("button", { class: "tutor-send", aria: { label: "Send" }, onclick: function () { submit(host, input); } }, ["➤"]);
     input.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(host, input); } });
+    input.addEventListener("input", function () { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 120) + "px"; });
     var bar = el("div", { class: "tutor-input-bar" }, [input, send]);
     if (session.busy) { input.setAttribute("disabled", ""); send.setAttribute("disabled", ""); }
     wrap.appendChild(bar);
@@ -161,9 +162,12 @@
   function bubble(role, text, opts) {
     opts = opts || {};
     var side = role === "user" ? "me" : "tutor";
-    var kids = [el("div", { class: "tutor-bubble-text", text: text })];
+    var kids = [
+      el("span", { class: "sr-only", text: role === "user" ? "You: " : "Tutor: " }),
+      el("div", { class: "tutor-bubble-text", text: text })
+    ];
     if (role === "assistant" && !opts.noSpeak) {
-      kids.push(el("button", { class: "speak-btn small", aria: { label: "Hear this" }, onclick: function (e) {
+      kids.push(el("button", { class: "speak-btn small", aria: { label: "Hear the tutor's reply" }, onclick: function (e) {
         e.stopPropagation(); PT.audio.pop(); PT.audio.speak(stripEnglishNotes(text), { rate: 0.92 });
       } }, ["🔊"]));
     }
@@ -188,14 +192,18 @@
   /* Send the current history to the tutor and stream the reply into a bubble. */
   function sendToTutor(host, isFirst) {
     session.busy = true;
+    var sess = session;                          // capture: "New"/abort may swap it out
     abort = (typeof AbortController !== "undefined") ? new AbortController() : null;
     var thread = document.getElementById("tutor-thread");
+    setInputBusy(true);
+    if (PT.announce) PT.announce("Tutor is replying…");
     var typing = el("div", { class: "tutor-msg tutor" }, [el("div", { class: "tutor-bubble typing" }, [el("span", { class: "dot" }), el("span", { class: "dot" }), el("span", { class: "dot" })])]);
     if (thread) { thread.appendChild(typing); scrollThread(); }
 
     var acc = "";
     var liveBubble = null;
     PT.tutor.stream(session.messages, session.system, function (delta) {
+      if (sess !== session) return;              // stale stream — ignore
       acc += delta;
       if (!liveBubble && thread) {
         if (typing.parentNode) typing.remove();
@@ -204,21 +212,28 @@
       }
       if (liveBubble) { liveBubble.querySelector(".tutor-bubble-text").textContent = acc; scrollThread(); }
     }, abort ? abort.signal : undefined).then(function (full) {
+      if (!session || sess !== session) return;  // session replaced/cleared — drop the result
       session.messages.push({ role: "assistant", content: full });
       session.busy = false; abort = null;
+      if (PT.announce) PT.announce("Tutor replied.");
       if (mounted) render(host);
     }).catch(function (err) {
+      if (err && err.name === "AbortError") return;   // navigated / new session
+      if (!session || sess !== session) return;       // session replaced — nothing to show
       session.busy = false; abort = null;
-      if (err && err.name === "AbortError") return; // user navigated/reset
       if (!mounted) return;
       if (typing.parentNode) typing.remove();
-      // roll back the unanswered user turn so they can retry
-      if (!isFirst && session.messages.length && session.messages[session.messages.length - 1].role === "user") {
-        // keep it; just show the error
-      }
       if (thread) thread.appendChild(errorBubble(err && err.message));
+      if (PT.announce) PT.announce((err && err.message) || "Tutor error.");
+      setInputBusy(false);
       scrollThread();
     });
+  }
+
+  function setInputBusy(busy) {
+    var input = document.querySelector(".tutor-input"), send = document.querySelector(".tutor-send");
+    if (input) { if (busy) input.setAttribute("disabled", ""); else input.removeAttribute("disabled"); }
+    if (send) { if (busy) { send.setAttribute("disabled", ""); send.setAttribute("aria-disabled", "true"); } else { send.removeAttribute("disabled"); send.setAttribute("aria-disabled", "false"); } }
   }
 
   function errorBubble(msg) {
@@ -233,23 +248,28 @@
     if (session.busy) return;
     session.messages.push({ role: "user", content: PT.tutor.reviewRequest() });
     session.busy = true;
+    var sess = session;
     render(host); // shows the review request as a (brief) user bubble
     var thread = document.getElementById("tutor-thread");
     var typing = el("div", { class: "tutor-msg tutor" }, [el("div", { class: "tutor-bubble typing" }, [el("span", { class: "dot" }), el("span", { class: "dot" }), el("span", { class: "dot" })])]);
     if (thread) { thread.appendChild(typing); scrollThread(); }
     abort = (typeof AbortController !== "undefined") ? new AbortController() : null;
+    if (PT.announce) PT.announce("Preparing your session review…");
 
     PT.tutor.stream(session.messages, session.system, null, abort ? abort.signal : undefined).then(function (full) {
+      if (!session || sess !== session) return;
       session.messages.push({ role: "assistant", content: full });
       var words = PT.tutor.parseWordList(full);
       var summary = full.replace(/```json[\s\S]*?```/i, "").trim();
-      session.review = { summary: summary, words: words, saved: 0 };
+      session.review = { summary: summary, words: words, saved: -1 };
       session.busy = false; abort = null;
       if (mounted) render(host);
     }).catch(function (err) {
-      session.busy = false; abort = null;
       if (err && err.name === "AbortError") return;
+      if (!session || sess !== session) return;
+      session.busy = false; abort = null;
       if (!mounted) return;
+      if (typing.parentNode) typing.remove();
       if (thread) thread.appendChild(errorBubble(err && err.message));
       scrollThread();
     });
@@ -268,13 +288,17 @@
         ]));
       });
       kids.push(list);
-      if (review.saved) {
-        kids.push(el("div", { class: "review-saved", text: "✓ Saved " + review.saved + " word" + (review.saved === 1 ? "" : "s") + " to your flashcards." }));
-      } else {
+      if (review.saved < 0) {       // not saved yet
         kids.push(el("button", { class: "btn btn-primary", onclick: function () {
           var n = PT.store.addCustomWords(review.words);
-          review.saved = n || keys.length; PT.audio.correct(); render(host);
+          review.saved = n; PT.audio.correct();
+          if (PT.announce) PT.announce(n ? ("Saved " + n + " words to flashcards") : "Already in your flashcards");
+          render(host);
         } }, ["💾 Save " + keys.length + " words to flashcards"]));
+      } else {
+        kids.push(el("div", { class: "review-saved", text: review.saved > 0
+          ? ("✓ Saved " + review.saved + " new word" + (review.saved === 1 ? "" : "s") + " to your flashcards.")
+          : "✓ These are already in your flashcards." }));
       }
     }
     return el("div", { class: "card review-card" }, kids);

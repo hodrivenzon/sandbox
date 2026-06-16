@@ -503,7 +503,8 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- AI tutor: home card ---------- */
 .tutor-home-card { display: flex; align-items: center; gap: 13px; padding: 15px 16px; margin-bottom: 14px;
-  background: linear-gradient(120deg, var(--primary), color-mix(in srgb, var(--primary) 55%, var(--accent))); color: #fff; border: none; }
+  /* fixed deep-teal gradient (theme-independent) so white text clears 4.5:1 */
+  background: linear-gradient(120deg, #0b5a54, #0f766e); color: #fff; border: none; }
 .thc-emoji { font-size: 30px; width: 50px; height: 50px; display: grid; place-items: center; background: rgba(255,255,255,.18); border-radius: 14px; flex: 0 0 auto; }
 .thc-body { flex: 1; min-width: 0; }
 .thc-title { font-weight: 780; font-size: 16px; }
