@@ -3,6 +3,7 @@ window.TE = window.TE || {}; TE.screens = TE.screens || {};
 
 TE.screens.home = {
   title: "Tiny Explorers",
+  titleKey: "appName",
   theme: "home",
   render: function (host) {
     var el = TE.ui.el;
@@ -10,8 +11,8 @@ TE.screens.home = {
 
     var hero = el("div", { class: "home-hero" }, [
       el("div", { class: "logo", text: "🧸" }),
-      el("h2", { text: "Tiny Explorers" }),
-      el("p", { text: "Tap a picture to play!" })
+      el("h2", { text: TE.t("appName") }),
+      el("p", { text: TE.t("homeTap") })
     ]);
 
     var grid = el("div", { class: "tile-grid" });
@@ -19,33 +20,29 @@ TE.screens.home = {
       var tile = el("button", {
         class: "tile",
         style: { "--tile": m.tile },
-        aria: { label: m.label }
+        aria: { label: TE.tx(m) }
       }, [
         el("span", { class: "emoji", text: m.emoji }),
-        el("span", { class: "label", text: m.label })
+        el("span", { class: "label", text: TE.tx(m) })
       ]);
       tile.addEventListener("click", function () {
         TE.audio.pop();
-        TE.audio.speak(m.label);
+        TE.audio.speak(TE.tx(m));
         TE.router.go(m.id);
       });
       grid.appendChild(tile);
     });
 
-    // Back to the Sandbox hub + a discreet, gated grown-ups entrance.
-    var footer = el("div", {
-      style: { textAlign: "center", marginTop: "30px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }
-    }, [
-      el("a", { class: "mode-btn", href: "../", "aria-label": "Back to the Sandbox", style: { textDecoration: "none" } },
-        [el("span", { text: "← Sandbox" })]),
+    // Discreet, gated grown-ups entrance.
+    var parents = el("div", { style: { textAlign: "center", marginTop: "30px" } }, [
       el("button", {
         class: "mode-btn",
         onclick: function () { TE.audio.pop(); TE.requireParentGate(function () { TE.router.go("parents"); }); }
-      }, [el("span", { text: "👋 For Grown-Ups" })])
+      }, [el("span", { text: TE.t("forGrownups") })])
     ]);
 
     host.appendChild(hero);
     host.appendChild(grid);
-    host.appendChild(footer);
+    host.appendChild(parents);
   }
 };

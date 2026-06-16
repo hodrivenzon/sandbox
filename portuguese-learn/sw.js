@@ -2,7 +2,7 @@
    Cache-first for our own static assets so the app works fully offline after the
    first visit. Bump CACHE when shipping new files. Speech synthesis still needs
    the OS voice, but all app code/content is cached. */
-var CACHE = "falar-v3";
+var CACHE = "falar-v4";
 var ASSETS = [
   "./",
   "index.html",
@@ -14,6 +14,7 @@ var ASSETS = [
   "js/data-advanced.js",
   "js/content.js",
   "js/components.js",
+  "js/tutor-api.js",
   "js/app.js",
   "js/screens/home.js",
   "js/screens/lessons.js",
@@ -23,6 +24,7 @@ var ASSETS = [
   "js/screens/verbs.js",
   "js/screens/songs.js",
   "js/screens/conversations.js",
+  "js/screens/tutor.js",
   "js/screens/dictation.js",
   "js/screens/drill.js",
   "js/screens/mistakes.js",

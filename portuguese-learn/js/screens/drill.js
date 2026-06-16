@@ -53,7 +53,7 @@
 
       var input = el("input", { class: "drill-input", type: "text", lang: "pt-BR", autocomplete: "off", autocapitalize: "none", spellcheck: "false", "aria-label": "Type the conjugated form" });
       stage.appendChild(input);
-      var feedback = el("div", { class: "dictation-feedback" });
+      var feedback = el("div", { class: "dictation-feedback", role: "status", aria: { live: "polite" } });
       stage.appendChild(feedback);
       var checkBtn = el("button", { class: "btn btn-primary btn-block", onclick: check }, ["Check"]);
       stage.appendChild(checkBtn);

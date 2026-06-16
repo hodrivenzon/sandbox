@@ -21,6 +21,12 @@ TE.screens.parents = {
 
     var doc = el("div", { class: "doc" }, [
       el("h2", { text: "👋 For Grown-Ups" }),
+      el("div", { style: { margin: "0 0 18px" } }, [
+        el("button", {
+          class: "mode-btn",
+          onclick: function () { TE.audio.pop(); TE.router.go("settings"); }
+        }, [el("span", { text: TE.t("settingsBtn") })])
+      ]),
       p("Tiny Explorers is a free, ad-free learning playground for children roughly 2–3 years old. " +
         "It's built around published early-childhood development guidance, so the activities match what " +
         "toddlers can actually do, the interface fits little hands, and the screen experience itself stays " +

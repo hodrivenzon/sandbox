@@ -77,10 +77,14 @@
         if (flipped) return; flipped = true;
         PT.dom.clear(card); card.appendChild(back); card.classList.add("flipped");
         card.setAttribute("aria-label", "Answer shown");
+        if (PT.announce) PT.announce(item.pt + " — " + item.en);
         if (!ptFront) PT.audio.speak(item.pt);
         showRating();
       }
       card.addEventListener("click", flip);
+      card.addEventListener("keydown", function (e) {
+        if (e.key === " " || e.key === "Enter" || e.key === "Spacebar") { e.preventDefault(); flip(); }
+      });
       stage.appendChild(card);
 
       clearTimeout(timer);
@@ -173,6 +177,7 @@
       grid.appendChild(el(m.disabled ? "div" : "a", {
         class: "card lesson-card" + (m.disabled ? " disabled" : ""),
         href: m.disabled ? null : m.href,
+        aria: m.disabled ? { disabled: "true" } : null,
         onclick: m.disabled ? null : function () { PT.audio.pop(); }
       }, [
         el("div", { class: "lc-emoji", text: m.emoji }),

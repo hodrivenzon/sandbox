@@ -8,7 +8,12 @@
   var N = 10;
 
   function buildQueue() {
-    var pool = PT.content.allItems().filter(function (it) { return it.ex_pt && it.ex_pt.split(" ").length >= 3; });
+    // keep sentences short enough to dictate well (skip 12+ word literary lines)
+    var pool = PT.content.allItems().filter(function (it) {
+      if (!it.ex_pt) return false;
+      var n = it.ex_pt.split(" ").length;
+      return n >= 3 && n <= 9;
+    });
     return PT.dom.shuffle(pool).slice(0, N);
   }
 
@@ -56,7 +61,7 @@
       var input = el("textarea", { class: "dictation-input", rows: "2", autocomplete: "off", autocapitalize: "none", spellcheck: "false", "aria-label": "Type the sentence you hear" });
       stage.appendChild(input);
 
-      var feedback = el("div", { class: "dictation-feedback" });
+      var feedback = el("div", { class: "dictation-feedback", role: "status", aria: { live: "polite" } });
       stage.appendChild(feedback);
 
       var checkBtn = el("button", { class: "btn btn-primary btn-block", onclick: check }, ["Check"]);
@@ -70,18 +75,24 @@
         if (answered) { idx++; show(); return; }
         answered = true;
         var verdict = PT.content.compareAnswer(input.value, target);
-        PT.store.grade(item.key, verdict.correct);
-        if (verdict.correct) { right++; PT.audio.correct(); } else PT.audio.wrong();
+        // Grade the SRS on a word-match ratio so one slip in a long sentence
+        // doesn't demote the whole item; keep a strict label for feedback.
+        var tgt = tokens(target), usr = tokens(input.value), matched = 0;
+        tgt.forEach(function (w, i) { if (usr[i] != null && (clean(usr[i]) === clean(w) || deburr(usr[i]) === deburr(w))) matched++; });
+        var ratio = tgt.length ? matched / tgt.length : 0;
+        var pass = verdict.correct || ratio >= 0.8;
+        PT.store.grade(item.key, pass);
+        if (pass) { right++; PT.audio.correct(); } else PT.audio.wrong();
         input.setAttribute("disabled", "");
-        renderDiff(feedback, target, input.value, verdict, item);
+        renderDiff(feedback, target, input.value, verdict, item, pass);
         checkBtn.textContent = idx === queue.length - 1 ? "See results" : "Next →";
-        if (PT.announce) PT.announce(verdict.correct ? "Correct" : "Not quite");
+        if (PT.announce) PT.announce(pass ? "Correct" : "Not quite");
       }
 
       cur = { check: check, replay: function () { PT.audio.speak(target); }, slow: function () { PT.audio.speakSlow(target); }, answered: function () { return answered; } };
     }
 
-    function renderDiff(host, target, typed, verdict, item) {
+    function renderDiff(host, target, typed, verdict, item, pass) {
       PT.dom.clear(host);
       var tgt = tokens(target), usr = tokens(typed);
       var row = el("div", { class: "diff" });
@@ -90,8 +101,9 @@
         row.appendChild(el("span", { class: "diff-w " + (ok ? "ok" : "bad"), text: w }));
         row.appendChild(document.createTextNode(" "));
       });
-      host.appendChild(el("div", { class: "dictation-result " + (verdict.correct ? "good" : "bad") }, [
-        el("div", { class: "dr-label", text: verdict.exact ? "✓ Perfect!" : verdict.almost ? "✓ Right — watch the accents" : "✗ Not quite" }),
+      var label = verdict.exact ? "✓ Perfect!" : verdict.almost ? "✓ Right — watch the accents" : pass ? "✓ Close enough" : "✗ Not quite";
+      host.appendChild(el("div", { class: "dictation-result " + (pass ? "good" : "bad") }, [
+        el("div", { class: "dr-label", text: label }),
         el("div", { class: "dr-pt", lang: "pt-BR" }, [row]),
         item.ex_en ? el("div", { class: "dr-en", text: item.ex_en }) : null
       ]));

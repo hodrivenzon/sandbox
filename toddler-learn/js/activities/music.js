@@ -6,6 +6,7 @@ window.TE = window.TE || {}; TE.screens = TE.screens || {};
 
 TE.screens.music = {
   title: "Music",
+  titleKey: "title_music",
   theme: "music",
   render: function (host) {
     var el = TE.ui.el;
@@ -39,7 +40,7 @@ TE.screens.music = {
       ["E",1],["D",1],["C",1],["D",1],["E",1],["E",1],["E",1],["E",1],
       ["D",1],["D",1],["E",1],["D",1],["C",2]
     ];
-    var songBtn = el("button", { class: "mode-btn" }, [el("span", { text: "🎶 Play a Song" })]);
+    var songBtn = el("button", { class: "mode-btn" }, [el("span", { text: TE.t("playSong") })]);
     songBtn.addEventListener("click", function () {
       TE.audio.pop();
       var t = 0, beat = 0.42;
@@ -49,15 +50,15 @@ TE.screens.music = {
         TE.audio.tone(f, dur, "triangle", 0.2, t);
         t += beat * step[1];
       });
-      TE.audio.speak("Mary had a little lamb!");
+      TE.audio.speak(TE.t("songName"));
     });
 
     var stage = el("div", { class: "stage" }, [
-      el("div", { class: "prompt-banner", text: "Tap to make music! 🎵" }),
+      el("div", { class: "prompt-banner", text: TE.t("musicBanner") }),
       grid,
       el("div", { class: "mode-bar" }, [songBtn])
     ]);
     host.appendChild(stage);
-    setTimeout(function () { TE.audio.speak("Tap the colors to make music!"); }, 350);
+    setTimeout(function () { TE.audio.speak(TE.t("musicIntro")); }, 350);
   }
 };

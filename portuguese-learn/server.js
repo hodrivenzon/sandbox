@@ -22,7 +22,11 @@ http.createServer((req, res) => {
   if (!filePath.startsWith(ROOT)) { res.writeHead(403); res.end("Forbidden"); return; }
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404, { "Content-Type": "text/plain" }); res.end("Not found"); return; }
-    res.writeHead(200, { "Content-Type": TYPES[path.extname(filePath)] || "application/octet-stream" });
+    res.writeHead(200, {
+      "Content-Type": TYPES[path.extname(filePath)] || "application/octet-stream",
+      // dev server: never let the browser serve stale JS/CSS from disk cache
+      "Cache-Control": "no-store, max-age=0"
+    });
     res.end(data);
   });
 }).listen(PORT, () => console.log("Falar dev server on http://localhost:" + PORT));

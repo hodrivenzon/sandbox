@@ -4,18 +4,19 @@ window.TE = window.TE || {}; TE.screens = TE.screens || {};
 
 TE.screens.colors = {
   title: "Colors",
+  titleKey: "title_colors",
   theme: "colors",
   render: function (host) {
     TE.ui.gridActivity({
       host: host,
       items: TE.data.colors,
-      name: function (c) { return c.name; },
-      say: function (c) { return c.name; },
-      intro: "Let's learn colors! Tap a color.",
+      name: function (c) { return TE.tx(c); },
+      say: function (c) { return TE.tx(c); },
+      intro: TE.t("introColors"),
       build: function (c) {
         var sw = TE.ui.el("div", { class: "swatch", style: { background: c.hex } });
-        if (c.name === "White") sw.style.borderColor = "#d8d8d8";
-        return { node: sw, cap: c.name };
+        if (c.en === "White") sw.style.borderColor = "#d8d8d8";
+        return { node: sw, cap: TE.tx(c) };
       }
     });
   }

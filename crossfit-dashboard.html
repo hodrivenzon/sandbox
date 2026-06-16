@@ -248,6 +248,29 @@
   :focus-visible{outline:2px solid var(--accent2);outline-offset:2px;border-radius:8px}
   button:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
   .vh{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  input.invalid{border-color:var(--bad)!important}
+
+  /* ===== guide / movement library ===== */
+  .movegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:12px}
+  .movecard{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:13px;padding:14px}
+  .movecard .mh{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .movecard .mn{font-size:15.5px;font-weight:800}
+  .movecard .mcat{font-size:8.5px;text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:999px;font-weight:700;background:rgba(77,159,255,.16);color:var(--blue)}
+  .musc{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 6px}
+  .musc .m{font-size:9.5px;background:rgba(255,90,60,.15);color:var(--accent);padding:2px 7px;border-radius:999px;font-weight:600}
+  .musc .m.sec{background:var(--bg);color:var(--mut);font-weight:400}
+  .movecard .mr{font-size:11.5px;color:var(--mut);margin-top:6px;line-height:1.5}
+  .movecard .mr b{color:var(--txt)}
+  .movecard .cue{font-size:11.5px;color:var(--accent2);font-style:italic;margin-top:6px}
+  .glossgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:10px}
+  .glosscard{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .glosscard .gt{font-weight:800;font-size:13.5px;color:var(--accent2)}
+  .glosscard .gf{font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+  .glosscard .gm{font-size:11.5px;color:var(--mut);margin-top:5px;line-height:1.45}
+  .movecard.flash{border-color:var(--accent2)!important;box-shadow:0 0 0 1px var(--accent2),0 0 22px rgba(255,184,60,.35)}
+  input.flash{border-color:var(--accent2)!important;box-shadow:0 0 0 1px var(--accent2)}
+  .guidelink{cursor:pointer;border-bottom:1px dotted var(--dim)}
+  .guidelink:hover{color:var(--accent2);border-color:var(--accent2)}
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
     .view{animation:none}
@@ -364,6 +387,7 @@
     <button data-view="home" class="on" role="tab" id="tab-home" aria-controls="view-home" aria-selected="true"><span class="ti" aria-hidden="true">🏠</span><span class="tl">Home</span></button>
     <button data-view="analytics" role="tab" id="tab-analytics" aria-controls="view-analytics" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">📊</span><span class="tl">Analytics</span></button>
     <button data-view="train" role="tab" id="tab-train" aria-controls="view-train" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">🔥</span><span class="tl">Train</span></button>
+    <button data-view="guide" role="tab" id="tab-guide" aria-controls="view-guide" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">📚</span><span class="tl">Guide</span></button>
     <button data-view="timer" role="tab" id="tab-timer" aria-controls="view-timer" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">⏱️</span><span class="tl">Timer</span></button>
     <button data-view="log" role="tab" id="tab-log" aria-controls="view-log" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">📝</span><span class="tl">Log</span></button>
     <button data-view="progress" role="tab" id="tab-progress" aria-controls="view-progress" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">📈</span><span class="tl">Progress</span></button>
@@ -458,7 +482,7 @@
           <h2><span class="dot"></span>Standard Stratification Map</h2>
           <div class="strat" id="stratList"></div>
           <div class="tierlegend"><span>Untrained</span><span>Novice</span><span>Intermediate</span><span>Advanced</span><span>Elite</span></div>
-          <p class="hint" style="margin-top:12px">White marker = your lift vs. bodyweight-scaled standards for your sex.</p>
+          <p class="hint" style="margin-top:12px">White marker = your lift vs. bodyweight-scaled standards for your sex. <b>Tap a lift name</b> for its technique &amp; rest guide.</p>
         </div>
         <div class="card">
           <h2><span class="dot"></span>Strength Index</h2>
@@ -596,6 +620,26 @@
       </div>
     </section>
 
+    <!-- ============ GUIDE ============ -->
+    <section id="view-guide" class="view">
+      <div class="sectitle"><span class="bar"></span>Rest &amp; Recovery Guidelines</div>
+      <div class="card" style="margin-top:10px">
+        <h2><span class="dot"></span>Rest Intervals by Training Goal</h2>
+        <table class="norm" id="restTable"></table>
+        <p class="hint" id="restTips" style="margin-top:10px"></p>
+      </div>
+      <div class="sectitle"><span class="bar"></span>Movement Library</div>
+      <div class="card" style="margin-top:10px">
+        <div class="wodfilters">
+          <div class="seg" id="moveCat" style="width:auto;flex-wrap:wrap"></div>
+          <input id="moveSearch" placeholder="Search movements, muscles…" style="flex:1;min-width:180px">
+        </div>
+        <div class="movegrid" id="moveGrid"></div>
+      </div>
+      <div class="sectitle"><span class="bar"></span>CrossFit Glossary</div>
+      <div class="card" style="margin-top:10px"><div class="glossgrid" id="glossGrid"></div></div>
+    </section>
+
     <!-- ============ TIMER ============ -->
     <section id="view-timer" class="view">
       <div class="card" style="margin-top:10px">
@@ -629,6 +673,7 @@
         <div class="card">
           <h2><span class="dot"></span>Log a Lift</h2>
           <label for="logLiftSel">Lift</label><select id="logLiftSel"></select>
+          <div style="text-align:right;margin-top:5px"><button class="btn sm ghost" id="logGuideBtn" style="padding:5px 10px;font-size:11px">📚 Technique &amp; rest guide</button></div>
           <div class="row2">
             <div><label for="logWeight">Weight (<span class="unitlbl">kg</span>)</label><input id="logWeight" type="number"></div>
             <div><label for="logReps">Reps</label><input id="logReps" type="number" value="3" min="1"></div>
@@ -690,6 +735,11 @@
           <h2><span class="dot"></span>WOD Personal Records</h2>
           <div id="wodPRs"></div>
         </div>
+      </div>
+      <div class="card chartcard" style="margin-top:16px">
+        <h2><span class="dot"></span>Strength Index Over Time</h2>
+        <svg id="scoreChart" viewBox="0 0 600 240"></svg>
+        <p class="hint">Composite Strength Score reconstructed from your logged lifts &amp; bodyweight history — your true multi-month trajectory.</p>
       </div>
       <div class="grid cols-2" style="margin-top:16px">
         <div class="card chartcard">
@@ -1083,7 +1133,7 @@ function plateChips(totalKg){ const p=platesFor(totalKg); if(p.under)return '<sp
   const col={45:'#ff5a5a',35:'#4d9fff',25:'#ffb83c',20:'#39d98a',15:'#4d9fff',10:'#e6ebf5',5:'#a87bff',2.5:'#8b95a8',1.25:'#5d6678'};
   return p.list.map(w=>`<span class="plate" style="background:${col[w]||'#8b95a8'}">${w}</span>`).join('')+'<span class="plate none">/side</span>'; }
 // RPE-aware estimated 1RM: reps-in-reserve folds into Epley
-function e1rmRPE(w,reps,rpe){ const rir=clamp(10-(+rpe||10),0,6); const eff=(+reps||1)+rir; return Math.round(w*(1+eff/30)); }
+function e1rmRPE(w,reps,rpe){ const rir=clamp(10-(+rpe||10),0,6); const eff=(+reps||1)+rir; return eff<=1?Math.round(w):Math.round(w*(1+eff/30)); }
 function etaForGoal(lift,target){ const cur=APP.lifts[lift]||0; if(cur>=target)return 'reached ✓';
   const rows=APP.logs.lifts.filter(l=>l.lift===lift).slice(-8); if(rows.length<2)return 'log more to project';
   const t0=new Date(rows[0].date+'T00:00').getTime();
@@ -1114,6 +1164,17 @@ function toastUndo(msg,undoFn){ const t=$('toast'); t.innerHTML=msg+' <button cl
 function deleteWithUndo(arr,idx,label,after){ const item=arr[idx]; if(item===undefined)return; arr.splice(idx,1); save(); after&&after();
   toastUndo(label+' deleted', ()=>{ arr.splice(idx,0,item); save(); after&&after(); }); }
 
+// cross-links between tracked lifts and the Guide movement library
+const LIFT_GUIDE={back_squat:'Back Squat',front_squat:'Front Squat',deadlift:'Deadlift',clean_jerk:'Clean & Jerk',snatch:'Snatch',power_clean:'Power Clean',strict_press:'Strict Press',split_jerk:'Push Jerk',bench_press:'Bench Press',overhead_sq:'Overhead Squat'};
+const GUIDE_LIFT={}; Object.keys(LIFT_GUIDE).forEach(k=>GUIDE_LIFT[LIFT_GUIDE[k]]=k);
+function openGuideMovement(name){ if(!name)return; showView('guide'); guideCat='all'; guideSearch=''; if($('moveSearch'))$('moveSearch').value='';
+  if($('moveCat'))$('moveCat').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
+  renderMoveGrid();
+  requestAnimationFrame(()=>{ const cards=[...$('moveGrid').querySelectorAll('.movecard')]; const c=cards.find(el=>{const mn=el.querySelector('.mn');return mn&&mn.textContent.trim()===name;});
+    if(c){ c.classList.add('flash'); c.scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'center'}); setTimeout(()=>c.classList.remove('flash'),2400); } }); }
+function openLiftAnalytics(moveName){ const k=GUIDE_LIFT[moveName]; showView('analytics');
+  if(k){ const inp=document.querySelector('#liftGrid input[data-k="'+k+'"]'); if(inp){ inp.scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'center'}); inp.classList.add('flash'); setTimeout(()=>{inp.classList.remove('flash');inp.focus();},400); } } }
+
 /* ============================================================
    TAB NAV
    ============================================================ */
@@ -1129,6 +1190,7 @@ function showView(v,sub){
   if(v==='home')renderHome();
   if(v==='analytics')renderAnalytics();
   if(v==='train')renderTrain();
+  if(v==='guide')renderGuide();
   if(v==='timer')setupTimer();
   if(v==='log'){renderLog(); if(sub)focusLog(sub);}
   if(v==='progress')renderProgress();
@@ -1146,6 +1208,7 @@ document.querySelectorAll('.quickbtn').forEach(q=>q.addEventListener('click',()=
 function renderHome(){}
 function renderAnalytics(){}
 function renderTrain(){}
+function renderGuide(){}
 function setupTimer(){}
 function renderLog(){}
 function focusLog(){}
@@ -1191,6 +1254,7 @@ function wireAnalytics(){
   ['male','female'].forEach(sx=>{ const og=document.createElement('optgroup'); og.label=sx==='male'?'Men':'Women';
     ATHLETES.filter(a=>a.sex===sx).forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=`${a.emoji} ${a.name}`;og.appendChild(o);}); as.appendChild(og); });
   as.value=APP.compareId||''; as.addEventListener('change',()=>{ APP.compareId=as.value||null; COMPARE=ATHLETES.find(a=>a.id===as.value)||null; save(); renderStrat(); renderRadar(); renderCompare(); });
+  $('stratList').addEventListener('click',e=>{ const g=e.target.closest('[data-guide]'); if(g)openGuideMovement(LIFT_GUIDE[g.dataset.guide]); });
   wiredAnalytics=true;
 }
 function renderAnalytics(){
@@ -1214,7 +1278,7 @@ function renderStrat(){
     let ghost=''; if(COMPARE){ const cti=tierIndexFor(L.k,COMPARE.lifts,COMPARE.bw,COMPARE.sex);
       ghost=`<div class="marker" style="left:${Math.min(cti/4*100,99)}%;background:#4d9fff;box-shadow:0 0 8px #4d9fff"></div>`; }
     const row=document.createElement('div'); row.className='strat-row';
-    row.innerHTML=`<div class="name">${L.n}<small>${L.d}</small></div>
+    row.innerHTML=`<div class="name"><span class="guidelink" data-guide="${L.k}" title="Open ${L.n} in the Guide">${L.n}</span><small>${L.d}</small></div>
       <div class="track"><div class="tiers"><i></i><i></i><i></i><i></i></div>
         <div class="fill" style="width:${Math.min(widthPct,100)}%;background:linear-gradient(90deg,${col},${col}cc)"></div>
         <div class="marker" style="left:${Math.min(widthPct,99)}%"></div>${ghost}</div>
@@ -1312,7 +1376,7 @@ function renderMRV(){
 }
 function renderMacro(){
   const strip=$('weekStrip'); strip.innerHTML='';
-  WAVE.forEach((w,i)=>{ const c=document.createElement('div'); c.className='weekcell'+(APP.week===i+1?' on':'');
+  WAVE.forEach((w,i)=>{ const c=document.createElement('button'); c.type='button'; c.className='weekcell'+(APP.week===i+1?' on':''); c.setAttribute('aria-pressed',APP.week===i+1?'true':'false'); c.setAttribute('aria-label',`Week ${i+1}, ${w.ph}, ${w.p}%`);
     c.innerHTML=`<div class="wk">WK ${i+1}</div><div class="pc">${w.p}%</div><div class="ph">${w.ph}</div>`;
     c.onclick=()=>{APP.week=i+1;save();renderMacro();}; strip.appendChild(c); });
   const w=WAVE[APP.week-1]; $('cycPhase').textContent=`Week ${APP.week} · ${w.ph} · ${PHASE_SCHEME[w.ph]} @ ${w.p}%`;
@@ -1608,6 +1672,7 @@ function wireLog(){
   $('logWodBtn').addEventListener('click',saveWod);
   $('logMetricBtn').addEventListener('click',saveMetric);
   $('restChipStop').addEventListener('click',stopLogRest);
+  $('logGuideBtn').addEventListener('click',()=>openGuideMovement(LIFT_GUIDE[$('logLiftSel').value]));
   wiredLog=true;
 }
 let _restTick=null;
@@ -1623,45 +1688,50 @@ function rebuildWodSel(){ const ws=$('logWodSel'); const cur=ws.value; ws.innerH
   if(cur)ws.value=cur;
 }
 function saveLift(){
-  const lift=$('logLiftSel').value, w=Math.round(disp2w(+$('logWeight').value||0)), reps=+$('logReps').value||1;
-  if(!w){toast('Enter a weight');return;}
-  const e=e1rm(w,reps); APP.logs.lifts.push({date:todayISO(),lift,weight:w,reps,e1rm:e});
-  let pr=false; if(e>(APP.lifts[lift]||0)){ APP.lifts[lift]=e; pr=true; }
-  save(); toast(pr?`🎉 New ${LIFTNAME[lift]} PR: ${fmtW(e)} ${APP.units}!`:`Logged ${LIFTNAME[lift]} ${fmtW(w)}×${reps}`);
-  $('logWeight').value=''; renderLog(); refreshHeader();
+  const lift=$('logLiftSel').value, wEl=$('logWeight'), w=storeKg(wEl.value);
+  if(!w){ wEl.classList.add('invalid'); wEl.focus(); toast('Enter a weight'); return; } wEl.classList.remove('invalid');
+  const reps=clamp(+$('logReps').value||1,1,30), rpe=clamp(+$('logRpe').value||10,5,10), notes=$('logNotes').value.trim();
+  const e=e1rmRPE(w,reps,rpe); APP.logs.lifts.push({date:todayISO(),lift,weight:w,reps,rpe,notes,e1rm:e});
+  let pr=false,prev=APP.lifts[lift]||0; if(e>prev){ APP.lifts[lift]=e; pr=true; if(!APP.logs.prs)APP.logs.prs=[]; APP.logs.prs.push({date:todayISO(),lift,e1rm:e,prev}); }
+  save();
+  if(pr) firePR(lift,e,prev); else toast(`Logged ${LIFTNAME[lift]} ${fmtW(w)}×${reps} @${rpe}`);
+  $('logWeight').value=''; $('logNotes').value=''; renderLog(); refreshHeader();
+  const rest=+$('logRestS').value||0; if(rest>0) startLogRest(rest);
 }
 function saveWod(){
-  let name=$('logWodSel').value; if(name==='__custom'){ name=prompt('WOD name?')||'Custom WOD'; }
+  let name=$('logWodSel').value; if(name==='__custom'){ name=(prompt('WOD name?')||'').trim()||'Custom WOD'; }
   const result=$('logWodResult').value.trim(); if(!result){toast('Enter a result');return;}
+  const wod=findWod(name); const lower=wod&&wod.format!=='AMRAP'&&wod.format!=='EMOM';
+  if(wod&&lower&&isNaN(parseResultNum(result))){ toast('Enter a time like 4:12'); return; }
   const rx=$('logWodRx').value, notes=$('logWodNotes').value.trim();
   APP.logs.wods.push({date:todayISO(),wod:name,result,rx,notes});
-  const w=findWod(name); const lv=w?wodLevel(w,result):null;
+  const lv=wod?wodLevel(wod,result):null;
   save(); toast(lv?`Logged ${name} — ${lv} level`:`Logged ${name}`); $('logWodResult').value=''; $('logWodNotes').value=''; renderLog(); refreshHeader();
 }
 function saveMetric(){
-  const bw=Math.round(disp2w(+$('logBw').value||0)*10)/10;
-  const m={date:todayISO(),bw:bw||APP.profile.bw,bf:+$('logBf').value||null,rhr:+$('logRhr').value||APP.today.rhr,
-    sleep:+$('logSleep').value||APP.today.sleep,mood:+$('logMood').value||4,sore:+$('logSoreM').value||3};
+  const bw=storeKg($('logBw').value);
+  const m={date:todayISO(),bw:bw||APP.profile.bw,bf:+$('logBf').value||null,rhr:clamp(+$('logRhr').value||APP.today.rhr,30,120),
+    sleep:clamp(+$('logSleep').value||APP.today.sleep,0,14),mood:clamp(+$('logMood').value||4,1,5),sore:clamp(+$('logSoreM').value||3,1,10)};
   // replace same-day entry if present
   APP.logs.metrics=APP.logs.metrics.filter(x=>x.date!==m.date); APP.logs.metrics.push(m); APP.logs.metrics.sort((a,b)=>a.date<b.date?-1:1);
   if(bw)APP.profile.bw=bw; APP.today.rhr=m.rhr; APP.today.sleep=m.sleep; APP.recovery.rhr=m.rhr; APP.recovery.sleep=m.sleep;
   save(); toast('Check-in saved'); renderLog(); refreshHeader();
 }
 function recentList(el,arr,fmtFn){ el.innerHTML=''; if(!arr.length){el.innerHTML='<p class="hint">Nothing yet.</p>';return;}
-  arr.slice().reverse().slice(0,8).forEach((x,ri)=>{ const realIdx=arr.length-1-ri; const d=document.createElement('div'); d.className='logentry'; d.innerHTML=fmtFn(x)+`<div class="ld">${daysAgo(x.date)}</div><button class="del" data-i="${realIdx}">✕</button>`; el.appendChild(d); }); }
+  arr.slice().reverse().slice(0,8).forEach((x,ri)=>{ const realIdx=arr.length-1-ri; const d=document.createElement('div'); d.className='logentry'; d.innerHTML=fmtFn(x)+`<div class="ld">${daysAgo(x.date)}</div><button class="del" data-i="${realIdx}" aria-label="Delete entry">✕</button>`; el.appendChild(d); }); }
 function renderLog(){
   if(!wiredLog)wireLog(); rebuildWodSel();
-  const w=disp2w(+$('logWeight').value||0),reps=+$('logReps').value||1; $('logE1rm').innerHTML=`Est. 1RM: <b style="color:var(--accent2)">${w?fmtW(e1rm(w,reps)):'—'} ${APP.units}</b>`;
+  const w=disp2w(+$('logWeight').value||0),reps=+$('logReps').value||1,rpe=+$('logRpe').value||10; $('logE1rm').innerHTML=`Est. 1RM: <b style="color:var(--accent2)">${w?fmtW(e1rmRPE(w,reps,rpe)):'—'} ${APP.units}</b>`;
   $('logBw').value=fmtW(APP.profile.bw);
   const best={}; APP.logs.lifts.forEach(l=>{ if(!best[l.lift]||l.e1rm>best[l.lift])best[l.lift]=l.e1rm; });
-  recentList($('recentLifts'),APP.logs.lifts,l=>{ const isPr=l.e1rm===best[l.lift]; return `<div class="le">${LIFTNAME[l.lift]||l.lift}</div><div style="color:var(--mut)">${fmtW(l.weight)}×${l.reps} <span style="color:var(--dim)">→ ${fmtW(l.e1rm)}</span> ${isPr?'<span class="prchip">PR</span>':''}</div>`; });
+  recentList($('recentLifts'),APP.logs.lifts,l=>{ const isPr=l.e1rm===best[l.lift]; return `<div class="le">${LIFTNAME[l.lift]||l.lift}</div><div style="color:var(--mut)">${fmtW(l.weight)}×${l.reps} ${l.rpe?`<span class="rpechip">@${l.rpe}</span>`:''} <span style="color:var(--dim)">→ ${fmtW(l.e1rm)}</span> ${isPr?'<span class="prchip">PR</span>':''}</div>`; });
   recentList($('recentWods'),APP.logs.wods,x=>`<div class="le">${x.wod}</div><div style="color:var(--mut)">${x.result} · ${x.rx}</div>`);
   recentList($('recentMetrics'),APP.logs.metrics,m=>`<div class="le">${fmtW(m.bw)}${APP.units}</div><div style="color:var(--mut)">RHR ${m.rhr} · ${m.bf?m.bf+'% bf · ':''}${m.sleep}h</div>`);
-  document.querySelectorAll('#recentLifts .del').forEach(b=>b.onclick=()=>{APP.logs.lifts.splice(+b.dataset.i,1);save();renderLog();refreshHeader();});
-  document.querySelectorAll('#recentWods .del').forEach(b=>b.onclick=()=>{APP.logs.wods.splice(+b.dataset.i,1);save();renderLog();refreshHeader();});
-  document.querySelectorAll('#recentMetrics .del').forEach(b=>b.onclick=()=>{APP.logs.metrics.splice(+b.dataset.i,1);save();renderLog();});
+  document.querySelectorAll('#recentLifts .del').forEach(b=>b.onclick=()=>deleteWithUndo(APP.logs.lifts,+b.dataset.i,'Set',()=>{renderLog();refreshHeader();}));
+  document.querySelectorAll('#recentWods .del').forEach(b=>b.onclick=()=>deleteWithUndo(APP.logs.wods,+b.dataset.i,'WOD result',()=>{renderLog();refreshHeader();}));
+  document.querySelectorAll('#recentMetrics .del').forEach(b=>b.onclick=()=>deleteWithUndo(APP.logs.metrics,+b.dataset.i,'Check-in',()=>renderLog()));
 }
-function focusLog(sub){ const map={lift:'logLiftSel',wod:'logWodSel',metric:'logBw'}; const el=$(map[sub]); if(el){el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>el.focus(),300);} }
+function focusLog(sub){ const map={lift:'logLiftSel',wod:'logWodSel',metric:'logBw'}; const el=$(map[sub]); if(el){el.scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'center'}); setTimeout(()=>el.focus(),300);} }
 function logWodPrefill(name){ if(!wiredLog)wireLog(); rebuildWodSel(); const ws=$('logWodSel');
   if(![...ws.options].some(o=>o.value===name)){const o=document.createElement('option');o.value=name;o.textContent=name;ws.insertBefore(o,ws.firstChild);}
   ws.value=name; $('logWodResult').focus(); }
@@ -1670,12 +1740,12 @@ function logWodPrefill(name){ if(!wiredLog)wireLog(); rebuildWodSel(); const ws=
    PROGRESS MODULE
    ============================================================ */
 let wiredProgress=false;
-function barChartSVG(W,H,vals,labels,color){
+function barChartSVG(W,H,vals,labels,color,tips){
   const pad={l:40,r:12,t:12,b:24}; const n=vals.length; if(!n)return '';
   const xw=W-pad.l-pad.r,yh=H-pad.t-pad.b; const max=Math.max(1,...vals); const bw=xw/n*0.62;
   let g=''; for(let i=0;i<=3;i++){const v=max*i/3,y=pad.t+yh-yh*i/3; g+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="var(--line)" opacity=".5"/><text x="${pad.l-6}" y="${y+3}" text-anchor="end" font-size="9" fill="var(--dim)">${Math.round(v)}</text>`;}
   vals.forEach((v,i)=>{ const x=pad.l+xw*(i+0.5)/n,h=v/max*yh,y=pad.t+yh-h;
-    g+=`<rect x="${(x-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0,h).toFixed(1)}" rx="3" fill="${color}" opacity="${i===n-1?1:.65}"/>`;
+    g+=`<rect x="${(x-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0,h).toFixed(1)}" rx="3" fill="${color}" opacity="${i===n-1?1:.65}"><title>${tips&&tips[i]?tips[i]:v}</title></rect>`;
     if(labels[i])g+=`<text x="${x.toFixed(1)}" y="${H-7}" text-anchor="middle" font-size="8.5" fill="var(--dim)">${labels[i]}</text>`; });
   return g;
 }
@@ -1689,9 +1759,11 @@ function renderTraj(){
   const k=$('trajSel').value; const rows=APP.logs.lifts.filter(l=>l.lift===k);
   if(rows.length<2){ $('trajChart').innerHTML=`<text x="300" y="130" text-anchor="middle" fill="var(--dim)" font-size="13">Log at least 2 sets of ${LIFTNAME[k]||k} to see a trajectory.</text>`; $('trajLegend').innerHTML=''; return; }
   const vals=rows.map(r=>+w2disp(r.e1rm).toFixed(1)); const dates=rows.map(r=>r.date);
-  $('trajChart').innerHTML=lineChartSVG(600,260,[{name:k,color:'#ff5a3c',vals}],{xlabels:sparseLabels(dates),l:44,yfmt:v=>Math.round(v)});
+  let bestSoFar=0; const stars=[]; rows.forEach((r,i)=>{ if(r.e1rm>bestSoFar){bestSoFar=r.e1rm;stars.push(i);} });
+  $('trajChart').innerHTML=lineChartSVG(600,260,[{name:k,label:LIFTNAME[k],color:'#ff5a3c',vals}],{xlabels:sparseLabels(dates),l:44,yfmt:v=>Math.round(v),tipx:dates.map(fmtDate),vfmt:v=>v+' '+APP.units,stars});
   const first=vals[0],last=vals[vals.length-1],gain=last-first;
-  $('trajLegend').innerHTML=`<span><span class="leg-dot" style="background:var(--accent)"></span>Est. 1RM (${APP.units})</span><span style="color:var(--good)">▲ ${gain>=0?'+':''}${gain.toFixed(1)} ${APP.units} over period</span><span>Current PR: <b>${fmtW(APP.lifts[k]||0)} ${APP.units}</b></span>`;
+  $('trajChart').setAttribute('role','img'); $('trajChart').setAttribute('aria-label',`${LIFTNAME[k]} estimated 1RM from ${first} to ${last} ${APP.units} over ${rows.length} sets`);
+  $('trajLegend').innerHTML=`<span><span class="leg-dot" style="background:var(--accent)"></span>Est. 1RM (${APP.units})</span><span><span class="leg-dot" style="background:var(--accent2)"></span>🏆 PR set</span><span style="color:var(--good)">▲ ${gain>=0?'+':''}${gain.toFixed(1)} ${APP.units} over period</span><span>Current PR: <b>${fmtW(APP.lifts[k]||0)} ${APP.units}</b></span>`;
 }
 function renderWodPRs(){
   const best={}; APP.logs.wods.forEach(w=>{ const wod=findWod(w.wod); const lower=!wod||(wod.format!=='AMRAP'&&wod.format!=='EMOM'); const v=parseResultNum(w.result);
@@ -1702,17 +1774,24 @@ function renderWodPRs(){
 function renderWell(){
   const m=APP.logs.metrics; if(m.length<2){ $('wellChart').innerHTML=`<text x="300" y="120" text-anchor="middle" fill="var(--dim)" font-size="13">Add body check-ins to chart your wellness trend.</text>`; $('wellLegend').innerHTML=''; return; }
   const bw=m.map(x=>+x.bw||null),bf=m.map(x=>+x.bf||null),rhr=m.map(x=>+x.rhr||null);
-  $('wellChart').innerHTML=lineChartSVG(600,240,[{name:'bw',color:'#ff5a3c',vals:bw},{name:'bf',color:'#ffb83c',vals:bf},{name:'rhr',color:'#4d9fff',vals:rhr}],{normalized:true,xlabels:sparseLabels(m.map(x=>x.date)),b:24});
+  $('wellChart').innerHTML=lineChartSVG(600,240,[{name:'bw',label:'Bodyweight',color:'#ff5a3c',vals:bw},{name:'bf',label:'Body Fat %',color:'#ffb83c',vals:bf},{name:'rhr',label:'Resting HR',color:'#4d9fff',vals:rhr}],{normalized:true,xlabels:sparseLabels(m.map(x=>x.date)),b:24,tipx:m.map(x=>fmtDate(x.date)),vfmt:v=>v});
+  $('wellChart').setAttribute('role','img'); $('wellChart').setAttribute('aria-label','Wellness trends — bodyweight, body fat, resting HR over '+m.length+' check-ins');
   const last=m[m.length-1];
   $('wellLegend').innerHTML=`<span><span class="leg-dot" style="background:var(--accent)"></span>Bodyweight ${fmtW(last.bw)}${APP.units}</span><span><span class="leg-dot" style="background:var(--accent2)"></span>Body Fat ${last.bf||'—'}%</span><span><span class="leg-dot" style="background:var(--blue)"></span>Resting HR ${last.rhr}</span>`;
 }
 function renderVol(){
-  const byWeek={}; APP.logs.lifts.forEach(l=>{ const d=new Date(l.date+'T00:00'); const onejan=new Date(d.getFullYear(),0,1); const wk=Math.ceil(((d-onejan)/864e5+onejan.getDay()+1)/7); const key=d.getFullYear()+'-W'+String(wk).padStart(2,'0');
+  const byWeek={}; APP.logs.lifts.forEach(l=>{ const d=new Date(l.date+'T00:00'); d.setDate(d.getDate()-((d.getDay()+6)%7)); const key=d.toISOString().slice(0,10);
     byWeek[key]=(byWeek[key]||0)+l.weight*l.reps; });
-  const keys=Object.keys(byWeek).sort().slice(-8); const vals=keys.map(k=>Math.round(w2disp(byWeek[k]))); const labels=keys.map(k=>'W'+k.slice(-2));
+  const keys=Object.keys(byWeek).sort().slice(-8); const vals=keys.map(k=>Math.round(w2disp(byWeek[k]))); const labels=keys.map(fmtDate);
+  const tips=keys.map((k,i)=>`Week of ${fmtDate(k)}: ${vals[i]} ${APP.units}`);
   if(!keys.length){ $('volChart').innerHTML=`<text x="300" y="120" text-anchor="middle" fill="var(--dim)" font-size="13">Log lifts to see weekly tonnage.</text>`; return; }
-  $('volChart').innerHTML=barChartSVG(600,240,vals,labels,'#2dd4bf');
+  $('volChart').innerHTML=barChartSVG(600,240,vals,labels,'#2dd4bf',tips);
+  $('volChart').setAttribute('role','img'); $('volChart').setAttribute('aria-label','Weekly training tonnage over the last '+vals.length+' weeks');
 }
+function renderScoreTrend(){ const svg=$('scoreChart'); const h=historicalScores();
+  if(!h||h.vals.length<2){ svg.innerHTML=`<text x="300" y="120" text-anchor="middle" fill="var(--dim)" font-size="13">Log lifts over time to see your Strength Index trend.</text>`; svg.removeAttribute('aria-label'); return; }
+  svg.innerHTML=lineChartSVG(600,240,[{name:'score',label:'Strength Index',color:'#a87bff',vals:h.vals}],{xlabels:sparseLabels(h.dates),l:40,tipx:h.dates.map(fmtDate),vfmt:v=>v});
+  svg.setAttribute('role','img'); svg.setAttribute('aria-label','Strength Index from '+h.vals[0]+' to '+h.vals[h.vals.length-1]+' over '+h.vals.length+' points'); }
 function renderHeat(){
   const el=$('heat'); el.innerHTML=''; const counts={}; APP.logs.lifts.forEach(l=>counts[l.date]=(counts[l.date]||0)+1); APP.logs.wods.forEach(w=>counts[w.date]=(counts[w.date]||0)+1);
   const today=new Date(); const start=new Date(today); start.setDate(start.getDate()-118-((start.getDay()+6)%7));
@@ -1721,7 +1800,7 @@ function renderHeat(){
     i2.style.background=c>=2?'var(--accent)':c===1?'rgba(255,90,60,.45)':'var(--bg)'; i2.title=key+(c?` · ${c} session(s)`:''); el.appendChild(i2); }
 }
 function renderProgress(){ if(!wiredProgress)wireProgress(); else{ const sel=$('trajSel'); const keys=[...new Set(APP.logs.lifts.map(l=>l.lift))]; if(keys.length&&sel.options.length!==keys.length){ const cur=sel.value; sel.innerHTML=keys.map(k=>`<option value="${k}">${LIFTNAME[k]||k}</option>`).join(''); if(keys.includes(cur))sel.value=cur; } }
-  renderTraj(); renderWodPRs(); renderWell(); renderVol(); renderHeat(); }
+  renderTraj(); renderWodPRs(); renderWell(); renderVol(); renderScoreTrend(); renderHeat(); }
 
 /* ============================================================
    PROFILE MODULE
@@ -1734,23 +1813,26 @@ function wireProfile(){
   $('pfName').addEventListener('input',e=>{APP.profile.name=e.target.value;save();});
   $('pfSexSeg').addEventListener('click',e=>{if(!e.target.dataset.sex)return;APP.profile.sex=e.target.dataset.sex;save();renderProfile();renderHome();});
   $('pfUnitSeg').addEventListener('click',e=>{if(!e.target.dataset.unit)return;APP.units=e.target.dataset.unit;save();applyUnitChange();});
-  $('pfBw').addEventListener('input',e=>{APP.profile.bw=Math.round(disp2w(+e.target.value||80));save();renderProfile();});
-  $('pfAge').addEventListener('input',e=>{APP.profile.age=+e.target.value||28;save();});
+  $('pfBw').addEventListener('input',e=>{APP.profile.bw=storeKg(e.target.value)||80;save();renderProfile();});
+  $('pfAge').addEventListener('input',e=>{APP.profile.age=clamp(+e.target.value||28,12,90);save();});
   $('pfHeight').addEventListener('input',e=>{APP.profile.heightCm=+e.target.value||178;save();});
   const gs=$('goalLift'); gs.innerHTML=LIFTS.map(L=>`<option value="${L.k}">${L.n}</option>`).join('');
-  $('goalAdd').addEventListener('click',()=>{ const lift=$('goalLift').value,target=Math.round(disp2w(+$('goalTarget').value||0));
-    if(!target){toast('Enter a target');return;} APP.goals=APP.goals.filter(g=>g.lift!==lift); APP.goals.push({lift,target}); save(); $('goalTarget').value=''; renderProfile(); toast('Goal set'); });
+  $('goalAdd').addEventListener('click',()=>{ const lift=$('goalLift').value,target=storeKg($('goalTarget').value);
+    if(!target){toast('Enter a target');return;} APP.goals=APP.goals.filter(g=>g.lift!==lift); APP.goals.push({lift,target}); save(); $('goalTarget').value=''; renderProfile(); renderHome(); toast('Goal set'); });
   $('dataExport').addEventListener('click',exportData);
   $('dataImportBtn').addEventListener('click',()=>$('dataImport').click());
   $('dataImport').addEventListener('change',importData);
-  $('dataSeed').addEventListener('click',()=>{ if(confirm('Replace all data with fresh demo data?')){APP=defaultApp();COMPARE=null;save();refreshHeader();showView('home');toast('Demo data loaded');} });
-  $('dataReset').addEventListener('click',()=>{ if(confirm('Erase ALL your data? This cannot be undone.')){localStorage.removeItem(STORE_KEY);APP=defaultApp();APP.logs={lifts:[],wods:[],metrics:[]};COMPARE=null;save();refreshHeader();showView('home');toast('Reset complete');} });
+  $('dataSeed').addEventListener('click',()=>{ if(confirm('Replace all data with fresh demo data?')){APP=demoApp();APP.onboarded=true;COMPARE=null;save();refreshHeader();updateDemoBanner();showView('home');toast('Demo data loaded');} });
+  $('dataReset').addEventListener('click',()=>{ if(confirm('Erase ALL your data? This cannot be undone.')){APP=blankApp();APP.onboarded=true;COMPARE=null;save();refreshHeader();updateDemoBanner();showView('home');toast('Reset — starting fresh');} });
   wiredProfile=true;
 }
 function exportData(){ const blob=new Blob([JSON.stringify(APP,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='forgefit-backup-'+todayISO()+'.json'; a.click(); URL.revokeObjectURL(a.href); toast('Exported'); }
 function importData(e){ const f=e.target.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d.logs||!d.lifts)throw 0; APP=d; COMPARE=APP.compareId?ATHLETES.find(a=>a.id===APP.compareId):null; save(); refreshHeader(); showView('home'); toast('Data imported'); }catch(err){ toast('Invalid backup file'); } };
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d||typeof d!=='object'||!d.logs)throw new Error('not a FORGE backup');
+      const snap=JSON.stringify(APP); APP=normalizeApp(d); COMPARE=APP.compareId?ATHLETES.find(a=>a.id===APP.compareId):null; save(); refreshHeader(); updateDemoBanner(); showView('home');
+      toastUndo('Data imported', ()=>{ APP=normalizeApp(JSON.parse(snap)); COMPARE=APP.compareId?ATHLETES.find(a=>a.id===APP.compareId):null; save(); refreshHeader(); updateDemoBanner(); showView('home'); });
+    }catch(err){ toast('Invalid backup: '+(err.message||'parse error')); } };
   r.readAsText(f); e.target.value=''; }
 function normTable(el,head,rows){ el.innerHTML='<tr>'+head.map(h=>`<th>${h}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>').join(''); }
 function renderProfile(){
@@ -1760,9 +1842,9 @@ function renderProfile(){
   document.querySelectorAll('#pfSexSeg button').forEach(b=>b.classList.toggle('on',b.dataset.sex===APP.profile.sex));
   document.querySelectorAll('#pfUnitSeg button').forEach(b=>b.classList.toggle('on',b.dataset.unit===APP.units));
   const gl=$('goalList'); gl.innerHTML=''; if(!APP.goals.length)gl.innerHTML='<p class="hint">No goals yet.</p>';
-  APP.goals.forEach((g,i)=>{ const cur=APP.lifts[g.lift]||0,pct=clamp(cur/g.target*100,0,100); const d=document.createElement('div'); d.className='goalrow';
-    d.innerHTML=`<div class="gt"><span>${LIFTNAME[g.lift]||g.lift}</span><span><b>${fmtW(cur)}</b>/${fmtW(g.target)} ${APP.units} · ${Math.round(pct)}% <button class="del" data-i="${i}" style="margin-left:6px">✕</button></span></div><div class="goalbar"><i style="width:${pct}%"></i></div>`; gl.appendChild(d); });
-  gl.querySelectorAll('.del').forEach(b=>b.onclick=()=>{APP.goals.splice(+b.dataset.i,1);save();renderProfile();});
+  APP.goals.forEach((g,i)=>{ const cur=APP.lifts[g.lift]||0,pct=clamp(cur/g.target*100,0,100); const eta=etaForGoal(g.lift,g.target); const d=document.createElement('div'); d.className='goalrow';
+    d.innerHTML=`<div class="gt"><span>${LIFTNAME[g.lift]||g.lift} <span style="color:var(--blue);font-size:10px">${eta}</span></span><span><b>${fmtW(cur)}</b>/${fmtW(g.target)} ${APP.units} · ${Math.round(pct)}% <button class="del" data-i="${i}" aria-label="Remove goal" style="margin-left:6px">✕</button></span></div><div class="goalbar"><i style="width:${pct}%"></i></div>`; gl.appendChild(d); });
+  gl.querySelectorAll('.del').forEach(b=>b.onclick=()=>deleteWithUndo(APP.goals,+b.dataset.i,'Goal',()=>{renderProfile();renderHome();}));
   // norms
   normTable($('bfTable'),['Sex','Essential','Athlete','Fitness','Average'],WELLNESS.bodyFat.map(r=>[r.sex,r.essential,`<b style="color:var(--good)">${r.athlete}</b>`,r.fitness,r.average]));
   normTable($('rhrTable'),['Level','BPM','Note'],WELLNESS.restingHR.map(r=>[r.level,r.bpm,`<span style="color:var(--mut)">${r.note}</span>`]));
@@ -1773,11 +1855,145 @@ function renderProfile(){
 }
 
 /* ============================================================
-   BOOT
+   GUIDE MODULE (movements, rest, glossary)
    ============================================================ */
+let GUIDE={
+movements:[
+{name:"Back Squat",category:"Squat",primaryMuscles:"Gluteus maximus, quadriceps",secondaryMuscles:"Adductor magnus, hamstrings, erector spinae, core",cue:"Brace the trunk, knees track over toes, drive hips and chest up together out of the bottom.",repRest:"Strength: 3-5 × 3-5, rest 2-3 min between sets.",why:"Foundational lower-body strength builder; develops maximal hip/knee extension force and trunk bracing that carries to the deadlift, clean, jerk recovery, wall ball, and your leg engine in metcons."},
+{name:"Front Squat",category:"Squat",primaryMuscles:"Quadriceps, gluteus maximus",secondaryMuscles:"Erector spinae, upper-back extensors, anterior core, adductors",cue:"Keep elbows high, torso vertical, and the front rack tight as you drive straight up.",repRest:"Strength: 3-5 × 2-5, rest 2-3 min.",why:"Builds quad-dominant strength, an upright torso, and front-rack tolerance; transfers directly to the clean catch, thruster, and wall ball."},
+{name:"Overhead Squat",category:"Squat",primaryMuscles:"Quadriceps, gluteus maximus",secondaryMuscles:"Deltoids/triceps (overhead lockout), rotator cuff, erector spinae, core",cue:"Keep shoulders active and the bar slightly back, midline tight, squat between the heels.",repRest:"Skill/strength: 3-5 × 2-4, rest 2-3 min.",why:"A demanding test of squat mechanics, midline stability, and overhead mobility; essential for receiving the snatch."},
+{name:"Air Squat",category:"Squat",primaryMuscles:"Gluteus maximus, quadriceps",secondaryMuscles:"Hamstrings, adductors, core, calves",cue:"Weight in the midfoot/heels, hips back and below parallel, knees out, stand tall.",repRest:"Conditioning: high-volume sets of 15-50 or for time; rest as needed.",why:"Teaches the squat pattern and builds local muscular endurance; the base for thrusters and wall balls."},
+{name:"Pistol (Single-Leg Squat)",category:"Squat",primaryMuscles:"Quadriceps, gluteus maximus (working leg)",secondaryMuscles:"Gluteus medius/minimus, hip flexors, adductors, core, ankle stabilizers",cue:"Drive the down knee out over the foot, keep the free leg long, control the bottom.",repRest:"Skill: 3-5 × 5-10 per leg; rest as needed.",why:"Builds unilateral leg strength, balance, and mobility while exposing left-right asymmetries."},
+{name:"Deadlift",category:"Hinge",primaryMuscles:"Gluteus maximus, hamstrings, erector spinae",secondaryMuscles:"Quadriceps, latissimus dorsi, trapezius, grip, adductors",cue:"Set a flat back and engaged lats, push the floor away, drive the hips through to lockout.",repRest:"Strength: 3-5 × 1-5, rest 2-4 min.",why:"Premier posterior-chain and total-body pulling strength builder; carries to every pull from the floor (clean, snatch) and the kettlebell swing."},
+{name:"Kettlebell Swing",category:"Hinge",primaryMuscles:"Gluteus maximus, hamstrings",secondaryMuscles:"Erector spinae, core, deltoids, grip, latissimus dorsi",cue:"Hike the bell back, snap the hips to float it up, arms stay relaxed like ropes.",repRest:"Power/conditioning: sets of 15-35; rest 30-90 sec.",why:"Trains explosive hip extension and posterior-chain power-endurance; reinforces the hinge under the deadlift and Olympic lifts."},
+{name:"Good Morning",category:"Hinge",primaryMuscles:"Hamstrings, gluteus maximus",secondaryMuscles:"Erector spinae, adductor magnus, core, upper back",cue:"Knees soft, push the hips straight back, hold a neutral spine with the chest proud.",repRest:"Accessory: 3-4 × 8-12, rest 60-90 sec.",why:"Strengthens the hinge and spinal-extensor endurance; builds resilient hamstrings and low back that protect the deadlift and clean setup."},
+{name:"Strict Press",category:"Push",primaryMuscles:"Anterior & medial deltoids",secondaryMuscles:"Triceps brachii, upper trapezius, serratus anterior, core",cue:"Squeeze glutes and abs, press the bar back around the face, finish with biceps by the ears.",repRest:"Strength: 3-5 × 3-5, rest 2-3 min.",why:"Builds raw vertical pressing strength and shoulder stability with no leg drive; the base for the push press, jerk, and handstand push-up."},
+{name:"Push Press",category:"Push",primaryMuscles:"Deltoids, triceps brachii",secondaryMuscles:"Quadriceps & glutes (dip-drive), upper trapezius, core",cue:"Short vertical dip, drive hard with the legs, then punch the bar to lockout.",repRest:"Strength/power: 3-5 × 2-5, rest 2-3 min.",why:"Adds leg drive to overhead pressing (≈20-30% more than the strict press); bridges the strict press to the jerk and raises overhead capacity in metcons."},
+{name:"Push Jerk",category:"Push",primaryMuscles:"Deltoids, triceps, quadriceps/glutes (dip-drive)",secondaryMuscles:"Upper trapezius, core, adductors, rotator cuff",cue:"Dip-drive the bar up, re-bend the knees to drop fast under it, receive it locked out.",repRest:"Power/skill: 3-5 × 1-3, rest 2-3 min.",why:"Teaches receiving load in a partial squat for heavier overhead numbers and speed under the bar; core to the clean & jerk."},
+{name:"Bench Press",category:"Push",primaryMuscles:"Pectoralis major, anterior deltoid, triceps brachii",secondaryMuscles:"Serratus anterior, latissimus dorsi (stabilizer), forearms",cue:"Pin the shoulder blades back and down, lower to the lower chest, press up and slightly back.",repRest:"Strength: 3-5 × 3-8, rest 2-3 min.",why:"Primary horizontal pressing strength builder for chest and triceps; develops pushing power that supports dips, push-ups, and pressing balance."},
+{name:"Handstand Push-Up",category:"Push",primaryMuscles:"Deltoids, triceps brachii",secondaryMuscles:"Upper trapezius, serratus anterior, core, scapular stabilizers",cue:"Hold a hollow body, set head and hands in a tripod, use a hip kip to assist if needed.",repRest:"Gymnastics: 3-6 × 3-12, or for reps in a WOD; rest as needed.",why:"Builds inverted pressing strength, midline control, and shoulder endurance; the bodyweight expression of the strict/push press."},
+{name:"Ring Dip",category:"Push",primaryMuscles:"Pectoralis major (lower), triceps brachii, anterior deltoid",secondaryMuscles:"Rotator cuff, core, forearms (ring stability)",cue:"Turn the rings out at the top, control the descent, keep shoulders away from the ears.",repRest:"Gymnastics: 3-5 × 5-12; rest 60-90 sec.",why:"Develops pressing strength on an unstable surface with high cuff demand; the lockout that finishes the ring muscle-up."},
+{name:"Push-Up",category:"Push",primaryMuscles:"Pectoralis major, triceps brachii, anterior deltoid",secondaryMuscles:"Serratus anterior, core, scapular stabilizers",cue:"Hold a rigid plank, elbows ~45° from the torso, lower until the chest touches, press as one unit.",repRest:"Conditioning: sets of 10-30 or for time; rest as needed.",why:"Accessible horizontal-push and midline-endurance builder; foundation for the burpee, the bench pattern, and pressing stamina."},
+{name:"Strict Pull-Up",category:"Pull",primaryMuscles:"Latissimus dorsi, biceps brachii",secondaryMuscles:"Rhomboids, lower/mid trapezius, teres major, brachialis, grip",cue:"Pull the shoulders down and back first, drive elbows to the ribs, chin over the bar.",repRest:"Gymnastics strength: 3-5 × 3-8, rest 90-120 sec.",why:"Core vertical pulling strength and scapular control; the prerequisite for kipping/chest-to-bar pull-ups, muscle-ups, and rope climbs."},
+{name:"Chest-to-Bar Pull-Up",category:"Pull",primaryMuscles:"Latissimus dorsi, biceps brachii",secondaryMuscles:"Lower trapezius, rhomboids, teres major, posterior deltoid, core, grip",cue:"Bigger hip drive and a hard final pull so the chest, not just the chin, contacts the bar.",repRest:"Gymnastics: sets of 5-20 or for time; rest as needed.",why:"Greater range and pulling power than a standard pull-up; a competition standard and the bridge toward the bar muscle-up."},
+{name:"Ring Muscle-Up",category:"Pull",primaryMuscles:"Latissimus dorsi, pectoralis major, triceps, biceps",secondaryMuscles:"Deltoids, rotator cuff, core, grip, scapular stabilizers",cue:"Pull from a false grip to the sternum, turn over fast through the rings, press out of the dip.",repRest:"Advanced gymnastics: small sets of 1-5; rest 1-3 min.",why:"Combines a high pull and a deep dip into one skill demanding full upper-body strength and coordination; a benchmark of gymnastics mastery."},
+{name:"Toes-to-Bar",category:"Pull",primaryMuscles:"Rectus abdominis, hip flexors (iliopsoas, rectus femoris)",secondaryMuscles:"Latissimus dorsi, obliques, grip, hip adductors",cue:"Drive a tight kip, pull the bar down with straight arms as the toes snap up to it.",repRest:"Gymnastics/core: sets of 5-20 or for time; rest as needed.",why:"Builds dynamic hip and trunk flexion, grip, and lat engagement under fatigue; trains the kip rhythm shared with pull-ups and muscle-ups."},
+{name:"Bent-Over Row",category:"Pull",primaryMuscles:"Latissimus dorsi, rhomboids, middle trapezius",secondaryMuscles:"Posterior deltoid, biceps, erector spinae, forearms",cue:"Hinge to a flat back, pull the bar to the lower ribs, squeeze the shoulder blades together.",repRest:"Accessory: 3-4 × 6-12, rest 60-120 sec.",why:"Builds horizontal pulling strength and upper-back thickness that balance pressing volume; reinforces the strong-back position used in deadlifts and cleans."},
+{name:"Rope Climb",category:"Pull",primaryMuscles:"Latissimus dorsi, biceps brachii, forearm/grip",secondaryMuscles:"Brachialis, core, hip flexors, calves (foot clamp)",cue:"Set a secure foot wrap, stand up on the rope to gain height, then reach and re-clamp.",repRest:"Gymnastics: 1-5 ascents per set; rest as needed.",why:"Combines pulling strength, grip endurance, and efficient leg-lock technique; trains the full pulling chain and grip for pull-ups and barbell holds."},
+{name:"Snatch",category:"Olympic",primaryMuscles:"Gluteus maximus, hamstrings, quadriceps, trapezius, deltoids",secondaryMuscles:"Erector spinae, latissimus dorsi, grip, calves, core",cue:"Patient off the floor, accelerate through full extension, pull yourself fast under the bar, stand.",repRest:"Power/skill: 3-6 × 1-3, rest 2-3 min.",why:"The most technical full-body power expression, ground-to-overhead in one motion; develops rate of force, mobility, and coordination."},
+{name:"Clean",category:"Olympic",primaryMuscles:"Gluteus maximus, hamstrings, quadriceps, trapezius",secondaryMuscles:"Deltoids, erector spinae, grip, core, calves",cue:"Drive the floor away, reach full extension, pull the elbows fast around into a strong front rack.",repRest:"Power/strength: 3-6 × 1-3, rest 2-3 min.",why:"Builds an explosive pull and a powerful front-rack receive; cornerstone of the clean & jerk and a primary developer of total-body power."},
+{name:"Clean & Jerk",category:"Olympic",primaryMuscles:"Gluteus maximus, hamstrings, quadriceps, deltoids, trapezius",secondaryMuscles:"Triceps, erector spinae, core, grip, adductors",cue:"Stand the clean fully, reset rack and breath, then dip-drive and split/drop under the jerk.",repRest:"Power/strength: 3-5 × 1-2, rest 2-3 min.",why:"The complete ground-to-overhead lift testing strength, power, and overhead stability; a benchmark of total-body capacity."},
+{name:"Power Clean",category:"Olympic",primaryMuscles:"Gluteus maximus, hamstrings, quadriceps, trapezius",secondaryMuscles:"Deltoids, erector spinae, grip, core",cue:"Reach full extension, catch the bar in a quarter-squat front rack with elbows whipping through fast.",repRest:"Power: 3-6 × 1-3, rest 2-3 min.",why:"Trains peak hip explosiveness and a fast turnover without a deep catch; the higher-speed clean used in most metcons."},
+{name:"Thruster",category:"Conditioning",primaryMuscles:"Quadriceps, gluteus maximus, deltoids",secondaryMuscles:"Triceps, upper trapezius, erector spinae, core, adductors",cue:"Drive out of the front-squat bottom straight into the press, legs launching the bar overhead.",repRest:"Conditioning: sets of 9-21 or for time; rest as needed.",why:"Fuses the front squat and push press into one of the most metabolically taxing movements; central to Fran."},
+{name:"Wall Ball",category:"Conditioning",primaryMuscles:"Quadriceps, gluteus maximus, deltoids",secondaryMuscles:"Triceps, upper trapezius, core, calves",cue:"Squat to full depth, then explode up and throw the ball to the target in one fluid drive.",repRest:"Conditioning: sets of 15-30 or for time; rest as needed.",why:"Combines a squat and throw for high metabolic demand; trains coordinated triple-extension and pacing (a staple of Karen)."},
+{name:"Burpee",category:"Conditioning",primaryMuscles:"Quadriceps, gluteus maximus, pectoralis major, triceps",secondaryMuscles:"Deltoids, core, hamstrings, calves",cue:"Drop chest to the floor, snap the feet in, jump and clap, find a smooth repeatable rhythm.",repRest:"Conditioning: high-volume for time or intervals.",why:"Full-body bodyweight conditioning that spikes heart rate fast; builds work capacity, grit, and the up-down transitions in countless WODs."},
+{name:"Box Jump",category:"Conditioning",primaryMuscles:"Quadriceps, gluteus maximus, gastrocnemius/soleus",secondaryMuscles:"Hamstrings, hip flexors, core",cue:"Load the hips, jump tall, land soft on the box with full hip extension at the top.",repRest:"Power/conditioning: sets of 10-30 or for time.",why:"Trains lower-body explosive power and landing mechanics; develops reactive strength that carries to jumping, sprinting, and the second pull of the lifts."},
+{name:"Double-Under",category:"Conditioning",primaryMuscles:"Gastrocnemius/soleus, forearm/wrist",secondaryMuscles:"Quadriceps, core, shoulders, tibialis anterior",cue:"Stay tall and relaxed, spin the rope with small fast wrist flicks, one slightly higher bounce per two passes.",repRest:"Conditioning: sets of 20-100 or for time.",why:"Builds calf endurance, timing, and a high-rate aerobic stimulus; a coordination skill that gates many WODs and benchmarks."},
+{name:"Row (Erg)",category:"Conditioning",primaryMuscles:"Quadriceps, gluteus maximus, hamstrings, latissimus dorsi",secondaryMuscles:"Erector spinae, rhomboids, biceps, core, calves",cue:"Legs first, then swing the torso back, then pull with the arms; reverse that order on the recovery.",repRest:"Conditioning: intervals or for distance/calories.",why:"Full-body, low-impact aerobic and power-endurance engine; reinforces leg-hip-arm sequencing — a primary cardio modality."},
+{name:"Run",category:"Conditioning",primaryMuscles:"Quadriceps, hamstrings, gluteus maximus, gastrocnemius/soleus",secondaryMuscles:"Hip flexors, core, tibialis anterior, hip abductors",cue:"Run tall with a quick light cadence, landing under the hips and driving the arms.",repRest:"Conditioning: 200-800 m intervals or steady efforts.",why:"Primary aerobic-capacity tool; builds the cardiovascular base that supports recovery between efforts in every WOD."},
+{name:"Assault/Echo Bike",category:"Conditioning",primaryMuscles:"Quadriceps, gluteus maximus, hamstrings, latissimus dorsi, deltoids",secondaryMuscles:"Pectoralis major, triceps, biceps, core, calves",cue:"Push and pull the arms hard while driving the legs, then settle into a sustainable cadence.",repRest:"Conditioning: intervals or for calories.",why:"Full-body, joint-friendly air bike that drives heart rate very high with no eccentric load; ideal for sprints and anaerobic/aerobic power."},
+{name:"GHD Sit-Up",category:"Core",primaryMuscles:"Rectus abdominis, hip flexors (iliopsoas, rectus femoris)",secondaryMuscles:"Obliques, erector spinae, quadriceps, hip adductors",cue:"Control the extension back, touch the floor, then crunch and round up — controlled, not ballistic.",repRest:"Core: 3-5 × 10-20 (build volume slowly), rest 60-90 sec.",why:"Builds a powerful trunk through a large range with strong eccentric demand; introduce conservatively to avoid rhabdomyolysis and strain."},
+{name:"Hollow Hold",category:"Core",primaryMuscles:"Rectus abdominis",secondaryMuscles:"Transverse abdominis, obliques, hip flexors, quadriceps",cue:"Press the low back into the floor, pull the ribs down, keep arms and legs long and squeezed tight.",repRest:"Core: 3-5 × 20-45 sec holds, rest 30-60 sec.",why:"Teaches the braced, connected midline that powers efficient kipping; the foundational shape for pull-ups, T2B, muscle-ups, and overhead stability."},
+{name:"L-Sit",category:"Core",primaryMuscles:"Hip flexors (iliopsoas, rectus femoris), rectus abdominis",secondaryMuscles:"Quadriceps, triceps, anterior deltoid, scapular depressors",cue:"Push the floor away to depress the shoulders, lock the knees, lift the legs to parallel.",repRest:"Core/gymnastics: 3-5 × 10-30 sec holds, rest 60 sec.",why:"Develops compression strength, active straight-arm support, and shoulder depression; carries to dips, muscle-ups, and gymnastics control."},
+{name:"Plank",category:"Core",primaryMuscles:"Rectus abdominis, transverse abdominis",secondaryMuscles:"Obliques, erector spinae, glutes, shoulder stabilizers",cue:"Hold a straight line from heels to head, squeeze glutes and abs, don't let the hips sag.",repRest:"Core: 3-4 × 30-60 sec holds, rest 30-60 sec.",why:"Builds foundational anti-extension trunk stability and bracing endurance; the midline control that underpins squats, presses, and every loaded position."}
+],
+rest:{rows:[
+{goal:"Max / Limit Strength",reps:"1-5 reps @ ~85-100% 1RM",rest:"3-5 min",energySystem:"Phosphagen (ATP-PCr)",rationale:"Near-maximal loads recruit high-threshold motor units fueled by stored ATP and phosphocreatine. PCr is ~70% restored within ~2 min and largely complete by 3-5 min, and the nervous system also benefits from longer rest. Full rest preserves force and bar speed across sets; cutting it short blunts the strength stimulus."},
+{goal:"Power & Olympic Lifting",reps:"1-3 reps @ ~75-90% (strength-speed); ~30-60% for ballistic speed-strength",rest:"2-5 min",energySystem:"Phosphagen (ATP-PCr)",rationale:"Power depends on a high rate of force development and fast, precise movement. Efforts are brief and phosphagen-fueled, so near-complete ATP-PCr resynthesis lets each set hit peak velocity. Incomplete recovery degrades speed and technique — defeating the point."},
+{goal:"Hypertrophy (muscle gain)",reps:"6-12 reps @ ~67-85% 1RM (near failure)",rest:"~60-180 sec (≈2 min default)",energySystem:"Glycolytic (fast glycolysis)",rationale:"The primary driver is mechanical tension via a challenging load taken near failure, with metabolic stress secondary. The old 'short-rest hormone spike' theory is largely discounted. Rest of ~1-3 min preserves load and total volume-load per set, which research links to greater growth — don't minimize rest to chase metabolites."},
+{goal:"Strength-Endurance",reps:"~15-25 reps @ ~50-67% 1RM",rest:"≤30-60 sec",energySystem:"Glycolytic / Oxidative (mixed)",rationale:"The goal is sustaining submaximal force over many reps. Short rest keeps the muscle under near-continuous demand, improving local endurance, buffering capacity, and oxidative capacity of the working fibers. Longer rest would weaken the fatigue-resistance adaptation."},
+{goal:"Metabolic Conditioning",reps:"High-rep circuits @ light-moderate loads (~30-50% 1RM or bodyweight)",rest:"0-60 sec (often only transition pauses)",energySystem:"Glycolytic + significant oxidative",rationale:"MetCon compresses rest to maximize cardiovascular and metabolic demand, keeping HR high and forcing lactate clearance and energy resynthesis while still working. This drives glycolytic capacity, buffering, and aerobic recovery rate. Loads stay light enough that technique holds under fatigue."},
+{goal:"Work:Rest — Phosphagen (short sprints)",reps:"~5-10 sec all-out efforts",rest:"1:12 to 1:20 work:rest",energySystem:"Phosphagen (ATP-PCr)",rationale:"All-out efforts under ~10 sec deplete ATP/PCr fast. Recovery of ~12-20× the work duration allows near-complete PCr resynthesis so each repeat is maximal power. This long ratio targets the phosphagen system and prevents a slide into glycolytic fatigue."},
+{goal:"Work:Rest — Glycolytic (capacity intervals)",reps:"~30 sec to 2-3 min hard efforts",rest:"1:3 to 1:5 (≈1:1 to train lactate tolerance)",energySystem:"Glycolytic (fast glycolysis)",rationale:"These efforts rely on fast glycolysis and produce lots of lactate and H+. A ~1:3-1:5 ratio gives partial recovery (some lactate clearance and buffering) while still imposing repeated glycolytic stress. Deliberately shorter ratios keep fatigue high to train acidosis tolerance; the ratio shortens as effort lengthens."},
+{goal:"Work:Rest — Oxidative (long aerobic)",reps:"Efforts >3 min up to continuous steady-state",rest:"1:1 to 1:3 (often ≤1:1 for steady-state)",energySystem:"Oxidative (aerobic)",rationale:"Longer, lower-intensity work is fueled by aerobic oxidation and recovers quickly, so only short rest is needed. Brief, incomplete recovery keeps the cardiovascular system continuously loaded, driving aerobic adaptations (stroke volume, mitochondrial density, capillarization)."}
+]},
+terms:[
+{term:"WOD",full:"Workout of the Day",meaning:"The day's prescribed training session — the central workout every member completes."},
+{term:"AMRAP",full:"As Many Rounds (or Reps) As Possible",meaning:"Complete as many rounds or reps of the prescribed work as you can within a fixed time cap."},
+{term:"EMOM",full:"Every Minute On the Minute",meaning:"At the start of each minute you perform a set amount of work, then rest the remainder of that minute."},
+{term:"For Time",full:"For Time",meaning:"Complete the prescribed work as fast as possible; your total elapsed time is the score."},
+{term:"Tabata",full:"Tabata Interval",meaning:"8 rounds of 20 sec all-out work / 10 sec rest (4 min per movement); the score is often the lowest rep count of any round."},
+{term:"Chipper",full:"Chipper Workout",meaning:"A long, typically single-round workout with many movements you 'chip away' at, usually finishing one station before the next."},
+{term:"Couplet",full:"Couplet",meaning:"A workout built from just two movements paired or alternated together."},
+{term:"Triplet",full:"Triplet",meaning:"A workout built from three movements combined together."},
+{term:"RX",full:"As Prescribed",meaning:"Completing the workout exactly as written — no changes to the prescribed weights, reps, or movements."},
+{term:"RX+",full:"As Prescribed Plus",meaning:"A harder-than-prescribed version with heavier loads or more advanced movements for elite athletes."},
+{term:"Scaled",full:"Scaled",meaning:"A modified version with reduced weight/reps or easier movements to match your ability while keeping the intended stimulus."},
+{term:"MetCon",full:"Metabolic Conditioning",meaning:"A conditioning workout designed to tax the energy systems and build cardiovascular and muscular endurance."},
+{term:"1RM",full:"One-Rep Max",meaning:"The maximum weight you can lift for a single rep of a movement with proper form."},
+{term:"PR",full:"Personal Record",meaning:"Your best-ever performance on a lift or workout — a new heaviest weight or fastest time (also PB)."},
+{term:"Buy-in",full:"Buy-in",meaning:"A chunk of work performed at the very start of a workout before the main piece begins."},
+{term:"Cash-out",full:"Cash-out",meaning:"A chunk of work performed at the very end of a workout after the main piece is finished."},
+{term:"Box",full:"Box",meaning:"The nickname for a CrossFit gym — typically a bare warehouse-style training space."},
+{term:"Pood",full:"Pood",meaning:"A Russian unit used to size kettlebells; one pood ≈ 16 kg (≈36 lb)."},
+{term:"DU",full:"Double-Under",meaning:"A jump-rope rep in which the rope passes under the feet twice during a single jump."},
+{term:"T2B",full:"Toes-to-Bar",meaning:"A hanging movement (hip flexors and core) where you bring your toes up to touch the pull-up bar."},
+{term:"HSPU",full:"Handstand Push-Up",meaning:"An inverted vertical press in a handstand (usually against a wall) — head to floor, press to lockout; works shoulders and triceps."},
+{term:"C2B",full:"Chest-to-Bar",meaning:"A pull-up where the chest must contact the bar at the top of each rep."},
+{term:"MU",full:"Muscle-Up",meaning:"An advanced move combining a pull-up and a dip to transition from hanging to supporting above the rings/bar."},
+{term:"GHD",full:"Glute-Ham Developer",meaning:"A bench-like apparatus for hip/back extensions (glutes, hamstrings, erectors) and GHD sit-ups (abs, hip flexors) through an extended range."},
+{term:"WB",full:"Wall Ball",meaning:"A squat-and-throw where you rise from a squat to toss a medicine ball to a wall target, then catch and absorb it into the next squat."},
+{term:"KB",full:"Kettlebell",meaning:"A cast-iron weight with a handle used for swings, snatches, and other ballistic movements."},
+{term:"OHS",full:"Overhead Squat",meaning:"A full-depth squat with a barbell locked out overhead — demands shoulder/ankle mobility and trunk stability."},
+{term:"TnG",full:"Touch-and-Go",meaning:"Consecutive barbell reps without pausing or resetting, the bar lightly touching the floor before rebounding."},
+{term:"No-rep",full:"No-rep",meaning:"A rep that fails the movement standard and doesn't count; also the judge's call signaling that failure."},
+{term:"The Open",full:"The CrossFit Open",meaning:"CrossFit's annual worldwide online competition — the first stage of qualifying for the CrossFit Games."},
+{term:"Benchmark WOD",full:"Benchmark Workout",meaning:"A standardized, repeatable workout used to measure and track fitness over time."},
+{term:"Hero WOD",full:"Hero Workout",meaning:"A grueling benchmark named for a member of the military, law enforcement, or first responders who died in the line of duty."},
+{term:"Girl WOD",full:"The Girls",meaning:"A classic benchmark from a set of women's names (Fran, Cindy, Grace…) used as repeatable fitness tests."},
+{term:"DOMS",full:"Delayed Onset Muscle Soreness",meaning:"Soreness that develops ~12-72 h after hard/unfamiliar training, peaking ~24-48 h, linked to eccentric loading."},
+{term:"RPE",full:"Rating of Perceived Exertion",meaning:"A subjective 1-10 scale of how hard an effort feels; higher = fewer reps left before failure."},
+{term:"RIR",full:"Reps in Reserve",meaning:"How many more reps you could have done before failure at the end of a set."},
+{term:"MRV",full:"Maximum Recoverable Volume",meaning:"The most training volume you can do and still recover from; exceeding it over time stalls or reverses progress."},
+{term:"AbMat",full:"AbMat",meaning:"A contoured foam pad placed under the lower back to support the lumbar curve and standardize sit-up range."},
+{term:"Kipping vs Strict",full:"Kipping versus Strict",meaning:"Kipping uses a hip/leg swing to generate momentum for more/faster reps; strict uses muscular strength alone with no swing."},
+{term:"Pacing",full:"Pacing",meaning:"Managing effort and rest across a workout to sustain steady, repeatable output and avoid redlining before the finish."}
+]
+};
+let wiredGuide=false, guideCat='all', guideSearch='';
+const MOVE_CATS=['all','Squat','Hinge','Push','Pull','Olympic','Conditioning','Core'];
+function wireGuide(){
+  const seg=$('moveCat'); seg.innerHTML=MOVE_CATS.map((c,i)=>`<button data-cat="${c}"${i===0?' class="on"':''}>${c==='all'?'All':c}</button>`).join('');
+  seg.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; guideCat=b.dataset.cat; seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.cat===guideCat)); renderMoveGrid(); });
+  $('moveSearch').addEventListener('input',e=>{ guideSearch=e.target.value.toLowerCase(); renderMoveGrid(); });
+  $('moveGrid').addEventListener('click',e=>{ const b=e.target.closest('[data-mylift]'); if(b)openLiftAnalytics(b.dataset.mylift); });
+  wiredGuide=true;
+}
+function renderGuide(){
+  if(!GUIDE){ if($('moveGrid'))$('moveGrid').innerHTML='<p class="hint">Guide unavailable.</p>'; return; }
+  if(!wiredGuide)wireGuide();
+  normTable($('restTable'),['Goal','Reps · %1RM','Rest','Energy system','Why'],GUIDE.rest.rows.map(r=>[`<b>${r.goal}</b>`,r.reps||'—',`<span style="color:var(--accent2);font-weight:700">${r.rest}</span>`,r.energySystem||'—',`<span style="color:var(--mut)">${r.rationale}</span>`]));
+  $('restTips').innerHTML='<b>Rule of thumb:</b> the heavier &amp; more neural the work, the longer the rest. Max-strength &amp; power want near-full recovery to protect bar speed &amp; quality; hypertrophy &amp; metcon use shorter rest to drive metabolic stress and conditioning. Day-to-day recovery follows the <b>MRV</b> &amp; readiness logic on the Home tab.';
+  renderMoveGrid(); renderGloss();
+}
+function splitChips(s,cls){ return (s||'').split(/,|\//).map(x=>x.trim()).filter(Boolean).map(x=>`<span class="m${cls?' '+cls:''}">${x}</span>`).join(''); }
+function renderMoveGrid(){
+  let list=GUIDE.movements.filter(m=>guideCat==='all'||m.category===guideCat);
+  if(guideSearch)list=list.filter(m=>(m.name+' '+m.primaryMuscles+' '+(m.secondaryMuscles||'')+' '+m.why).toLowerCase().includes(guideSearch));
+  $('moveGrid').innerHTML=list.map(m=>`<div class="movecard"><div class="mh"><div class="mn">${m.name}</div><span class="mcat">${m.category}</span></div>
+    <div class="musc">${splitChips(m.primaryMuscles)}${splitChips(m.secondaryMuscles,'sec')}</div>
+    <div class="cue">💡 ${m.cue}</div>
+    <div class="mr"><b>Sets &amp; rest:</b> ${m.repRest}</div>
+    <div class="mr"><b>Why it matters:</b> ${m.why}</div>
+    ${GUIDE_LIFT[m.name]?`<div style="margin-top:9px"><button class="btn sm ghost" data-mylift="${escAttr(m.name)}" style="padding:5px 10px;font-size:11px">📊 My 1RM &amp; standards</button></div>`:''}</div>`).join('')||'<p class="hint">No movements match.</p>';
+}
+function renderGloss(){
+  $('glossGrid').innerHTML=GUIDE.terms.map(t=>`<div class="glosscard"><div class="gt">${t.term}</div>${t.full&&t.full.toLowerCase()!==t.term.toLowerCase()?`<div class="gf">${t.full}</div>`:''}<div class="gm">${t.meaning}</div></div>`).join('');
+}
+
+/* ============================================================
+   ONBOARDING + DEMO BANNER + BOOT
+   ============================================================ */
+function updateDemoBanner(){ $('demoBanner').classList.toggle('on', !!APP.demo); }
+function finishOnboard(){ $('onboard').classList.remove('on'); save(); refreshHeader(); updateDemoBanner(); showView('home'); }
+$('obFresh').addEventListener('click',()=>{ APP=blankApp(); APP.onboarded=true; APP.demo=false; COMPARE=null; finishOnboard(); showView('profile'); toast('Welcome — enter your lifts in Profile & Analytics'); });
+$('obDemo').addEventListener('click',()=>{ APP=demoApp(); APP.onboarded=true; COMPARE=APP.compareId?ATHLETES.find(a=>a.id===APP.compareId):null; finishOnboard(); toast('Exploring with demo data'); });
+$('demoClear').addEventListener('click',()=>{ APP=blankApp(); APP.onboarded=true; COMPARE=null; save(); refreshHeader(); updateDemoBanner(); showView('profile'); toast('Cleared — start logging your own'); });
+
 APP=load(); COMPARE=APP.compareId?ATHLETES.find(a=>a.id===APP.compareId):null;
-refreshHeader();
-renderHome();
+refreshHeader(); updateDemoBanner();
+if(!APP.onboarded){ $('onboard').classList.add('on'); }
+renderHome(); applyInputModes(); applyA11yLabels();
 </script>
 </body>
 </html>

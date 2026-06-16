@@ -22,11 +22,17 @@
     return out;
   }
 
+  function deburr(s) { s = String(s).toLowerCase(); return s.normalize ? s.normalize("NFD").replace(/[̀-ͯ]/g, "") : s; }
   function clozeBlank(item) {
     if (!item.ex_pt || !item.pt) return null;
-    var re = new RegExp(item.pt.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-    if (!re.test(item.ex_pt)) return null;
-    return item.ex_pt.replace(re, "______");
+    var esc = item.pt.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // whole-word match (handles accented Portuguese letters at the boundaries)
+    var pat = "(^|[^A-Za-zÀ-ÿ])(" + esc + ")(?![A-Za-zÀ-ÿ])";
+    if (!new RegExp(pat, "i").test(item.ex_pt)) return null;
+    var blanked = item.ex_pt.replace(new RegExp(pat, "ig"), "$1______");
+    // never leak the answer (e.g. a second mention the regex didn't catch)
+    if (deburr(blanked).indexOf(deburr(item.pt)) !== -1) return null;
+    return blanked;
   }
 
   function makeQuestions(pool) {
@@ -114,16 +120,18 @@
       });
       stage.appendChild(opts); stage.appendChild(next);
 
+      function srTag(node, text) { node.appendChild(el("span", { class: "sr-only", text: " " + text })); }
       function choose(opt, b) {
         if (answered) return; answered = true;
         var correct = opt === q.item;
         PT.store.grade(q.item.key, correct);
-        if (correct) { score++; b.classList.add("correct"); b._mark.textContent = "✓"; PT.audio.correct(); if (PT.announce) PT.announce("Correct"); }
+        if (correct) { score++; b.classList.add("correct"); b._mark.textContent = "✓"; srTag(b, "(correct answer)"); PT.audio.correct(); if (PT.announce) PT.announce("Correct"); }
         else {
-          b.classList.add("wrong"); b._mark.textContent = "✗"; PT.audio.wrong();
-          buttons.forEach(function (c, k) { if (q.options[k] === q.item) { c.classList.add("correct"); c._mark.textContent = "✓"; } });
+          b.classList.add("wrong"); b._mark.textContent = "✗"; srTag(b, "(your answer, incorrect)"); PT.audio.wrong();
+          buttons.forEach(function (c, k) { if (q.options[k] === q.item) { c.classList.add("correct"); c._mark.textContent = "✓"; srTag(c, "(correct answer)"); } });
           if (PT.announce) PT.announce("Incorrect. The answer is " + q.item[q.field]);
         }
+        buttons.forEach(function (c) { c.setAttribute("aria-disabled", "true"); }); // options locked
         PT.audio.speak(q.item.pt);
         opts.classList.add("locked"); next.removeAttribute("hidden");
       }
@@ -134,11 +142,11 @@
     function showTyped(q) {
       stage.appendChild(el("div", { class: "q-prompt" }, [
         el("div", { class: "q-instr", text: "Type this in Portuguese" }),
-        el("div", { class: "q-word en", text: q.item.en }),
+        el("div", { class: "q-word-row" }, [el("span", { class: "q-word en", text: q.item.en }), C.speakBtn(q.item.pt)]),
         q.item.gender ? el("div", { class: "q-gender", text: q.item.gender === "m" ? "(masculine)" : "(feminine)" }) : null
       ]));
       var input = el("input", { class: "drill-input", type: "text", lang: "pt-BR", autocomplete: "off", autocapitalize: "none", spellcheck: "false", placeholder: "type here…", "aria-label": "Type the Portuguese" });
-      var feedback = el("div", { class: "dictation-feedback" });
+      var feedback = el("div", { class: "dictation-feedback", role: "status", aria: { live: "polite" } });
       var next = nextBtn();
       var checkBtn = el("button", { class: "btn btn-primary btn-block", onclick: submit }, ["Check"]);
       stage.appendChild(input); stage.appendChild(feedback); stage.appendChild(checkBtn);
@@ -155,7 +163,8 @@
         feedback.appendChild(el("div", { class: "dictation-result " + (v.correct ? "good" : "bad") }, [
           el("div", { class: "dr-label", text: v.exact ? "✓ Perfect!" : v.almost ? "✓ Right — watch the accents" : "✗ Not quite" }),
           el("div", { class: "dr-answer" }, [el("span", { lang: "pt-BR", text: q.item.pt }), C.speakBtn(q.item.pt)]),
-          q.item.ex_pt ? el("div", { class: "dr-en", text: q.item.ex_pt }) : null
+          q.item.ex_pt ? el("div", { class: "dr-pt", lang: "pt-BR", text: q.item.ex_pt }) : null,
+          q.item.ex_en ? el("div", { class: "dr-en", text: q.item.ex_en }) : null
         ]));
         PT.audio.speak(q.item.pt);
         checkBtn.setAttribute("hidden", ""); next.removeAttribute("hidden");

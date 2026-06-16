@@ -1,8 +1,11 @@
 /* Tiny Explorers — shared UI helpers + the reusable "grid activity" engine
-   used by Colors, Shapes, Animals, Letters and My Body. Keeping these
-   activities on one engine guarantees a consistent, predictable interface
-   (the same tap → name → celebrate loop everywhere), which matters a lot for
-   toddlers who rely on repetition and predictability. */
+   used by Colors, Shapes, Animals and My Body. Keeping these activities on one
+   engine guarantees a consistent, predictable interface (the same tap → name →
+   celebrate loop everywhere), which matters a lot for toddlers who rely on
+   repetition and predictability.
+
+   All spoken/visible phrases go through TE.t() so the engine speaks whichever
+   language is selected; content labels come from the activity's name()/say(). */
 window.TE = window.TE || {};
 
 TE.ui = (function () {
@@ -67,6 +70,8 @@ TE.ui = (function () {
 
   /* Falling-emoji celebration. */
   function celebrate(emojis) {
+    // Honor the grown-up "celebrations" / "calm motion" settings.
+    if (TE.config && (!TE.config.celebrateOn() || !TE.config.motionOn())) return;
     var layer = document.getElementById("celebrate");
     if (!layer) return;
     var pool = emojis || ["🎉", "⭐", "🎈", "🌟", "✨", "💛", "💙", "💚"];
@@ -82,6 +87,42 @@ TE.ui = (function () {
     }
   }
 
+  /* Particle "firework" burst from a node's center — contingent, brief, ease-out
+     (good "juice" per motion research; gated by the motion/celebrate settings). */
+  function burst(node, emojis) {
+    if (TE.config && (!TE.config.celebrateOn() || !TE.config.motionOn())) return;
+    var layer = document.getElementById("celebrate");
+    if (!layer || !node) return;
+    var r = node.getBoundingClientRect();
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    var pool = emojis || ["⭐", "✨", "🎉", "💛", "🌟"];
+    for (var i = 0; i < 12; i++) {
+      var ang = (Math.PI * 2 * i) / 12 + Math.random() * 0.4;
+      var dist = 80 + Math.random() * 80;
+      var p = el("div", { class: "spark", text: pool[Math.floor(Math.random() * pool.length)] });
+      p.style.left = cx + "px"; p.style.top = cy + "px";
+      p.style.setProperty("--x", (Math.cos(ang) * dist).toFixed(0) + "px");
+      p.style.setProperty("--y", (Math.sin(ang) * dist).toFixed(0) + "px");
+      layer.appendChild(p);
+      (function (n) { setTimeout(function () { n.remove(); }, 1000); })(p);
+    }
+  }
+
+  /* A short "parade" of characters walking across the screen — a milestone reward. */
+  function parade(emojis) {
+    if (TE.config && (!TE.config.celebrateOn() || !TE.config.motionOn())) return;
+    var layer = document.getElementById("celebrate");
+    if (!layer) return;
+    var pool = emojis || ["🐶", "🐱", "🐮", "🐷", "🦁", "🐸", "🐤"];
+    for (var i = 0; i < 4; i++) {
+      var m = el("div", { class: "parade", text: pool[Math.floor(Math.random() * pool.length)] });
+      m.style.top = (38 + Math.random() * 16) + "vh";
+      m.style.setProperty("--delay", (i * 0.5).toFixed(2) + "s");
+      layer.appendChild(m);
+      (function (node) { setTimeout(function () { node.remove(); }, 4400); })(m);
+    }
+  }
+
   /* Brief pop animation helper that auto-cleans. */
   function bump(node, cls) {
     cls = cls || "is-pop";
@@ -91,8 +132,10 @@ TE.ui = (function () {
     setTimeout(function () { node.classList.remove(cls); }, 600);
   }
 
-  var CHEERS = ["Yay!", "Great job!", "You did it!", "Wonderful!", "Hooray!", "Well done!", "Awesome!"];
-  function cheer() { return CHEERS[Math.floor(Math.random() * CHEERS.length)]; }
+  function cheer() {
+    var list = TE.i18n.cheers();
+    return list[Math.floor(Math.random() * list.length)];
+  }
 
   /* ----------------------------------------------------------------------
      gridActivity — the shared tap-to-learn engine.
@@ -111,7 +154,7 @@ TE.ui = (function () {
     var findable = opts.findable !== false;
 
     var stage = el("div", { class: "stage" });
-    var banner = el("div", { class: "prompt-banner", text: "Tap to play! 👆" });
+    var banner = el("div", { class: "prompt-banner", text: TE.t("tapToPlay") });
     var grid = el("div", { class: "card-grid" + (items.length <= 6 ? " few" : "") });
     stage.appendChild(banner);
     stage.appendChild(grid);
@@ -151,7 +194,7 @@ TE.ui = (function () {
         bump(card, "is-wobble");
         TE.audio.nudge();
         banner.classList.remove("cheer");
-        var msg = "That's " + opts.name(item) + ". Find the " + opts.name(target) + "!";
+        var msg = TE.t("thatsX", opts.name(item), opts.name(target));
         banner.textContent = "🔎 " + msg;
         TE.audio.speak(msg);
       }
@@ -160,7 +203,7 @@ TE.ui = (function () {
     function newTarget() {
       target = sample(items, target);
       banner.classList.remove("cheer");
-      var q = "Can you find the " + opts.name(target) + "?";
+      var q = TE.t("findQ", opts.name(target));
       banner.textContent = "🔎 " + q;
       TE.audio.speak(q);
     }
@@ -168,13 +211,13 @@ TE.ui = (function () {
     function setMode(m) {
       mode = m;
       banner.classList.remove("cheer");
-      if (m === "find") { newTarget(); toggle.querySelector(".lbl").textContent = "Free Play"; toggle.querySelector(".ic").textContent = "👆"; }
-      else { banner.textContent = "Tap to play! 👆"; toggle.querySelector(".lbl").textContent = "Find It Game"; toggle.querySelector(".ic").textContent = "🔎"; }
+      if (m === "find") { newTarget(); toggle.querySelector(".lbl").textContent = TE.t("freePlay"); toggle.querySelector(".ic").textContent = "👆"; }
+      else { banner.textContent = TE.t("tapToPlay"); toggle.querySelector(".lbl").textContent = TE.t("findGame"); toggle.querySelector(".ic").textContent = "🔎"; }
     }
 
     var toggle = el("button", { class: "mode-btn" }, [
       el("span", { class: "ic", text: "🔎" }),
-      el("span", { class: "lbl", text: "Find It Game" })
+      el("span", { class: "lbl", text: TE.t("findGame") })
     ]);
     toggle.addEventListener("click", function () {
       TE.audio.pop();
@@ -192,7 +235,7 @@ TE.ui = (function () {
 
   return {
     el: el, clear: clear, shuffle: shuffle, sample: sample,
-    shapeSVG: shapeSVG, celebrate: celebrate, bump: bump, cheer: cheer,
-    gridActivity: gridActivity
+    shapeSVG: shapeSVG, celebrate: celebrate, burst: burst, parade: parade,
+    bump: bump, cheer: cheer, gridActivity: gridActivity
   };
 })();

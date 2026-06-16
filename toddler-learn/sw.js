@@ -1,7 +1,7 @@
 /* Tiny Explorers — service worker for offline play.
    Cache-first for the (tiny, fully-static) app shell. Bumping CACHE
    invalidates the old cache on the next visit. */
-var CACHE = "tiny-explorers-v3";
+var CACHE = "tiny-explorers-v5";
 
 var ASSETS = [
   "./",
@@ -9,6 +9,9 @@ var ASSETS = [
   "manifest.webmanifest",
   "icons/icon.svg",
   "css/styles.css",
+  "js/i18n.js",
+  "js/auth.js",
+  "js/config.js",
   "js/data.js",
   "js/audio.js",
   "js/ui.js",
@@ -24,6 +27,10 @@ var ASSETS = [
   "js/activities/body.js",
   "js/activities/draw.js",
   "js/activities/weather.js",
+  "js/activities/bubblepop.js",
+  "js/activities/peekaboo.js",
+  "js/activities/soundmatch.js",
+  "js/activities/settings.js",
   "js/activities/parents.js"
 ];
 

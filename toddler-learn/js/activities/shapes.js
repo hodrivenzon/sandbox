@@ -3,6 +3,7 @@ window.TE = window.TE || {}; TE.screens = TE.screens || {};
 
 TE.screens.shapes = {
   title: "Shapes",
+  titleKey: "title_shapes",
   theme: "shapes",
   render: function (host) {
     var fills = {
@@ -12,12 +13,12 @@ TE.screens.shapes = {
     TE.ui.gridActivity({
       host: host,
       items: TE.data.shapes,
-      name: function (s) { return s.name; },
-      say: function (s) { return s.name; },
-      intro: "Let's learn shapes! Tap a shape.",
+      name: function (s) { return TE.tx(s); },
+      say: function (s) { return TE.tx(s); },
+      intro: TE.t("introShapes"),
       build: function (s) {
         var node = TE.ui.el("span", { html: TE.ui.shapeSVG(s.type, fills[s.type] || "#3db4ff") });
-        return { node: node, cap: s.name };
+        return { node: node, cap: TE.tx(s) };
       }
     });
   }

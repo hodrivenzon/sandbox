@@ -4,14 +4,17 @@
      2. Web Audio API    → friendly synthesized tones / chimes / note pads.
    Everything degrades gracefully if a browser lacks support, and respects
    a global mute. The first user tap calls unlock() to satisfy autoplay
-   policies on iOS/Safari/Chrome. */
+   policies on iOS/Safari/Chrome.
+
+   Narration is language-aware: speak() uses the voice that matches the current
+   language (en-US or he-IL). hasVoice(code) lets the app warn a parent when no
+   voice for the chosen language is installed. */
 window.TE = window.TE || {};
 
 TE.audio = (function () {
   var ctx = null;
   var muted = false;
-  try { muted = localStorage.getItem("te-muted") === "1"; } catch (e) {}
-  var voice = null;
+  var voices = { en: null, he: null };   // best voice picked per language
   var hasSpeech = ("speechSynthesis" in window) && ("SpeechSynthesisUtterance" in window);
 
   function ensureCtx() {
@@ -23,15 +26,23 @@ TE.audio = (function () {
     return ctx;
   }
 
-  /* Prefer a clear English voice; lightly favor ones that sound friendly. */
-  function pickVoice() {
-    if (!hasSpeech) return;
+  function currentLang() { return (TE.lang ? TE.lang() : "en"); }
+
+  /* All installed voices whose lang starts with the given code (en / he). */
+  function voicesFor(code) {
     var vs = window.speechSynthesis.getVoices() || [];
-    if (!vs.length) return;
-    var en = vs.filter(function (v) { return /^en(-|_|$)/i.test(v.lang); });
-    var pool = en.length ? en : vs;
-    var prefer = ["samantha", "google us english", "karen", "moira", "tessa",
-                  "victoria", "fiona", "female", "zira", "child"];
+    var re = code === "he" ? /^he(-|_|$)/i : /^en(-|_|$)/i;
+    return vs.filter(function (v) { return re.test(v.lang); });
+  }
+
+  /* Pick the friendliest available voice for a language. */
+  function pickFor(code) {
+    var pool = voicesFor(code);
+    if (!pool.length) return null;
+    var prefer = code === "he"
+      ? ["carmit", "google", "female"]                        // Carmit = Apple he-IL
+      : ["samantha", "google us english", "karen", "moira",   // friendly en voices
+         "tessa", "victoria", "fiona", "female", "zira", "child"];
     var best = null, bestRank = 99;
     pool.forEach(function (v) {
       var n = (v.name || "").toLowerCase();
@@ -39,12 +50,22 @@ TE.audio = (function () {
         if (n.indexOf(prefer[i]) !== -1 && i < bestRank) { best = v; bestRank = i; }
       }
     });
-    voice = best || pool[0];
+    return best || pool[0];
+  }
+
+  function pickVoices() {
+    if (!hasSpeech) return;
+    voices.en = pickFor("en");
+    voices.he = pickFor("he");
+    if (TE.onVoices) { try { TE.onVoices(); } catch (e) {} }
   }
   if (hasSpeech) {
-    pickVoice();
-    window.speechSynthesis.onvoiceschanged = pickVoice;
+    pickVoices();
+    window.speechSynthesis.onvoiceschanged = pickVoices;
   }
+
+  /* True if a usable voice exists for the language (default: current). */
+  function hasVoice(code) { return hasSpeech && !!voices[code || currentLang()]; }
 
   /* Called from the first user gesture (the Start overlay). */
   function unlock() {
@@ -57,20 +78,25 @@ TE.audio = (function () {
         window.speechSynthesis.speak(u);
         window.speechSynthesis.cancel();
       } catch (e) {}
-      pickVoice();
+      pickVoices();
     }
   }
 
   function speak(text, opts) {
     if (muted || !hasSpeech || !text) return;
     opts = opts || {};
+    var code = opts.lang || currentLang();
+    var v = voices[code];
+    // Strip Hebrew niqqud so TTS reads the bare word (no-op for other text).
+    var plain = TE.i18n ? TE.i18n.strip(text) : String(text);
     try {
       window.speechSynthesis.cancel(); // never let phrases pile up
-      var u = new SpeechSynthesisUtterance(String(text));
-      u.rate = opts.rate || 0.92;   // a touch slower for little ears
+      var u = new SpeechSynthesisUtterance(plain);
+      u.rate = opts.rate || (TE.config ? TE.config.rate() : 0.92);   // honor the Speed setting
       u.pitch = opts.pitch || 1.15; // friendly, bright
       u.volume = 1;
-      if (voice) { u.voice = voice; u.lang = voice.lang; }
+      if (v) { u.voice = v; u.lang = v.lang; }
+      else { u.lang = TE.i18n ? TE.i18n.locale(code) : "en-US"; }
       window.speechSynthesis.speak(u);
     } catch (e) {}
   }
@@ -111,11 +137,7 @@ TE.audio = (function () {
     tone(294, 0.20, "sine", 0.12, 0.12);
   }
 
-  function setMuted(m) {
-    muted = !!m;
-    try { localStorage.setItem("te-muted", muted ? "1" : "0"); } catch (e) {}
-    if (muted && hasSpeech) { try { window.speechSynthesis.cancel(); } catch (e) {} }
-  }
+  function setMuted(m) { muted = !!m; if (muted && hasSpeech) { try { window.speechSynthesis.cancel(); } catch (e) {} } }
   function toggleMute() { setMuted(!muted); return muted; }
 
   return {
@@ -127,6 +149,7 @@ TE.audio = (function () {
     nudge: nudge,
     setMuted: setMuted,
     toggleMute: toggleMute,
+    hasVoice: hasVoice,
     get muted() { return muted; },
     get hasSpeech() { return hasSpeech; }
   };

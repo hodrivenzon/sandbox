@@ -31,7 +31,7 @@
       return { pct: pct, cls: cls, label: label, count: count };
     }
     var segs = [seg(learned, "s-learned", "Learned"), seg(learning, "s-learning", "Learning"), seg(fresh, "s-new", "Not started")];
-    var bar = el("div", { class: "mastery-bar" });
+    var bar = el("div", { class: "mastery-bar", role: "img", aria: { label: "Mastery: " + learned + " learned, " + learning + " learning, " + fresh + " not started, of " + total } });
     segs.forEach(function (s) { if (s.pct > 0) bar.appendChild(el("div", { class: "mastery-seg " + s.cls, style: { width: s.pct + "%" }, title: s.label + ": " + s.count })); });
 
     wrap.appendChild(el("div", { class: "card mastery-card" }, [

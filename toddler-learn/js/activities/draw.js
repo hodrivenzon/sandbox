@@ -5,6 +5,7 @@ window.TE = window.TE || {}; TE.screens = TE.screens || {};
 
 TE.screens.draw = {
   title: "Draw",
+  titleKey: "title_draw",
   theme: "draw",
   render: function (host) {
     var el = TE.ui.el;
@@ -44,16 +45,16 @@ TE.screens.draw = {
     clearBtn.addEventListener("click", function () {
       TE.audio.pop();
       canvas.querySelectorAll(".stamp").forEach(function (s) { s.remove(); });
-      TE.audio.speak("All clean!");
+      TE.audio.speak(TE.t("allClean"));
     });
     tools.appendChild(clearBtn);
 
     var stage = el("div", { class: "draw-wrap" }, [
-      el("div", { class: "prompt-banner", text: "Pick a sticker, then tap! ✨" }),
+      el("div", { class: "prompt-banner", text: TE.t("drawBanner") }),
       canvas,
       tools
     ]);
     host.appendChild(stage);
-    setTimeout(function () { TE.audio.speak("Pick a sticker, then tap to draw!"); }, 350);
+    setTimeout(function () { TE.audio.speak(TE.t("drawIntro")); }, 350);
   }
 };

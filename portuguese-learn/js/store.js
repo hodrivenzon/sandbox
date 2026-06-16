@@ -17,9 +17,13 @@ PT.store = (function () {
   function defaults() {
     return {
       srs: {},
+      custom: [],   // words saved from AI-tutor sessions: [{pt, en}]
       stats: { xp: 0, streak: 0, lastDay: null, learned: 0 },
       daily: { day: null, reviewed: 0, goal: 20 },
-      settings: { dir: "pt-en", ttsRate: 0.9, theme: "auto" }
+      settings: {
+        dir: "pt-en", ttsRate: 0.9, theme: "auto",
+        dialect: "pt-BR", level: "B1", model: "claude-opus-4-8", apiKey: ""
+      }
     };
   }
 
@@ -32,6 +36,7 @@ PT.store = (function () {
       if (raw) {
         var saved = JSON.parse(raw);
         base.srs = saved.srs || {};
+        base.custom = Array.isArray(saved.custom) ? saved.custom : [];
         Object.assign(base.stats, saved.stats || {});
         Object.assign(base.daily, saved.daily || {});
         Object.assign(base.settings, saved.settings || {});
@@ -97,7 +102,9 @@ PT.store = (function () {
     rec.due = Date.now() + INTERVALS[Math.min(rec.box, INTERVALS.length - 1)] * DAY;
     state.srs[key] = rec;
     var nowLearned = rec.box >= LEARNED_BOX;
-    if (!wasLearned && nowLearned) state.stats.learned++;
+    // A word that climbs back to mastery is no longer a "mistake": clear lapses
+    // so the review-mistakes deck doesn't keep re-mastered words forever.
+    if (!wasLearned && nowLearned) { state.stats.learned++; rec.lapses = 0; }
     else if (wasLearned && !nowLearned) state.stats.learned = Math.max(0, state.stats.learned - 1);
     state.daily.reviewed++;
     recordStudyDay();
@@ -116,23 +123,24 @@ PT.store = (function () {
   function dueFrom(items) {
     var now = Date.now();
     return items
-      .filter(function (it) { var r = state.srs[it.key]; return !r || r.due <= now; })
+      // a record with a missing/NaN due counts as due rather than vanishing
+      .filter(function (it) { var r = state.srs[it.key]; return !r || !(r.due > now); })
       .sort(function (a, b) {
         var ra = state.srs[a.key], rb = state.srs[b.key];
-        return (ra ? ra.due : 0) - (rb ? rb.due : 0);
+        return (ra && ra.due ? ra.due : 0) - (rb && rb.due ? rb.due : 0);
       });
   }
 
-  /* Items the learner keeps struggling with: seen a few times but still in a low
-     box and below ~60% accuracy, or that have lapsed out of the learned box.
-     Hardest (lowest accuracy) first. */
+  /* Items the learner keeps struggling with: low accuracy (independent of box
+     position, so a single lucky answer can't hide a shaky word), or that lapsed
+     out of mastery and haven't recovered. Hardest (lowest accuracy) first. */
   function strugglingFrom(items) {
     return items
       .map(function (it) { return { it: it, r: state.srs[it.key] }; })
       .filter(function (x) {
         var r = x.r; if (!r || r.seen < 2) return false;
         var acc = r.right / r.seen;
-        return (r.box <= 1 && acc < 0.6) || r.lapses > 0;
+        return acc < 0.6 || (r.lapses > 0 && r.box < LEARNED_BOX);
       })
       .sort(function (a, b) { return (a.r.right / a.r.seen) - (b.r.right / b.r.seen); })
       .map(function (x) { return x.it; });
@@ -161,6 +169,23 @@ PT.store = (function () {
 
   function setSetting(k, v) { state.settings[k] = v; save(); }
   function setGoal(n) { rollDay(); state.daily.goal = Math.max(5, Math.min(200, n | 0)); save(); }
+
+  /* Words the AI tutor flagged as new/difficult, saved for later practice. */
+  function getCustomWords() { return state.custom || []; }
+  function addCustomWords(map) {
+    if (!state.custom) state.custom = [];
+    var seen = {};
+    state.custom.forEach(function (w) { seen[(w.pt || "").toLowerCase()] = true; });
+    var added = 0;
+    Object.keys(map || {}).forEach(function (pt) {
+      var k = String(pt).trim();
+      if (!k || seen[k.toLowerCase()]) return;
+      state.custom.push({ pt: k, en: String(map[pt] || "").trim() });
+      seen[k.toLowerCase()] = true; added++;
+    });
+    if (added) save();
+    return added;
+  }
   function reset() { state = defaults(); state.daily.day = todayStr(); save(); }
 
   /* Back up / restore the whole profile as JSON text. */
@@ -170,10 +195,25 @@ PT.store = (function () {
       var obj = JSON.parse(text);
       if (!obj || typeof obj !== "object" || !obj.srs) return false;
       var fresh = defaults();
-      fresh.srs = obj.srs || {};
+      fresh.custom = Array.isArray(obj.custom) ? obj.custom : [];
       Object.assign(fresh.stats, obj.stats || {});
       Object.assign(fresh.daily, obj.daily || {});
       Object.assign(fresh.settings, obj.settings || {});
+      // Normalize every SRS record (older/edited backups may miss fields) and
+      // recompute "learned" from the boxes so the counter can never disagree.
+      var learned = 0;
+      Object.keys(obj.srs || {}).forEach(function (k) {
+        var r = obj.srs[k] || {};
+        var rec = {
+          box: r.box | 0, seen: r.seen | 0, right: r.right | 0,
+          lapses: r.lapses | 0, due: typeof r.due === "number" ? r.due : 0
+        };
+        fresh.srs[k] = rec;
+        if (rec.box >= LEARNED_BOX) learned++;
+      });
+      fresh.stats.learned = learned;
+      fresh.stats.xp = fresh.stats.xp | 0;
+      fresh.stats.streak = fresh.stats.streak | 0;
       state = fresh; save(); return true;
     } catch (e) { return false; }
   }
@@ -190,6 +230,7 @@ PT.store = (function () {
     dueFrom: dueFrom, strugglingFrom: strugglingFrom, lessonProgress: lessonProgress,
     boxDistribution: boxDistribution, accuracy: accuracy, seenCount: seenCount,
     setSetting: setSetting, setGoal: setGoal, reset: reset,
+    getCustomWords: getCustomWords, addCustomWords: addCustomWords,
     exportJSON: exportJSON, importJSON: importJSON
   };
 })();

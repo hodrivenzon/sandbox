@@ -53,6 +53,16 @@
     ]);
     wrap.appendChild(cta);
 
+    /* AI tutor — the headline conversational feature */
+    wrap.appendChild(el("a", { class: "card tutor-home-card", href: "#/tutor", onclick: function () { PT.audio.pop(); } }, [
+      el("div", { class: "thc-emoji", text: "🗣️" }),
+      el("div", { class: "thc-body" }, [
+        el("div", { class: "thc-title", text: "Talk with the AI tutor" }),
+        el("div", { class: "thc-sub", text: "Live conversation in Portuguese, corrected as you go" })
+      ]),
+      el("span", { class: "thc-go", text: "›" })
+    ]));
+
     /* advanced pillars: learn through famous songs + real conversations */
     if (PT.content.songs().length || PT.content.dialogues().length) {
       wrap.appendChild(C.sectionTitle("Learn with…"));

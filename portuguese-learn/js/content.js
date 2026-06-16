@@ -67,11 +67,25 @@ PT.content = (function () {
   songs.forEach(function (s) { all = all.concat(s.items); });
   dialogues.forEach(function (d) { all = all.concat(d.items); });
 
+  /* Words saved from AI-tutor sessions — computed live so freshly-saved words
+     are immediately practiceable and searchable without a reload. */
+  function customItems() {
+    var words = (PT.store && PT.store.getCustomWords) ? PT.store.getCustomWords() : [];
+    return words.map(function (w) {
+      return {
+        pt: w.pt, en: w.en, hint: "", pos: "phrase", gender: null,
+        note: "Saved from your AI tutor session", ex_pt: "", ex_en: "", emoji: "💬",
+        key: "custom:" + slug(w.pt), lessonId: "custom", lessonTitle: "My words",
+        route: "#/tutor", source: "custom"
+      };
+    });
+  }
+
   function search(q) {
     q = (q || "").trim();
     if (!q) return [];
     var norm = deburr(q);
-    return all.filter(function (it) {
+    return all.concat(customItems()).filter(function (it) {
       return deburr(it.pt).indexOf(norm) !== -1 || deburr(it.en).indexOf(norm) !== -1;
     }).slice(0, 60);
   }
@@ -79,8 +93,9 @@ PT.content = (function () {
   /* Normalize a typed answer: lowercase, trim, drop punctuation, collapse spaces
      (accents preserved). Used to grade typed recall + dictation. */
   function clean(s) {
-    return String(s).toLowerCase().trim()
-      .replace(/[.,!?;:¡¿"'()]/g, "").replace(/\s+/g, " ");
+    return String(s).toLowerCase()
+      .replace(/[.,!?;:¡¿"'()\-]/g, " ")   // hyphen -> space so "segunda-feira" == "segunda feira"
+      .replace(/\s+/g, " ").trim();
   }
   /* Compare a typed answer to the target. Returns {correct, exact, almost}:
      exact = right including accents; almost = right but for accents only. */
@@ -123,9 +138,10 @@ PT.content = (function () {
     dialogues: function () { return dialogues; },
     dialogue: function (id) { return dlgById[id] || null; },
     verbs: function () { return data.verbs || { verbs: [], grammar: [] }; },
-    allItems: function () { return all; },
+    allItems: function () { return all.concat(customItems()); },
+    customItems: customItems,
     lessonCount: function () { return lessonItems.length; },
-    totalCount: function () { return all.length; },
+    totalCount: function () { return all.length + customItems().length; },
     search: search,
     compareAnswer: compareAnswer,
     verbDrillItems: verbDrillItems

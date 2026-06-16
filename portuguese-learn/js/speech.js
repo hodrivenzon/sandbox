@@ -26,17 +26,22 @@ PT.audio = (function () {
   /* Choose the best available Portuguese voice: Brazilian first, then European,
      then anything tagged pt-*. We still set lang="pt-BR" on every utterance so
      engines that synthesize purely from a language code sound right too. */
+  function dialect() {
+    return (PT.store && PT.store.settings && PT.store.settings.dialect) || "pt-BR";
+  }
   function pickVoice() {
     if (!hasSpeech) return;
     var vs = window.speechSynthesis.getVoices() || [];
     if (!vs.length) return;
     var br = vs.filter(function (v) { return /pt[-_]br/i.test(v.lang) || /pt[-_]br/i.test(v.name); });
-    var pt = vs.filter(function (v) { return /pt[-_]pt/i.test(v.lang); });
+    var pt = vs.filter(function (v) { return /pt[-_]pt/i.test(v.lang) || /portugal/i.test(v.name); });
     var anyPt = vs.filter(function (v) { return /^pt(\b|[-_])/i.test(v.lang); });
-    if (br.length) { ptVoice = preferNamed(br); voiceQuality = "br"; }
-    else if (pt.length) { ptVoice = preferNamed(pt); voiceQuality = "pt"; }
-    else if (anyPt.length) { ptVoice = anyPt[0]; voiceQuality = "any-pt"; }
-    else { ptVoice = null; voiceQuality = "none"; }
+    // prefer the learner's chosen dialect, then the other, then any Portuguese
+    var order = (dialect() === "pt-PT") ? [["pt", pt], ["br", br], ["any-pt", anyPt]] : [["br", br], ["pt", pt], ["any-pt", anyPt]];
+    for (var i = 0; i < order.length; i++) {
+      if (order[i][1].length) { ptVoice = preferNamed(order[i][1]); voiceQuality = order[i][0]; return; }
+    }
+    ptVoice = null; voiceQuality = "none";
   }
   /* Among same-locale voices, gently prefer known good/natural ones. */
   function preferNamed(pool) {
@@ -79,7 +84,7 @@ PT.audio = (function () {
     try {
       window.speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(String(text));
-      u.lang = "pt-BR";
+      u.lang = dialect();
       u.rate = opts.rate || defaultRate();
       u.pitch = opts.pitch || 1;
       u.volume = 1;
@@ -114,7 +119,7 @@ PT.audio = (function () {
   function toggleMute() { setMuted(!muted); return muted; }
 
   return {
-    unlock: unlock, speak: speak, speakSlow: speakSlow, tone: tone, pop: pop, correct: correct, wrong: wrong,
+    unlock: unlock, speak: speak, speakSlow: speakSlow, repickVoice: pickVoice, tone: tone, pop: pop, correct: correct, wrong: wrong,
     setMuted: setMuted, toggleMute: toggleMute,
     get muted() { return muted; },
     get hasSpeech() { return hasSpeech; },
