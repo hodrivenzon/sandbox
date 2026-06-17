@@ -267,6 +267,33 @@
   .glosscard .gt{font-weight:800;font-size:13.5px;color:var(--accent2)}
   .glosscard .gf{font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
   .glosscard .gm{font-size:11.5px;color:var(--mut);margin-top:5px;line-height:1.45}
+  /* ===== gym LED clock ===== */
+  .ledcolors{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+  .ledcolors button{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+  .ledcolors button.on{border-color:#fff;box-shadow:0 0 0 2px var(--bg),0 0 12px currentColor}
+  .clockface{--led:#ff2d2d;--ledoff:rgba(255,45,45,.09);background:#04060a;border:1px solid #1a2030;border-radius:18px;padding:22px 16px;text-align:center;box-shadow:inset 0 0 60px rgba(0,0,0,.7)}
+  .tled{display:flex;justify-content:center;align-items:center;margin:4px 0}
+  .tled svg{width:100%;max-height:42vh}
+  .ampm{font-size:13px;letter-spacing:4px;color:var(--led);font-weight:800;height:16px;text-shadow:0 0 8px var(--led)}
+  .clockface .tphase{min-height:22px}
+  .drill{font-size:clamp(20px,5vw,34px);font-weight:800;letter-spacing:.5px;margin-top:8px;min-height:26px}
+  .nextup{font-size:13px;color:var(--mut);margin-top:5px;min-height:16px}
+  .sessprog{height:6px;background:#11151f;border-radius:4px;margin:14px auto 2px;max-width:540px;overflow:hidden}
+  .sessprog i{display:block;height:100%;background:var(--led);width:0;transition:width .25s linear}
+  .clockface.clockmode .tphase,.clockface.clockmode .drill,.clockface.clockmode .nextup,.clockface.clockmode .tround,.clockface.clockmode .sessprog,.clockface.clockmode #tStart,.clockface.clockmode #tReset,.clockface.clockmode #tShort{display:none}
+  .clockface:fullscreen{display:flex;flex-direction:column;justify-content:center;width:100vw;height:100vh;border-radius:0;padding:3vh 4vw;box-shadow:none}
+  .clockface:fullscreen .tled svg{max-height:62vh}
+  .clockface:fullscreen .drill{font-size:clamp(28px,6vw,60px)}
+  #fitCtrls .tmodes{margin-top:4px}
+  #sessionPick{max-width:440px;margin:6px auto 10px;text-align:center}
+  /* ===== random WOD builder ===== */
+  .bld-subtitle{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);margin:16px 0 6px}
+  .bld-subtitle span{text-transform:none;letter-spacing:0;color:var(--dim);font-size:10.5px}
+  .equipgrid,.drillgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:7px}
+  .chk{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 10px;cursor:pointer;font-size:12px;user-select:none}
+  .chk:hover{border-color:var(--accent)}
+  .chk input{width:auto;margin:0;accent-color:var(--accent);cursor:pointer}
+  .drillgroup{grid-column:1/-1;font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;margin:8px 0 1px;font-weight:700}
   .movecard.flash{border-color:var(--accent2)!important;box-shadow:0 0 0 1px var(--accent2),0 0 22px rgba(255,184,60,.35)}
   input.flash{border-color:var(--accent2)!important;box-shadow:0 0 0 1px var(--accent2)}
   .guidelink{cursor:pointer;border-bottom:1px dotted var(--dim)}
@@ -388,7 +415,7 @@
     <button data-view="analytics" role="tab" id="tab-analytics" aria-controls="view-analytics" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">📊</span><span class="tl">Analytics</span></button>
     <button data-view="train" role="tab" id="tab-train" aria-controls="view-train" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">🔥</span><span class="tl">Train</span></button>
     <button data-view="guide" role="tab" id="tab-guide" aria-controls="view-guide" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">📚</span><span class="tl">Guide</span></button>
-    <button data-view="timer" role="tab" id="tab-timer" aria-controls="view-timer" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">⏱️</span><span class="tl">Timer</span></button>
+    <button data-view="timer" role="tab" id="tab-timer" aria-controls="view-timer" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">🟥</span><span class="tl">Clock</span></button>
     <button data-view="log" role="tab" id="tab-log" aria-controls="view-log" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">📝</span><span class="tl">Log</span></button>
     <button data-view="progress" role="tab" id="tab-progress" aria-controls="view-progress" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">📈</span><span class="tl">Progress</span></button>
     <button data-view="profile" role="tab" id="tab-profile" aria-controls="view-profile" aria-selected="false" tabindex="-1"><span class="ti" aria-hidden="true">⚙️</span><span class="tl">Profile</span></button>
@@ -613,7 +640,7 @@
             <button data-cat="Hero">Heroes</button>
           </div>
           <input id="wodSearch" placeholder="Search WODs, movements…" style="flex:1;min-width:180px">
-          <button class="btn ghost sm" id="genBtn">⚡ Generate WOD</button>
+          <button class="btn ghost sm" id="genBtn">🎲 Random WOD Builder</button>
         </div>
         <div id="genPanel" style="display:none"></div>
         <div class="wodgrid" id="wodGrid"></div>
@@ -640,29 +667,50 @@
       <div class="card" style="margin-top:10px"><div class="glossgrid" id="glossGrid"></div></div>
     </section>
 
-    <!-- ============ TIMER ============ -->
+    <!-- ============ GYM CLOCK ============ -->
     <section id="view-timer" class="view">
       <div class="card" style="margin-top:10px">
-        <div class="tmodes" id="tModes">
-          <button data-mode="amrap" class="on">AMRAP</button>
-          <button data-mode="fortime">For Time</button>
-          <button data-mode="emom">EMOM</button>
-          <button data-mode="tabata">Tabata</button>
-          <button data-mode="interval">Intervals</button>
-          <button data-mode="rest">Rest</button>
+        <div class="seg" id="clkSub" style="max-width:380px;margin:0 auto 14px">
+          <button data-sub="clock" class="on">🕐 Digital Clock</button>
+          <button data-sub="fitness">⏱️ Fitness Timer</button>
         </div>
-        <div class="tparams" id="tParams"></div>
-        <p class="hint" id="tDesc" style="text-align:center"></p>
-        <div class="timerbox">
+
+        <div class="ledcolors" id="ledColors"></div>
+
+        <div id="fitCtrls" style="display:none">
+          <div class="tmodes" id="tModes">
+            <button data-mode="session" class="on">Sessions</button>
+            <button data-mode="amrap">AMRAP</button>
+            <button data-mode="fortime">For Time</button>
+            <button data-mode="emom">EMOM</button>
+            <button data-mode="tabata">Tabata</button>
+            <button data-mode="interval">Intervals</button>
+            <button data-mode="rest">Rest</button>
+          </div>
+          <div id="sessionPick">
+            <label for="sessionSel">Prebuilt training session</label>
+            <select id="sessionSel"></select>
+            <p class="hint" id="sessionDesc" style="margin-top:5px"></p>
+          </div>
+          <div class="tparams" id="tParams"></div>
+          <p class="hint" id="tDesc" style="text-align:center"></p>
+        </div>
+
+        <div class="clockface clockmode" id="clockFace">
           <div class="tphase" id="tPhase" style="color:var(--accent2)" aria-live="assertive">READY</div>
-          <div class="tdisplay" id="tDisplay" role="timer" aria-hidden="true">00:00</div>
+          <div class="tled" id="tLed"></div>
+          <div class="tdisplay vh" id="tDisplay" role="timer" aria-live="off">00:00</div>
+          <div class="ampm" id="tAmpm"></div>
+          <div class="drill" id="tDrill"></div>
+          <div class="nextup" id="tNext"></div>
           <div class="tround" id="tRound" aria-live="polite"></div>
-          <div class="tctrl">
+          <div class="sessprog"><i id="tProg"></i></div>
+          <div class="tctrl" id="tCtrl">
             <button class="btn" id="tStart">START</button>
             <button class="btn ghost" id="tReset">RESET</button>
-            <button class="btn ghost" id="tFull" aria-label="Toggle fullscreen">⛶</button>
+            <button class="btn ghost" id="tFull" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
           </div>
-          <p class="hint" style="text-align:center;margin-top:10px">Space = start/pause · R = reset</p>
+          <p class="hint" id="tShort" style="text-align:center;margin-top:10px">Space = start/pause · R = reset · F = fullscreen</p>
         </div>
       </div>
     </section>
@@ -977,7 +1025,7 @@ function blankApp(){ return { version:2, onboarded:true, demo:false,
   readiness:{row2k:'',run5k:'',pullups:0,mu:0,hswalk:0,lsit:0},
   recovery:{vol:60,sleep:7.5,rhr:55,sore:3},
   today:{sleep:7.5,rhr:55,sore:3,mood:4,energy:4},
-  week:1, compareId:null, goals:[],
+  week:1, compareId:null, goals:[], clock:{color:'red'}, builder:{place:'gym',equip:['barbell','dumbbell','kettlebell','pullup','rings','box','rope','wallball','rower','bike','medball','ghd']},
   logs:{lifts:[],wods:[],metrics:[],prs:[]} }; }
 function demoApp(){ const a=blankApp(); a.demo=true;
   a.lifts=Object.assign({},DEFAULTS);
@@ -1000,6 +1048,8 @@ function normalizeApp(d){
   if(d.lifts&&typeof d.lifts==='object') LIFTS.forEach(L=>{ base.lifts[L.k]=+d.lifts[L.k]||0; });
   ['readiness','recovery','today'].forEach(k=>{ if(d[k]&&typeof d[k]==='object') Object.assign(base[k],d[k]); });
   if(Array.isArray(d.goals)) base.goals=d.goals.filter(g=>g&&g.lift&&+g.target>0);
+  if(d.clock&&['red','green','blue','amber','white','cyan','pink'].indexOf(d.clock.color)>=0) base.clock.color=d.clock.color;
+  if(d.builder&&typeof d.builder==='object'){ base.builder.place=d.builder.place==='home'?'home':'gym'; if(Array.isArray(d.builder.equip))base.builder.equip=d.builder.equip.filter(x=>typeof x==='string'); }
   const dl=(d.logs&&typeof d.logs==='object')?d.logs:{};
   base.logs.lifts=Array.isArray(dl.lifts)?dl.lifts:[];
   base.logs.wods=Array.isArray(dl.wods)?dl.wods:[];
@@ -1517,33 +1567,88 @@ function wireTrain(){
   $('wodSearch').addEventListener('input',e=>{ trainSearch=e.target.value.toLowerCase(); renderWodGrid(); });
   $('wodGrid').addEventListener('click',e=>{ const b=e.target.closest('button[data-act]'); if(!b)return; const name=b.dataset.wod;
     if(b.dataset.act==='timer')startWodOnTimer(name); else {showView('log','wod');logWodPrefill(name);} });
-  $('genBtn').addEventListener('click',()=>{ const p=$('genPanel'); if(p.style.display==='none'){ p.style.display='block';
-    p.innerHTML=`<div class="row3" style="margin:4px 0 10px">
-      <div><label>Time domain</label><select id="genDomain"><option value="short">Short (sprint)</option><option value="med" selected>Medium</option><option value="long">Long (grind)</option></select></div>
-      <div><label>Format</label><select id="genFormat"><option>AMRAP</option><option>For Time</option><option>EMOM</option><option>Chipper</option></select></div>
-      <div><label>Focus</label><select id="genFocus"><option value="mixed">Mixed</option><option value="barbell">Barbell</option><option value="gymnastics">Gymnastics</option><option value="mono">Engine</option></select></div>
-      <div><label>Barbell load</label><select id="genInt"><option value="light">Light &amp; fast</option><option value="moderate" selected>Moderate</option><option value="heavy">Heavy</option></select></div></div>
-      <button class="btn sm" id="genGo">⚡ Generate Workout</button>`;
-    $('genGo').addEventListener('click',()=>{ GENWOD=genWOD(); renderWodGrid(); toast('Workout generated'); });
-  } else p.style.display='none'; });
+  $('genBtn').addEventListener('click',openBuilder);
+  $('genPanel').addEventListener('click',e=>{
+    const act=e.target.closest('button[data-act]'); if(act){ if(act.dataset.act==='timer')startWodOnTimer(act.dataset.wod); else {showView('log','wod');logWodPrefill(act.dataset.wod);} return; }
+    const pl=e.target.closest('#bldPlace button'); if(pl){ APP.builder.place=pl.dataset.place; APP.builder.equip=PLACE_PRESETS[pl.dataset.place].slice(); save(); syncBuilder(); return; }
+    if(e.target.id==='bldGo'){ buildRandomWOD(); return; }
+  });
+  $('genPanel').addEventListener('change',e=>{
+    if(e.target.dataset.eq){ const k=e.target.dataset.eq; if(e.target.checked){ if(!APP.builder.equip.includes(k))APP.builder.equip.push(k); } else APP.builder.equip=APP.builder.equip.filter(x=>x!==k); save(); renderDrills(); return; }
+    if(e.target.dataset.mv){ if(e.target.checked)builderExcluded.delete(e.target.dataset.mv); else builderExcluded.add(e.target.dataset.mv); }
+  });
   wiredTrain=true;
 }
 function rint(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function genWOD(){
-  const dom=$('genDomain').value, fmt=$('genFormat').value, foc=$('genFocus').value;
-  // metcon load = movement-appropriate % of the relevant 1RM (decoupled from the strength wave)
-  const intF={light:0.72,moderate:0.85,heavy:1.0}[($('genInt')||{}).value||'moderate']||0.85;
-  const bb=()=>{ const p=pick(GEN_POOL.barbell); const load=round((APP.lifts[p[1]]||60)*p[2]*intF,2.5); return `${p[0]} (${load?fmtW(load)+APP.units:'light'})`; };
-  const gy=()=>pick(GEN_POOL.gym), mo=()=>pick(GEN_POOL.mono);
-  let mv=[]; if(foc==='barbell')mv=[bb(),gy()]; else if(foc==='gymnastics')mv=[gy(),gy(),mo()]; else if(foc==='mono')mv=[mo(),gy()]; else mv=[bb(),gy(),mo()];
-  const cap=dom==='short'?(fmt==='AMRAP'?7:rint(6,9)):dom==='med'?(fmt==='AMRAP'?14:rint(12,16)):(fmt==='AMRAP'?22:rint(22,30));
-  let desc,stim;
-  if(fmt==='AMRAP'){ const reps=mv.map(()=>pick([8,10,12,15])); desc=`AMRAP ${cap} min:\n`+mv.map((m,i)=>`${reps[i]} ${m}`).join(', '); stim='Sustainable pace — pick a rhythm you can hold the whole window.'; }
-  else if(fmt==='EMOM'){ desc=`EMOM ${cap} min, alternating:\n`+mv.map((m,i)=>`Min ${i+1}: ${pick([8,10,12])} ${m}`).join('\n'); stim='Hit each interval and recover in the remaining seconds.'; }
-  else if(fmt==='Chipper'){ desc=`For time:\n`+mv.map(m=>`${pick([30,40,50])} ${m}`).join(', '); stim='Break early on the big sets — chip away, don\'t blow up.'; }
-  else { const rounds=dom==='short'?3:dom==='med'?5:rint(6,8); desc=`${rounds} rounds for time:\n`+mv.map(m=>`${pick([9,12,15])} ${m}`).join(', '); stim='Steady repeatable round pace beats a fast first round.'; }
-  return {name:'Generated WOD',category:'Generated',format:fmt,description:desc,timeCapMin:cap,stimulus:stim,standards:{}};
+/* ---- random WOD builder ---- */
+const EQUIP=[{k:'barbell',n:'Barbell',ic:'🏋️'},{k:'dumbbell',n:'Dumbbells',ic:'💪'},{k:'kettlebell',n:'Kettlebell',ic:'🔔'},{k:'pullup',n:'Pull-up Bar',ic:'🧗'},{k:'rings',n:'Rings',ic:'⭕'},{k:'box',n:'Plyo Box',ic:'📦'},{k:'rope',n:'Jump Rope',ic:'🪢'},{k:'wallball',n:'Wall Ball',ic:'🏐'},{k:'rower',n:'Rower',ic:'🚣'},{k:'bike',n:'Bike',ic:'🚴'},{k:'medball',n:'Med Ball',ic:'⚽'},{k:'ghd',n:'GHD',ic:'🪑'}];
+const PLACE_PRESETS={gym:['barbell','dumbbell','kettlebell','pullup','rings','box','rope','wallball','rower','bike','medball','ghd'],home:['dumbbell','kettlebell','rope','pullup']};
+const MOVE_BANK=[
+ {n:'Thruster',eq:'barbell',mod:'WL',lift:'front_squat',f:.5,rep:[9,21]},{n:'Power Clean',eq:'barbell',mod:'WL',lift:'power_clean',f:.6,rep:[5,12]},{n:'Power Snatch',eq:'barbell',mod:'WL',lift:'snatch',f:.55,rep:[5,10]},{n:'Deadlift',eq:'barbell',mod:'WL',lift:'deadlift',f:.55,rep:[8,15]},{n:'Front Squat',eq:'barbell',mod:'WL',lift:'front_squat',f:.6,rep:[6,12]},{n:'Push Press',eq:'barbell',mod:'WL',lift:'strict_press',f:.85,rep:[8,15]},{n:'Overhead Squat',eq:'barbell',mod:'WL',lift:'overhead_sq',f:.6,rep:[6,12]},{n:'Clean & Jerk',eq:'barbell',mod:'WL',lift:'clean_jerk',f:.6,rep:[5,10]},{n:'Sumo Deadlift High-Pull',eq:'barbell',mod:'WL',lift:'deadlift',f:.4,rep:[10,18]},
+ {n:'DB Snatch',eq:'dumbbell',mod:'WL',db:1,rep:[10,20]},{n:'DB Thruster',eq:'dumbbell',mod:'WL',db:1,rep:[8,16]},{n:'DB Push Press',eq:'dumbbell',mod:'WL',db:1,rep:[10,16]},{n:'DB Walking Lunge',eq:'dumbbell',mod:'WL',db:1,rep:[10,20]},{n:'Devil Press',eq:'dumbbell',mod:'WL',db:1,rep:[6,12]},{n:'Renegade Row',eq:'dumbbell',mod:'WL',db:1,rep:[8,16]},
+ {n:'KB Swing',eq:'kettlebell',mod:'WL',kb:1,rep:[15,30]},{n:'Goblet Squat',eq:'kettlebell',mod:'WL',kb:1,rep:[10,20]},{n:'KB Snatch',eq:'kettlebell',mod:'WL',kb:1,rep:[10,20]},{n:'KB Clean & Jerk',eq:'kettlebell',mod:'WL',kb:1,rep:[10,20]},
+ {n:'Pull-ups',eq:'pullup',mod:'Gym',rep:[5,15]},{n:'Chest-to-Bar',eq:'pullup',mod:'Gym',rep:[5,12]},{n:'Toes-to-Bar',eq:'pullup',mod:'Gym',rep:[8,18]},{n:'Knees-to-Elbow',eq:'pullup',mod:'Gym',rep:[8,18]},
+ {n:'Ring Rows',eq:'rings',mod:'Gym',rep:[8,18]},{n:'Ring Dips',eq:'rings',mod:'Gym',rep:[6,12]},{n:'Muscle-ups',eq:'rings',mod:'Gym',rep:[3,8]},
+ {n:'Box Jumps',eq:'box',mod:'Gym',rep:[10,25]},{n:'Box Step-ups',eq:'box',mod:'Gym',rep:[15,30]},{n:'Box Jump-overs',eq:'box',mod:'Gym',rep:[10,20]},
+ {n:'Wall Balls',eq:'wallball',mod:'WL',rep:[15,30]},{n:'Med-Ball Cleans',eq:'medball',mod:'WL',rep:[10,20]},{n:'Med-Ball Sit-ups',eq:'medball',mod:'BW',rep:[15,30]},
+ {n:'Double-Unders',eq:'rope',mod:'Cardio',rep:[20,60]},{n:'Single-Unders',eq:'rope',mod:'Cardio',rep:[50,120]},
+ {n:'Row',eq:'rower',mod:'Cardio',unit:'cal',rep:[10,25]},{n:'Bike',eq:'bike',mod:'Cardio',unit:'cal',rep:[8,20]},
+ {n:'GHD Sit-ups',eq:'ghd',mod:'Gym',rep:[10,20]},
+ {n:'Burpees',eq:'none',mod:'BW',rep:[8,20]},{n:'Air Squats',eq:'none',mod:'BW',rep:[15,35]},{n:'Push-ups',eq:'none',mod:'BW',rep:[10,30]},{n:'Sit-ups',eq:'none',mod:'BW',rep:[15,30]},{n:'Walking Lunges',eq:'none',mod:'BW',rep:[16,30]},{n:'Mountain Climbers',eq:'none',mod:'BW',rep:[20,40]},{n:'Hollow Rocks',eq:'none',mod:'BW',rep:[15,30]},{n:'Squat Jumps',eq:'none',mod:'BW',rep:[15,30]},{n:'Burpee Broad Jumps',eq:'none',mod:'BW',rep:[8,16]},{n:'Run',eq:'none',mod:'Cardio',unit:'m',rep:[200,400]},
+];
+let builderExcluded=new Set();
+function dbLoad(i){ return ({light:'2×15kg',moderate:'2×22.5kg',heavy:'2×30kg'})[i]||'2×22.5kg'; }
+function kbLoad(i){ return ({light:'16kg',moderate:'24kg',heavy:'32kg'})[i]||'24kg'; }
+function moveStr(m,intF,intn){ if(m.eq==='barbell'&&m.lift){ const w=round((APP.lifts[m.lift]||60)*m.f*intF,2.5); return m.n+(w?` (${fmtW(w)}${APP.units})`:''); }
+  if(m.db)return m.n+` (${dbLoad(intn)})`; if(m.kb)return m.n+` (${kbLoad(intn)})`; return m.n; }
+function repFor(m,dom){ const lo=m.rep[0],hi=m.rep[1],t=dom==='short'?.3:dom==='med'?.55:.85; let r=Math.round(lo+(hi-lo)*t);
+  if(m.unit==='m')r=Math.max(100,round(r,100)); else if(r>=20)r=round(r,5); return r; }
+function repU(m,r){ return m.unit==='cal'?`${r} cal`:m.unit==='m'?`${r}m`:`${r}`; }
+function pickVaried(arr,n){ const pool=arr.slice(),out=[],mods=new Set();
+  while(out.length<n&&pool.length){ let i=pool.findIndex(m=>!mods.has(m.mod)); if(i<0)i=Math.floor(Math.random()*pool.length); const m=pool.splice(i,1)[0]; out.push(m); mods.add(m.mod); } return out; }
+function renderEquip(){ $('bldEquip').innerHTML=EQUIP.map(e=>`<label class="chk"><input type="checkbox" data-eq="${e.k}" ${APP.builder.equip.includes(e.k)?'checked':''}>${e.ic} ${e.n}</label>`).join('')
+  +`<label class="chk" style="opacity:.7"><input type="checkbox" checked disabled>🤸 Bodyweight</label>`; }
+function renderDrills(){ const eq=APP.builder.equip; const avail=MOVE_BANK.filter(m=>m.eq==='none'||eq.includes(m.eq));
+  const groups={WL:'Weightlifting',Gym:'Gymnastics',Cardio:'Cardio / Engine',BW:'Bodyweight'}; let html='';
+  Object.keys(groups).forEach(g=>{ const ms=avail.filter(m=>m.mod===g); if(!ms.length)return;
+    html+=`<div class="drillgroup">${groups[g]}</div>`+ms.map(m=>`<label class="chk"><input type="checkbox" data-mv="${escAttr(m.n)}" ${builderExcluded.has(m.n)?'':'checked'}>${m.n}</label>`).join(''); });
+  $('bldDrills').innerHTML=html||'<p class="hint">Tick some equipment to see available drills.</p>'; }
+function syncBuilder(){ document.querySelectorAll('#bldPlace button').forEach(b=>b.classList.toggle('on',b.dataset.place===APP.builder.place)); renderEquip(); renderDrills(); }
+function openBuilder(){ const p=$('genPanel'); if(p.style.display!=='none'){ p.style.display='none'; return; } p.style.display='block';
+  if(!APP.builder)APP.builder={place:'gym',equip:PLACE_PRESETS.gym.slice()};
+  p.innerHTML=`<div class="bld-subtitle">Setting</div>
+    <div class="seg" id="bldPlace" style="max-width:300px"><button data-place="gym">🏋️ Gym</button><button data-place="home">🏠 Home</button></div>
+    <div class="bld-subtitle">Available equipment</div><div class="equipgrid" id="bldEquip"></div>
+    <div class="bld-subtitle">Include drills <span>(uncheck to exclude)</span></div><div class="drillgrid" id="bldDrills"></div>
+    <div class="row3" style="margin-top:14px">
+      <div><label>Format</label><select id="bldFormat"><option>Random</option><option>AMRAP</option><option>For Time</option><option>EMOM</option><option>21-15-9</option><option>Chipper</option></select></div>
+      <div><label>Time domain</label><select id="bldDomain"><option value="short">Short</option><option value="med" selected>Medium</option><option value="long">Long</option></select></div>
+      <div><label>Load</label><select id="bldInt"><option value="light">Light</option><option value="moderate" selected>Moderate</option><option value="heavy">Heavy</option></select></div></div>
+    <button class="btn" id="bldGo" style="margin-top:8px">🎲 Generate Random WOD</button>
+    <div id="bldResult"></div>`;
+  syncBuilder();
+}
+function buildRandomWOD(){
+  const checked=[...$('bldDrills').querySelectorAll('input[data-mv]:checked')].map(i=>i.dataset.mv);
+  const moves=MOVE_BANK.filter(m=>checked.includes(m.n));
+  if(moves.length<2){ toast('Tick at least 2 drills'); return; }
+  const dom=$('bldDomain').value, intn=$('bldInt').value, intF=({light:.72,moderate:.85,heavy:1})[intn]||.85;
+  let fmt=$('bldFormat').value; if(fmt==='Random')fmt=pick(['AMRAP','For Time','EMOM','21-15-9','Chipper']);
+  const count=Math.min(fmt==='Chipper'?rint(3,4):rint(2,3),moves.length);
+  const chosen=pickVaried(moves,count);
+  const cap=dom==='short'?(fmt==='AMRAP'?7:rint(6,9)):dom==='med'?(fmt==='AMRAP'?14:rint(12,16)):(fmt==='AMRAP'?22:rint(20,28));
+  const ms=m=>moveStr(m,intF,intn);
+  let desc,stim,format='For Time',tcap=cap;
+  if(fmt==='AMRAP'){ desc=`AMRAP ${cap} min:\n`+chosen.map(m=>`${repU(m,repFor(m,dom))} ${ms(m)}`).join(', '); stim='Pick a sustainable pace you can hold the whole window.'; format='AMRAP'; }
+  else if(fmt==='EMOM'){ desc=`EMOM ${cap} min:\n`+chosen.map((m,i)=>`Min ${i+1}: ${repU(m,repFor(m,'short'))} ${ms(m)}`).join('\n'); stim='Hit each minute and rest the remainder.'; format='EMOM'; }
+  else if(fmt==='21-15-9'){ desc=`21-15-9 reps for time:\n`+chosen.map(m=>ms(m)).join(', '); stim='Classic descending ladder — go unbroken where you can.'; tcap=Math.min(cap,15); }
+  else if(fmt==='Chipper'){ desc=`For time:\n`+chosen.map(m=>`${repU(m,repFor(m,'long'))} ${ms(m)}`).join(', '); stim='Break the big sets early and keep chipping.'; format='Chipper'; }
+  else { const rounds=dom==='short'?rint(3,4):dom==='med'?5:rint(6,8); desc=`${rounds} rounds for time:\n`+chosen.map(m=>`${repU(m,repFor(m,dom))} ${ms(m)}`).join(', '); stim='Find a repeatable round pace.'; }
+  const place=APP.builder.place==='home'?'🏠 Home':'🏋️ Gym';
+  GENWOD={name:'Random WOD',category:'Generated',format,description:desc,timeCapMin:tcap,stimulus:`${place} build · ${stim}`,standards:{}};
+  $('bldResult').innerHTML=`<div style="margin-top:14px">${wodCard(GENWOD)}</div>`;
+  renderWodGrid(); toast('Random WOD generated 🎲');
 }
 function scalingFor(w){ const d=(w.description||'').toLowerCase(); const tips=[];
   if(d.includes('muscle-up'))tips.push('muscle-ups → jumping MU or pull-up + dip');
@@ -1574,7 +1679,7 @@ function wodCard(w){
 function renderWodGrid(){
   let list=WODS.filter(w=>trainCat==='all'||w.category===trainCat);
   if(trainSearch) list=list.filter(w=>(w.name+' '+w.description).toLowerCase().includes(trainSearch));
-  let html=''; if(GENWOD && (trainCat==='all') && (!trainSearch || 'generated'.includes(trainSearch))) html+=wodCard(GENWOD);
+  let html=''; if(GENWOD && (trainCat==='all') && (!trainSearch || 'generated random wod'.includes(trainSearch))) html+=wodCard(GENWOD);
   html+=list.map(wodCard).join('');
   $('wodGrid').innerHTML=html||'<p class="hint">No workouts match.</p>';
 }
@@ -1583,33 +1688,83 @@ function renderTrain(){ if(!wiredTrain)wireTrain(); renderWodGrid(); }
 /* ============================================================
    TIMER MODULE
    ============================================================ */
-let T={mode:'amrap',running:false,base:0,startTs:0,tick:null,lastSec:-1,ac:null,
-  params:{cap:20,min:10,rounds:8,work:30,rest:30}};
+let T={mode:'session',sub:'clock',running:false,base:0,startTs:0,tick:null,clkInt:null,lastSec:-1,lastIdx:-1,ac:null,
+  session:null,color:'red',wakeLock:null,params:{cap:20,min:10,rounds:8,work:30,rest:30}};
 function beep(f,d){ try{ if(!T.ac)T.ac=new (window.AudioContext||window.webkitAudioContext)();
   const o=T.ac.createOscillator(),g=T.ac.createGain(); o.frequency.value=f; o.type='square'; o.connect(g); g.connect(T.ac.destination);
   const t=T.ac.currentTime; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.35,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+d);
   o.start(t); o.stop(t+d); }catch(e){} }
 function tElapsed(){ return T.base + (T.running?(performance.now()-T.startTs)/1000:0); }
+
+/* --- LED 7-segment renderer --- */
+const LED_SEG={'0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgecd','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':''};
+const LED_RECT={a:[18,8,64,16],b:[78,18,16,64],c:[78,96,16,64],d:[18,156,64,16],e:[6,96,16,64],f:[6,18,16,64],g:[18,82,64,16]};
+function ledDigit(ch,x){ const on=LED_SEG[ch]!==undefined?LED_SEG[ch]:''; let s=''; for(const k in LED_RECT){ const r=LED_RECT[k],lit=on.indexOf(k)>=0;
+  s+=`<rect x="${x+r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" rx="4" fill="${lit?'var(--led)':'var(--ledoff)'}"${lit?' filter="url(#ledg)"':''}/>`; } return s; }
+function ledColon(x){ return `<circle cx="${x+18}" cy="70" r="9" fill="var(--led)" filter="url(#ledg)"/><circle cx="${x+18}" cy="118" r="9" fill="var(--led)" filter="url(#ledg)"/>`; }
+function ledHTML(str){ let x=0,body=''; for(const ch of String(str)){ if(ch===':'){ body+=ledColon(x); x+=36; } else { body+=ledDigit(ch,x); x+=108; } } if(x<10)x=108;
+  return `<svg viewBox="0 0 ${x} 184" preserveAspectRatio="xMidYMid meet"><defs><filter id="ledg" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>${body}</svg>`; }
+const LED_COLORS={red:'#ff2d2d',green:'#27e36a',blue:'#3aa0ff',amber:'#ffb020',white:'#eef2ff',cyan:'#22e0d6',pink:'#ff4fa3'};
+function hexA(hex,a){ const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
+function buildLedColors(){ const el=$('ledColors'); if(el.children.length)return; el.innerHTML=Object.keys(LED_COLORS).map(k=>`<button data-c="${k}" aria-label="${k} display" style="background:${LED_COLORS[k]};color:${LED_COLORS[k]}"></button>`).join(''); }
+function applyLed(name){ const c=LED_COLORS[name]||LED_COLORS.red; const f=$('clockFace'); f.style.setProperty('--led',c); f.style.setProperty('--ledoff',hexA(c,.10));
+  T.color=name; if(!APP.clock)APP.clock={}; APP.clock.color=name; save(); document.querySelectorAll('#ledColors button').forEach(b=>b.classList.toggle('on',b.dataset.c===name)); }
+function renderDigitalClock(){ const d=new Date(); let h=d.getHours(); const ap=h<12?'AM':'PM'; let hr=h%12; if(hr===0)hr=12;
+  const hs=(hr<10?' ':'')+hr,mm=String(d.getMinutes()).padStart(2,'0'),ss=String(d.getSeconds()).padStart(2,'0');
+  $('tLed').innerHTML=ledHTML(hs+':'+mm+':'+ss); $('tAmpm').textContent=ap; $('tPhase').textContent='DIGITAL CLOCK'; $('tPhase').style.color='var(--led)'; $('tDisplay').textContent=hr+':'+mm+' '+ap; }
+
+/* --- prebuilt training sessions --- */
+function segPrep(sec){ return {label:'Get Ready',kind:'prep',sec}; }
+function makeTabata(label,rounds,work,rest,prep){ const s=[]; if(prep)s.push(segPrep(prep)); for(let r=1;r<=rounds;r++){ s.push({label,kind:'work',sec:work,round:r,rounds}); s.push({label:'Rest',kind:'rest',sec:rest,round:r,rounds}); } if(s.length&&s[s.length-1].kind==='rest')s.pop(); return s; }
+function makeIntervals(wl,rl,rounds,work,rest,prep){ const s=[]; if(prep)s.push(segPrep(prep)); for(let r=1;r<=rounds;r++){ s.push({label:wl,kind:'work',sec:work,round:r,rounds}); s.push({label:rl,kind:'rest',sec:rest,round:r,rounds}); } if(s.length&&s[s.length-1].kind==='rest')s.pop(); return s; }
+function makeEmom(min,labels,prep){ const s=[]; if(prep)s.push(segPrep(prep)); for(let m=1;m<=min;m++)s.push({label:labels[(m-1)%labels.length],kind:'work',sec:60,round:m,rounds:min}); return s; }
+function makeCircuit(stations,rounds,sec,rest,prep){ const s=[]; if(prep)s.push(segPrep(prep)); for(let r=1;r<=rounds;r++){ stations.forEach(st=>s.push({label:st,kind:'work',sec,round:r,rounds})); if(r<rounds&&rest)s.push({label:'Rest',kind:'rest',sec:rest,round:r,rounds}); } return s; }
+function makeFlow(items,prep){ const s=[]; if(prep)s.push(segPrep(prep)); items.forEach(it=>s.push({label:it[0],kind:it[2]||'work',sec:it[1]})); return s; }
+function makeSingle(label,kind,sec,up,prep){ const s=[]; if(prep)s.push(segPrep(prep)); s.push({label,kind,sec,up}); return s; }
+const TRAINING_SETS=[
+  {id:'tabata',name:'Tabata — Classic',tag:'4 min',desc:'8 rounds of 20s max work / 10s rest. Pick one movement and empty the tank.',make:()=>makeTabata('Work',8,20,10,10)},
+  {id:'tabata4',name:'Tabata — 4 Movements',tag:'~19 min',desc:'Four movements, each a full 8-round Tabata, with 60s rest between blocks.',make:()=>{ const mv=['Air Squats','Push-ups','Sit-ups','Burpees']; let s=[segPrep(10)]; mv.forEach((m,i)=>{ s=s.concat(makeTabata(m,8,20,10,0)); if(i<mv.length-1)s.push({label:'Rest',kind:'rest',sec:60}); }); return s; }},
+  {id:'emom12',name:'EMOM 12 — Alternating',tag:'12 min',desc:'Every minute on the minute, alternate Burpees and KB Swings for 12 minutes.',make:()=>makeEmom(12,['Burpees','KB Swings'],10)},
+  {id:'fgb',name:'Fight Gone Bad',tag:'17 min',desc:'3 rounds of 5 stations (1 min each): Wall Ball, SDHP, Box Jump, Push Press, Row — 1 min rest between rounds.',make:()=>makeCircuit(['Wall Ball','SDHP','Box Jump','Push Press','Row'],3,60,60,10)},
+  {id:'amrap20',name:'AMRAP 20',tag:'20 min',desc:'One 20-minute block — as many rounds/reps as possible.',make:()=>makeSingle('AMRAP','work',1200,false,10)},
+  {id:'int5',name:'Intervals — 5 × 3:00 / 1:00',tag:'19 min',desc:'5 hard 3-minute efforts with 1 minute rest between.',make:()=>makeIntervals('Work','Rest',5,180,60,10)},
+  {id:'boxing',name:'Boxing — 5 × 3:00 Rounds',tag:'19 min',desc:'Five 3-minute rounds with 1-minute rest — bell every round.',make:()=>makeIntervals('Round','Rest',5,180,60,10)},
+  {id:'seven',name:'7-Minute Workout',tag:'~8 min',desc:'12 bodyweight exercises, 30s work / 10s rest — classic HICT circuit.',make:()=>{ const ex=['Jumping Jacks','Wall Sit','Push-ups','Crunches','Step-ups','Squats','Tricep Dips','Plank','High Knees','Lunges','Push-up + Rotation','Side Plank']; let s=[segPrep(10)]; ex.forEach((e,i)=>{ s.push({label:e,kind:'work',sec:30,round:i+1,rounds:12}); if(i<ex.length-1)s.push({label:'Rest',kind:'rest',sec:10,round:i+1,rounds:12}); }); return s; }},
+  {id:'warmup',name:'Warm-up Flow',tag:'~4 min',desc:'A quick movement-prep ramp before you train.',make:()=>makeFlow([['Jumping Jacks',60],['Air Squats',45],['Inchworms',45],['Greatest Stretch',60],['Arm Circles',30]],5)},
+  {id:'fortime',name:'For Time — 12:00 cap',tag:'12 min',desc:'A count-up clock with a 12-minute cap for a task-based workout.',make:()=>makeSingle('For Time','work',720,true,10)},
+];
+function buildSessionSel(){ const s=$('sessionSel'); if(s.children.length)return; s.innerHTML=TRAINING_SETS.map(t=>`<option value="${t.id}">${t.name} · ${t.tag}</option>`).join(''); }
+function loadSession(id){ const def=TRAINING_SETS.find(t=>t.id===id)||TRAINING_SETS[0]; const segs=def.make(); const total=segs.reduce((a,s)=>a+s.sec,0);
+  T.session={name:def.name,segments:segs,total}; $('sessionDesc').textContent=def.desc+'  ·  '+secToMmss(total)+' total'; tReset(); }
+function sessionAt(el){ const segs=T.session.segments; let acc=0; for(let i=0;i<segs.length;i++){ const s=segs[i]; if(el<acc+s.sec)return {i,seg:s,inSeg:el-acc,remain:acc+s.sec-el}; acc+=s.sec; } return {done:true,i:segs.length}; }
+
 function tCompute(el){
   const p=T.params;
-  if(T.mode==='amrap'){ const cap=p.cap*60,rem=cap-el; return {big:secToMmss(Math.max(0,rem)),phase:'AMRAP',col:'#39d98a',round:'',rem:Math.ceil(rem),done:rem<=0}; }
-  if(T.mode==='fortime'){ const cap=(p.cap||0)*60; return {big:secToMmss(el),phase:'FOR TIME',col:'#ffb83c',round:cap?'cap '+p.cap+':00':'',rem:cap?Math.ceil(cap-el):99,done:cap>0&&el>=cap}; }
-  if(T.mode==='emom'){ const mn=Math.floor(el/60),within=el%60,rem=60-within; return {big:secToMmss(rem),phase:'EMOM',col:'#4d9fff',round:`Round ${Math.min(mn+1,p.min)} / ${p.min}`,rem:Math.ceil(rem),done:mn>=p.min,newRound:within<1}; }
+  if(T.mode==='session'){ if(!T.session)return {big:'0:00',phase:'PICK A SESSION',col:'var(--mut)',round:'',rem:99,done:false,prog:0};
+    const a=sessionAt(el); if(a.done)return {big:secToMmss(T.session.total),phase:'DONE',col:'#39d98a',round:'',rem:99,done:true,drill:'Complete 🎉',next:'',prog:1};
+    const s=a.seg,show=s.up?a.inSeg:a.remain; const colMap={work:'var(--led)',rest:'#3aa0ff',prep:'#ffb020'},phMap={work:'WORK',rest:'REST',prep:'GET READY'};
+    const segs=T.session.segments,next=segs[a.i+1]?segs[a.i+1].label:'Finish';
+    return {big:secToMmss(Math.max(0,show)),phase:phMap[s.kind]||'GO',col:colMap[s.kind]||'var(--led)',round:s.round?`Round ${s.round} / ${s.rounds}`:'',
+      rem:Math.ceil(a.remain),done:false,drill:s.label,next:'Next: '+next,prog:clamp(el/T.session.total,0,1),idx:a.i,newRound:a.inSeg<1,kind:s.kind}; }
+  if(T.mode==='amrap'){ const cap=p.cap*60,rem=cap-el; return {big:secToMmss(Math.max(0,rem)),phase:'AMRAP',col:'var(--led)',round:'',rem:Math.ceil(rem),done:rem<=0,prog:clamp(el/cap,0,1)}; }
+  if(T.mode==='fortime'){ const cap=(p.cap||0)*60; return {big:secToMmss(el),phase:'FOR TIME',col:'var(--led)',round:cap?'cap '+p.cap+':00':'',rem:cap?Math.ceil(cap-el):99,done:cap>0&&el>=cap,prog:cap?clamp(el/cap,0,1):0}; }
+  if(T.mode==='emom'){ const mn=Math.floor(el/60),within=el%60,rem=60-within; return {big:secToMmss(rem),phase:'EMOM',col:'var(--led)',round:`Round ${Math.min(mn+1,p.min)} / ${p.min}`,rem:Math.ceil(rem),done:mn>=p.min,newRound:within<1,prog:clamp(el/(p.min*60),0,1)}; }
   if(T.mode==='tabata'){ const idx=Math.floor(el/30),within=el%30,work=within<20,rem=work?20-within:30-within;
-    return {big:secToMmss(rem),phase:work?'WORK':'REST',col:work?'#ff5a3c':'#4d9fff',round:`Round ${Math.min(idx+1,p.rounds)} / ${p.rounds}`,rem:Math.ceil(rem),done:idx>=p.rounds,newRound:work&&within<1}; }
-  if(T.mode==='rest'){ const tot=p.restTarget||180,rem=tot-el; return {big:secToMmss(Math.max(0,rem)),phase:'REST',col:'#4d9fff',round:'target '+tot+'s',rem:Math.ceil(rem),done:rem<=0}; }
-  // interval
+    return {big:secToMmss(rem),phase:work?'WORK':'REST',col:work?'var(--led)':'#3aa0ff',round:`Round ${Math.min(idx+1,p.rounds)} / ${p.rounds}`,rem:Math.ceil(rem),done:idx>=p.rounds,newRound:work&&within<1,prog:clamp(el/(p.rounds*30),0,1)}; }
+  if(T.mode==='rest'){ const tot=p.restTarget||180,rem=tot-el; return {big:secToMmss(Math.max(0,rem)),phase:'REST',col:'#3aa0ff',round:'target '+tot+'s',rem:Math.ceil(rem),done:rem<=0,prog:clamp(el/tot,0,1)}; }
   const cyc=(+p.work)+(+p.rest),idx=Math.floor(el/cyc),within=el%cyc,work=within<p.work,rem=work?p.work-within:cyc-within;
-  return {big:secToMmss(rem),phase:work?'WORK':'REST',col:work?'#ff5a3c':'#4d9fff',round:`Round ${Math.min(idx+1,p.rounds)} / ${p.rounds}`,rem:Math.ceil(rem),done:idx>=p.rounds};
+  return {big:secToMmss(rem),phase:work?'WORK':'REST',col:work?'var(--led)':'#3aa0ff',round:`Round ${Math.min(idx+1,p.rounds)} / ${p.rounds}`,rem:Math.ceil(rem),done:idx>=p.rounds,newRound:work&&within<1,prog:clamp(el/(p.rounds*cyc),0,1)};
 }
 function tRender(){
   const el=tElapsed(); const c=tCompute(el);
-  $('tDisplay').textContent=c.big; $('tPhase').textContent=c.done?'DONE':c.phase; $('tPhase').style.color=c.done?'#39d98a':c.col; $('tRound').textContent=c.round;
+  $('tLed').innerHTML=ledHTML(c.big); $('tDisplay').textContent=c.big; $('tAmpm').textContent='';
+  $('tPhase').textContent=c.done?'DONE':c.phase; $('tPhase').style.color=c.done?'#39d98a':c.col;
+  $('tRound').textContent=c.round||''; $('tDrill').textContent=c.drill||''; $('tDrill').style.color=c.col||'var(--txt)';
+  $('tNext').textContent=c.next||''; $('tProg').style.width=((c.prog||0)*100)+'%';
   if(T.running){ const sec=Math.floor(el);
-    if(sec!==T.lastSec){ T.lastSec=sec;
-      if(!c.done){ if(c.rem<=3&&c.rem>=1){beep(880,.09); navigator.vibrate&&navigator.vibrate(80);} if(c.newRound&&sec>0){beep(1320,.16); navigator.vibrate&&navigator.vibrate(160);} }
-    }
-    if(c.done){ beep(1320,.5); setTimeout(()=>beep(990,.5),250); navigator.vibrate&&navigator.vibrate([200,80,200]); tPause(); $('tStart').textContent='START'; }
+    if(c.idx!==undefined&&c.idx!==T.lastIdx){ if(T.lastIdx!==-1){ if(c.kind==='work'){beep(1320,.16);setTimeout(()=>beep(1320,.12),150);} else beep(540,.24); navigator.vibrate&&navigator.vibrate(220); } T.lastIdx=c.idx; }
+    if(sec!==T.lastSec){ T.lastSec=sec; if(!c.done){ if(c.rem<=3&&c.rem>=1){beep(880,.09);navigator.vibrate&&navigator.vibrate(80);} if(c.newRound&&c.idx===undefined&&sec>0){beep(1320,.16);navigator.vibrate&&navigator.vibrate(160);} } }
+    if(c.done){ beep(1320,.5); setTimeout(()=>beep(990,.5),250); setTimeout(()=>beep(760,.6),520); navigator.vibrate&&navigator.vibrate([200,80,200,80,300]); tPause(); $('tStart').textContent='START'; }
   }
 }
 function tParamsHTML(){ const p=T.params;
@@ -1625,33 +1780,47 @@ function readParams(){ const g=id=>$(id)?+$(id).value:null;
   if($('pWork'))T.params.work=g('pWork'); if($('pRest'))T.params.rest=g('pRest'); if($('pRestT'))T.params.restTarget=g('pRestT'); }
 const TDESC={amrap:'As many rounds/reps as possible before the clock caps.',fortime:'Complete the work as fast as possible; optional cap.',emom:'Every minute on the minute — new round each minute.',tabata:'8 intervals of 20s max work / 10s rest.',interval:'Custom work/rest intervals for N rounds.',rest:'Inter-set rest countdown — beeps when you should start the next set.'};
 function setupTimer(){
+  buildLedColors(); T.color=(APP.clock&&APP.clock.color)||T.color||'red'; applyLed(T.color);
+  document.querySelectorAll('#clkSub button').forEach(b=>b.classList.toggle('on',b.dataset.sub===T.sub));
+  const clockMode=T.sub==='clock';
+  $('fitCtrls').style.display=clockMode?'none':''; $('clockFace').classList.toggle('clockmode',clockMode);
+  clearInterval(T.clkInt);
+  if(clockMode){ T.running=false; clearInterval(T.tick); renderDigitalClock(); T.clkInt=setInterval(renderDigitalClock,250); return; }
   document.querySelectorAll('#tModes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===T.mode));
-  $('tParams').innerHTML=tParamsHTML(); $('tDesc').textContent=TDESC[T.mode];
-  $('tParams').querySelectorAll('input').forEach(i=>i.addEventListener('input',readParams));
+  const isSession=T.mode==='session';
+  $('sessionPick').style.display=isSession?'':'none';
+  $('tParams').style.display=isSession?'none':''; $('tDesc').style.display=isSession?'none':'';
+  if(isSession){ buildSessionSel(); loadSession($('sessionSel').value); }
+  else { T.session=null; $('tParams').innerHTML=tParamsHTML(); $('tDesc').textContent=TDESC[T.mode]; $('tParams').querySelectorAll('input').forEach(i=>i.addEventListener('input',readParams)); }
   tReset();
 }
 async function acquireWake(){ try{ if('wakeLock' in navigator){ T.wakeLock=await navigator.wakeLock.request('screen'); } }catch(e){} }
 function releaseWake(){ try{ T.wakeLock&&T.wakeLock.release&&T.wakeLock.release(); }catch(e){} T.wakeLock=null; }
-function tStartPause(){ if(T.running){ tPause(); $('tStart').textContent='RESUME'; }
-  else{ readParams(); if(T.ac&&T.ac.state==='suspended')T.ac.resume(); T.running=true; T.startTs=performance.now(); T.lastSec=-1;
+function tStartPause(){ if(T.sub==='clock')return;
+  if(T.running){ tPause(); $('tStart').textContent='RESUME'; }
+  else{ readParams(); if(T.ac&&T.ac.state==='suspended')T.ac.resume(); T.running=true; T.startTs=performance.now(); T.lastSec=-1; T.lastIdx=-1;
     if(!T.ac){try{T.ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}} beep(660,.15); acquireWake();
     $('tStart').textContent='PAUSE'; T.tick=setInterval(tRender,80); } }
 function tPause(){ T.running=false; T.base=tElapsed(); clearInterval(T.tick); releaseWake(); }
-function tReset(){ T.running=false; clearInterval(T.tick); releaseWake(); T.base=0; T.lastSec=-1; $('tStart').textContent='START'; tRender(); }
-function startWodOnTimer(name){ const w=findWod(name); if(!w){showView('timer');return;}
+function tReset(){ T.running=false; clearInterval(T.tick); releaseWake(); T.base=0; T.lastSec=-1; T.lastIdx=-1; $('tStart').textContent='START'; tRender(); }
+function toggleFull(){ const v=$('clockFace'); if(!document.fullscreenElement){v.requestFullscreen&&v.requestFullscreen();} else {document.exitFullscreen&&document.exitFullscreen();} }
+function startWodOnTimer(name){ const w=findWod(name); T.sub='fitness'; if(!w){showView('timer');setupTimer();return;}
   const f=w.format; if(f==='AMRAP'){T.mode='amrap';T.params.cap=w.timeCapMin||20;}
   else if(f==='EMOM'){T.mode='emom';T.params.min=w.timeCapMin||10;}
   else {T.mode='fortime';T.params.cap=w.timeCapMin||0;}
   showView('timer'); setupTimer(); toast('Loaded '+w.name+' → '+T.mode.toUpperCase());
 }
-function startRest(sec){ T.mode='rest'; T.params.restTarget=sec||180; showView('timer'); setupTimer(); tStartPause(); }
+function startRest(sec){ T.sub='fitness'; T.mode='rest'; T.params.restTarget=sec||180; showView('timer'); setupTimer(); tStartPause(); }
+document.getElementById('clkSub').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; T.sub=b.dataset.sub; setupTimer(); });
+document.getElementById('ledColors').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b)applyLed(b.dataset.c); });
 document.getElementById('tModes').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; T.mode=b.dataset.mode; setupTimer(); });
+document.getElementById('sessionSel').addEventListener('change',e=>loadSession(e.target.value));
 document.getElementById('tStart').addEventListener('click',tStartPause);
 document.getElementById('tReset').addEventListener('click',()=>{tReset();});
-document.getElementById('tFull').addEventListener('click',()=>{ const v=$('view-timer'); if(!document.fullscreenElement)v.requestFullscreen&&v.requestFullscreen(); else document.exitFullscreen&&document.exitFullscreen(); });
+document.getElementById('tFull').addEventListener('click',toggleFull);
 document.addEventListener('keydown',e=>{ if(!$('view-timer').classList.contains('active'))return;
   if(/^(INPUT|SELECT|TEXTAREA)$/.test((document.activeElement||{}).tagName))return;
-  if(e.code==='Space'){ e.preventDefault(); tStartPause(); } else if(e.key==='r'||e.key==='R'){ tReset(); } });
+  if(e.code==='Space'){ e.preventDefault(); tStartPause(); } else if(e.key==='r'||e.key==='R'){ tReset(); } else if(e.key==='f'||e.key==='F'){ toggleFull(); } });
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&T.running)acquireWake(); });
 
 /* ============================================================
